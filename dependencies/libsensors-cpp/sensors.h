@@ -22,11 +22,29 @@
 #define LIBSENSORS_CPP_SENSORS_H
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
 #include <sensors/sensors.h>
+
+#if defined(__has_include) && __has_include(<optional>)
+
+#include <optional>
+#if defined(__cpp_lib_optional) || defined (_MSC_VER)
+#define STD_OPTIONAL_FOUND
+#endif
+
+#endif
+#ifndef STD_OPTIONAL_FOUND
+
+#if defined(__has_include) && !__has_include(<experimental/optional>)
+#error Neither <optional> nor <experimental/optional> could be found on the system! Please report an issue to OpenRGB developers providing your system info.
+#endif
+
+#define _SILENCE_EXPERIMENTAL_OPTIONAL_DEPRECATION_WARNING
+#include <experimental/optional>
+
+#endif // C++17
 
 namespace sensors {
 
@@ -206,7 +224,12 @@ public:
     std::vector<sensors::subfeature> subfeatures() const;
 
     // Return the subfeature of the given type, if it exists
-    std::optional<sensors::subfeature> subfeature(subfeature_type type) const;
+    #ifndef STD_OPTIONAL_FOUND
+    std::experimental::optional
+    #else
+    std::optional
+    #endif
+    <sensors::subfeature> subfeature(subfeature_type type) const;
 
 private:
     using _sensors_impl::_sensors_impl;

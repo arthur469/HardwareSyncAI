@@ -31,6 +31,7 @@ before_script:
   script:
   - export QT_SELECT=qt5
   - export $(dpkg-architecture)
+  - apt install libsensors-dev
   - ./scripts/scripts_build-plugin.sh
   
   artifacts:
