@@ -48,6 +48,13 @@ SOURCES +=                                                          \
     ColorPicker.cpp                                                 \
     ColorStop.cpp                                                   \
 
+FORMS += \
+    HardwareSyncMainPage.ui                                             \
+    MeasureColor.ui                                                     \
+    MeasureEntry.ui                                                     \
+    ColorPicker.ui                                                      \
+    ColorStop.ui                                                        \
+
 #-------------------------------------------------------------------#
 # Windows GitLab CI Configuration                                   #
 #-------------------------------------------------------------------#
