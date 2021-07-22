@@ -103,7 +103,7 @@ void MeasureEntry::on_devices_clicked()
 
         for(unsigned int i = 0; i < OpenRGBHardwareSyncPlugin::controller_zones.size(); i++)
         {
-            if(list->selectionModel()->isRowSelected(i))
+            if(list->selectionModel()->isRowSelected(i, QModelIndex()))
             {
                 controller_zones.push_back(OpenRGBHardwareSyncPlugin::controller_zones[i]);
             }
