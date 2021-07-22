@@ -65,7 +65,6 @@ private:
     #elif __linux__
     std::vector<chip_name> chips;
     std::vector<subfeature> subfeatures;
-    std::map<int , chip_name , std::vector<feature>> FTRList;
     struct sysinfo info;
 
     #endif
