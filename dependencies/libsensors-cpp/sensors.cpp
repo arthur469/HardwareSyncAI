@@ -38,7 +38,7 @@ namespace sensors { namespace {
 class libsensors_handle
 {
 public:
-    libsensors_handle(std::string_view config_path = {})
+    libsensors_handle(std::string config_path = {})
         : m_path{config_path}, m_config{std::fopen(m_path.c_str(), "r")}
     {
         if (!m_path.empty() && !m_config)
@@ -78,7 +78,7 @@ struct impl_base : public std::reference_wrapper<T const>
     operator T const*() const { return &this->get(); }
 };
 
-inline std::string& operator+(std::string&& a, std::string_view b)
+inline std::string& operator+(std::string&& a, std::string b)
 {
     return a += b;
 }
@@ -109,7 +109,7 @@ struct _sensors_impl<chip_name>::impl : public impl_base<sensors_chip_name>
 {
     using impl_base::impl_base;
 
-    impl static find(std::string_view path)
+    impl static find(std::string path)
     {
         get_handle();
         int nr = 0;
@@ -131,7 +131,7 @@ struct _sensors_impl<feature>::impl : public impl_base<sensors_feature>
     impl(chip_name chip, sensors_feature const& feat) : impl_base{feat}, m_chip{std::move(chip)} {}
 
     // E.g. /sys/class/hwmon/hwmon0, temp1
-    impl static find(std::string_view chip_path, std::string_view feature_name)
+    impl static find(std::string chip_path, std::string feature_name)
     {
         int nr = 0;
         chip_name chip {chip_path};
@@ -152,7 +152,7 @@ struct _sensors_impl<subfeature>::impl : public impl_base<sensors_subfeature>
 
     impl(::feature feat, sensors_subfeature const& subfeat) : impl_base{subfeat}, m_feature{std::move(feat)} {}
 
-    impl static find(std::string_view full_path)
+    impl static find(std::string full_path)
     {
         fs::path path {full_path};
         if (!path.has_filename())
@@ -172,7 +172,7 @@ struct _sensors_impl<subfeature>::impl : public impl_base<sensors_subfeature>
 //
 // free functions
 //
-void load_config(std::string_view path)
+void load_config(std::string path)
 {
     auto &handle = get_handle();
     if (path != handle->config_path()) {
@@ -194,7 +194,7 @@ std::vector<chip_name> get_detected_chips()
 //
 // sensors::bus_id
 //
-std::string_view bus_id::adapter_name() const
+std::string bus_id::adapter_name() const
 {
     auto name = sensors_get_adapter_name(**this);
     return name ? name : "";
@@ -224,7 +224,7 @@ short bus_id::nr() const
 //
 // sensors::chip_name
 //
-chip_name::chip_name(std::string_view path)
+chip_name::chip_name(std::string path)
     : chip_name{impl::find(path)}
 {
 }
@@ -239,12 +239,12 @@ bus_id chip_name::bus() const
     return {m_impl->get().bus};
 }
 
-std::string_view chip_name::prefix() const
+std::string chip_name::prefix() const
 {
     return m_impl->get().prefix;
 }
 
-std::string_view chip_name::path() const
+std::string chip_name::path() const
 {
     return m_impl->get().path;
 }
@@ -273,11 +273,11 @@ std::vector<feature> chip_name::features() const
 //
 // sensors::feature
 //
-feature::feature(std::string_view full_path)
+feature::feature(std::string full_path)
     : feature{full_path, fs::path{full_path}.filename().string()}
 {}
 
-feature::feature(std::string_view chip_path, std::string_view feature_name)
+feature::feature(std::string chip_path, std::string feature_name)
     : feature{impl::find(chip_path, feature_name)}
 {
 }
@@ -287,7 +287,7 @@ chip_name const& feature::chip() const
     return m_impl->m_chip;
 }
 
-std::string_view feature::name() const
+std::string feature::name() const
 {
     return m_impl->get().name;
 }
@@ -346,7 +346,7 @@ std::vector<subfeature> feature::subfeatures() const
 //
 // sensors::subfeature
 //
-subfeature::subfeature(std::string_view path)
+subfeature::subfeature(std::string path)
     : subfeature{impl::find(path)}
 {
 }
@@ -356,7 +356,7 @@ feature const& subfeature::feature() const
     return m_impl->m_feature;
 }
 
-std::string_view subfeature::name() const
+std::string subfeature::name() const
 {
     return m_impl->get().name;
 }

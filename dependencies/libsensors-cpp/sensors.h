@@ -23,7 +23,6 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
 #include <vector>
 #include <sensors/sensors.h>
 
@@ -136,8 +135,8 @@ public:
     bus_id() = delete;
 
     // String representation of adapter type, e.g. "PCI adapter", or an empty
-    // string_view if it could not be found.
-    std::string_view adapter_name() const;
+    // string if it could not be found.
+    std::string adapter_name() const;
     bus_type type() const;
     short nr() const;
 
@@ -151,7 +150,7 @@ private:
 // optional and the argument may be empty; in both cases libsensors will be
 // loaded with the default configuration. Referencing any objects created before
 // calling this function is undefined behaviour.
-void load_config(std::string_view path);
+void load_config(std::string path);
 
 // Return chip_name object for each sensor chip detected on the system, or fail
 // with a sensors::init_error if libsensors failed to initialise.
@@ -171,13 +170,13 @@ public:
     // /sys/class/hwmon/hwmon0. This constructor throws a sensors::init_error if
     // there was an error loading the libsensors resources, or a
     // sensors::parse_error if no chip was found matching the given path.
-    explicit chip_name(std::string_view path);
+    explicit chip_name(std::string path);
 
     // Chip data
     int address() const;
     bus_id bus() const;
-    std::string_view prefix() const;
-    std::string_view path() const;
+    std::string prefix() const;
+    std::string path() const;
 
     // Chip name as obtained from sensors_snprintf_chip_name. Will throw a
     // sensors::io_error if that function reports an error.
@@ -201,18 +200,18 @@ public:
     // Construct a feature from its full filesystem path. This may include the
     // name of a subfeature, e.g. /sys/class/hwmon/hwmon0/temp1[_input]. Throws
     // a sensors::parse_error if no such feature was found.
-    explicit feature(std::string_view full_path);
+    explicit feature(std::string full_path);
 
     // Construct a feature from the filesystem path of its chip and its name,
     // e.g. /sys/class/hwmon/hwmon0, temp1. Throws a sensors::parse_error if no
     // such feature was found.
-    feature(std::string_view chip_path, std::string_view feature_name);
+    feature(std::string chip_path, std::string feature_name);
 
     // Parent chip
     chip_name const& chip() const;
 
     // Feature data
-    std::string_view name() const;
+    std::string name() const;
     int number() const;
     feature_type type() const;
 
@@ -247,13 +246,13 @@ public:
     // Attempt to construct a subfeature from its filesystem path, e.g.
     // /sys/class/hwmon/hwmon0/temp1_input. Throws a sensors::parse_error if no
     // such subfeature was found.
-    explicit subfeature(std::string_view path);
+    explicit subfeature(std::string path);
 
     // Parent feature
     sensors::feature const& feature() const;
 
     // Subfeature data
-    std::string_view name() const;
+    std::string name() const;
     int number() const;
     subfeature_type type() const;
 
