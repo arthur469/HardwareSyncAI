@@ -98,14 +98,10 @@ win32:{
 
 win32:CONFIG(debug, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
     LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Debug -llhwm-cpp-wrapper
-    RESOURCES += x64DebugResources.qrc
-    DEFINES += X64_BUILD
 }
 
 win32:CONFIG(release, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
     LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Release -llhwm-cpp-wrapper
-    RESOURCES += x64ReleaseResources.qrc
-    DEFINES += X64_BUILD
 }
 
 #-----------------------------------------------------------------------#
