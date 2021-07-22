@@ -30,7 +30,6 @@
 #include <functional>
 
 using namespace sensors;
-namespace fs = std::filesystem;
 
 namespace sensors { namespace {
 
@@ -154,7 +153,7 @@ struct _sensors_impl<subfeature>::impl : public impl_base<sensors_subfeature>
 
     impl static find(std::string full_path)
     {
-        fs::path path {full_path};
+        filesystem::path path {full_path};
         if (!path.has_filename())
             throw parse_error{"Path does not contain filename: " + full_path};
 
@@ -274,7 +273,7 @@ std::vector<feature> chip_name::features() const
 // sensors::feature
 //
 feature::feature(std::string full_path)
-    : feature{full_path, fs::path{full_path}.filename().string()}
+    : feature{full_path, filesystem::path{full_path}.filename().string()}
 {}
 
 feature::feature(std::string chip_path, std::string feature_name)
