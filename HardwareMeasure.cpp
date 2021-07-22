@@ -132,7 +132,7 @@ double HardwareMeasure::GetTemperature(Hardware Dev, HardwareFeature FTR)
 double HardwareMeasure::GetRamUsagePercent()
 {
     sysinfo(&info);
-    return 1.0f * (info.totalram - info.freeram) / info.totalram;
+    return 100.0f * (info.totalram - info.freeram) / info.totalram;
 }
 
 #endif
