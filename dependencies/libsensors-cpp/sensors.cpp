@@ -324,7 +324,12 @@ std::string feature::label() const
     return label;
 }
 
-std::optional<subfeature> feature::subfeature(subfeature_type type) const
+#ifndef STD_OPTIONAL_FOUND
+std::experimental::optional
+#else
+std::optional
+#endif
+<subfeature> feature::subfeature(subfeature_type type) const
 {
     auto subs = subfeatures();
     auto const it = std::find_if(subs.cbegin(), subs.cend(), [=](auto const& sf){ return sf.type() == type; });
