@@ -254,7 +254,7 @@ std::string chip_name::name() const
     if (size < 0)
         throw io_error{std::strerror(size)};
     std::string name(size, '\0');
-    auto const written = sensors_snprintf_chip_name(name.data(), size, **this);
+    auto const written = sensors_snprintf_chip_name(const_cast<char*>(name.c_str()), size, **this);
     if (written < 0)
         throw io_error{std::strerror(written)};
     return name;
