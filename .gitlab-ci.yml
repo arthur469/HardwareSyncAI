@@ -25,13 +25,13 @@ before_script:
 #-----------------------------------------------------------------------#
 # Linux 64-bit Build Target                                             #
 #-----------------------------------------------------------------------#
-"Linux 64":
+"Linux 64 - Stretch":
   image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:stretch-64
   stage: build
   script:
   - export QT_SELECT=qt5
   - export $(dpkg-architecture)
-  - apt install libsensors-dev
+  - apt install libsensors4-dev
   - ./scripts/scripts_build-plugin.sh
   
   artifacts:
