@@ -152,3 +152,24 @@ void MeasureEntry::Tick()
         controller->UpdateLEDs();
     }
 }
+
+json MeasureEntry::ToJson()
+{
+    json j;
+
+    j["refresh_interval"] = refresh_interval;
+    j["hardware"] = ui->hardware->currentIndex();
+    j["hardware_feature"] = ui->hardware_feature->currentIndex();
+    j["measure_color"] = ui->measure_color->ToJson();
+
+    std::vector<json> devices;
+
+    for(ControllerZone* controller_zone: controller_zones)
+    {
+       devices.push_back(controller_zone->to_json());
+    }
+
+    j["devices"] = devices;
+
+    return j;
+}

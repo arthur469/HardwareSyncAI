@@ -5,6 +5,9 @@
 #include <QImage>
 #include "ColorStop.h"
 #include "ui_MeasureColor.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 namespace Ui {
 class MeasureColor;
@@ -19,6 +22,7 @@ public:
     ~MeasureColor();
 
     std::tuple<unsigned int, QColor> GetColor(double, int);
+    json ToJson();
 
 private slots:
     void on_add_color_clicked();

@@ -1,4 +1,5 @@
 #include "HardwareSyncMainPage.h"
+#include "MeasureSettings.h"
 
 HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     QWidget(parent),
@@ -24,4 +25,18 @@ void HardwareSyncMainPage::on_add_measure_clicked()
         measures.erase(std::find(measures.begin(), measures.end(), measure));
         delete measure;
     });
+}
+
+void HardwareSyncMainPage::on_save_clicked()
+{
+    std::vector<json> v;
+
+    for(MeasureEntry* measure: measures)
+    {
+        v.push_back(measure->ToJson());
+    }
+
+    json j = v;
+
+    MeasureSettings::Save(j);
 }

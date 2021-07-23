@@ -21,6 +21,7 @@ public:
 
     void Start();
     void Stop();
+    json ToJson();
 
 private slots:
     void on_refresh_interval_valueChanged(int);

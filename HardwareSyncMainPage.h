@@ -19,6 +19,7 @@ public:
 
 private slots:
     void on_add_measure_clicked();
+    void on_save_clicked();
 
 private:
     Ui::HardwareSyncMainPage *ui;

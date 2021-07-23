@@ -27,6 +27,7 @@ INCLUDEPATH +=                                                      \
 
 HEADERS +=                                                          \
     ControllerZone.h \
+    MeasureSettings.h \
     OpenRGB/dependencies/ColorWheel/ColorWheel.h                    \
     HardwareSyncMainPage.h                                          \
     MeasureColor.h                                                  \
@@ -39,6 +40,7 @@ HEADERS +=                                                          \
     ColorStop.h                                                     \
 
 SOURCES +=                                                          \
+    MeasureSettings.cpp \
     OpenRGB/dependencies/ColorWheel/ColorWheel.cpp                  \
     HardwareSyncMainPage.cpp                                        \
     MeasureColor.cpp                                                \

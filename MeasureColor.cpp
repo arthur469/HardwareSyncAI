@@ -1,4 +1,5 @@
 #include "MeasureColor.h"
+#include "RGBController.h"
 #include <QPainter>
 
 MeasureColor::MeasureColor(QWidget *parent) :
@@ -126,4 +127,24 @@ std::tuple<unsigned int, QColor> MeasureColor::GetColor(double val, int last_idx
     }
 
     return std::tuple<int, QColor>(idx, image.pixelColor(idx, 0));
+}
+
+json MeasureColor::ToJson()
+{
+    json j;
+
+    std::vector<std::tuple<double, RGBColor>> tmp;
+
+    for(ColorStop* stop: color_stops)
+    {
+        QColor color = stop->GetColor();
+        RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+        tmp.push_back(std::tuple<double, RGBColor>(
+                          stop->GetValue(), rgb
+                          ));
+    }
+
+    j["color_stops"] = tmp;
+
+    return j;
 }
