@@ -119,11 +119,11 @@ std::tuple<unsigned int, QColor> MeasureColor::GetColor(double val, int last_idx
 
     if(idx < last_idx)
     {
-        idx++;
+        idx = last_idx - 1;
     }
     else if(idx > last_idx)
     {
-        idx--;
+        idx = last_idx + 1;
     }
 
     return std::tuple<int, QColor>(idx, image.pixelColor(idx, 0));
