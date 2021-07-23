@@ -10,12 +10,11 @@
 
 MeasureEntry::MeasureEntry(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MeasureEntry),
-    hm(new HardwareMeasure())
+    ui(new Ui::MeasureEntry)
 {
     ui->setupUi(this);
 
-    devices = hm->GetAvailableDevices();
+    devices = OpenRGBHardwareSyncPlugin::hm->GetAvailableDevices();
 
     for(Hardware& device: devices)
     {
@@ -28,7 +27,6 @@ MeasureEntry::MeasureEntry(QWidget *parent) :
 MeasureEntry::~MeasureEntry()
 {
     timer.stop();
-    delete hm;
     delete ui;
 }
 
@@ -126,7 +124,7 @@ void MeasureEntry::on_start_stop_clicked()
 
 void MeasureEntry::Tick()
 {
-    double measure = hm->GetMeasure(
+    double measure = OpenRGBHardwareSyncPlugin::hm->GetMeasure(
                 devices[hardware_id],
                 devices[hardware_id].features[hardware_feature_id]);
 

@@ -5,6 +5,7 @@
 bool OpenRGBHardwareSyncPlugin::DarkTheme = false;
 ResourceManager* OpenRGBHardwareSyncPlugin::RMPointer = nullptr;
 std::vector<ControllerZone*> OpenRGBHardwareSyncPlugin::controller_zones;
+HardwareMeasure* OpenRGBHardwareSyncPlugin::hm = new HardwareMeasure();
 
 OpenRGBPluginInfo OpenRGBHardwareSyncPlugin::Initialize(bool Dt, ResourceManager *RM)
 {

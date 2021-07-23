@@ -4,6 +4,7 @@
 #include "OpenRGBPluginInterface.h"
 #include "ResourceManager.h"
 #include "ControllerZone.h"
+#include "HardwareMeasure.h"
 
 #include <QObject>
 #include <QString>
@@ -24,7 +25,7 @@ public:
     QWidget*                CreateGUI(QWidget *Parent)           override;
     static bool             DarkTheme;
     static ResourceManager* RMPointer;
-
+    static HardwareMeasure* hm;
     static std::vector<ControllerZone*> controller_zones;
 
 private:

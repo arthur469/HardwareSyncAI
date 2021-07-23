@@ -7,7 +7,6 @@
 #include "HardwareMeasure.h"
 #include "ControllerZone.h"
 
-
 namespace Ui {
 class MeasureEntry;
 }
@@ -39,7 +38,6 @@ private:
     Ui::MeasureEntry *ui;
     QTimer timer;
     int refresh_interval = 100;
-    HardwareMeasure* hm;
     std::vector<Hardware> devices;
     int hardware_id;
     int hardware_feature_id;
