@@ -23,6 +23,8 @@ public:
     void Stop();
     json ToJson();
 
+    static MeasureEntry* FromJson(QWidget *parent, json);
+
 private slots:
     void on_refresh_interval_valueChanged(int);
     void on_hardware_currentIndexChanged(int);

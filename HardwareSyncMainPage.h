@@ -24,6 +24,7 @@ private slots:
 private:
     Ui::HardwareSyncMainPage *ui;
     std::vector<MeasureEntry*> measures;
+    void AddMeasure(MeasureEntry*);
 };
 
 #endif // HARDWARESYNCMAINPAGE_H

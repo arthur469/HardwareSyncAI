@@ -23,6 +23,7 @@ public:
 
     std::tuple<unsigned int, QColor> GetColor(double, int);
     json ToJson();
+    void LoadJson(json);
 
 private slots:
     void on_add_color_clicked();

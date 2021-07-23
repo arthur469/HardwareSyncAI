@@ -148,3 +148,29 @@ json MeasureColor::ToJson()
 
     return j;
 }
+
+void MeasureColor::LoadJson(json j)
+{
+    QLayoutItem* item;
+
+    while ((item = ui->color_stops->layout()->takeAt(0)) != NULL)
+    {
+        delete item->widget();
+        delete item;
+    }
+
+    color_stops.clear();
+
+    for(const std::tuple<double, RGBColor> entry : j["color_stops"])
+    {
+        ColorStop* stop = new ColorStop();
+        RGBColor rgb = std::get<1>(entry);
+        QColor color(RGBGetRValue(rgb), RGBGetGValue(rgb), RGBGetBValue(rgb));
+        stop->SetColor(color);
+        stop->SetStop(std::get<0>(entry));
+        AddColorStop(stop);
+    }
+}
+
+
+

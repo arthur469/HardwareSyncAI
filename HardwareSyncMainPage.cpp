@@ -7,6 +7,13 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->measures->setLayout(new QVBoxLayout());
+
+    json measure_list = MeasureSettings::Load();
+
+    for(json measure : measure_list)
+    {
+        AddMeasure(MeasureEntry::FromJson(this, measure));
+    }
 }
 
 HardwareSyncMainPage::~HardwareSyncMainPage()
@@ -16,7 +23,11 @@ HardwareSyncMainPage::~HardwareSyncMainPage()
 
 void HardwareSyncMainPage::on_add_measure_clicked()
 {
-    MeasureEntry* measure = new MeasureEntry(this);
+    AddMeasure(new MeasureEntry(this));
+}
+
+void HardwareSyncMainPage::AddMeasure(MeasureEntry* measure)
+{
     ui->measures->layout()->addWidget(measure);
     measures.push_back(measure);
 

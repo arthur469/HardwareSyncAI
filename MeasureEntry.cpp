@@ -166,10 +166,56 @@ json MeasureEntry::ToJson()
 
     for(ControllerZone* controller_zone: controller_zones)
     {
-       devices.push_back(controller_zone->to_json());
+        devices.push_back(controller_zone->to_json());
     }
 
     j["devices"] = devices;
 
     return j;
 }
+
+MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
+{
+    MeasureEntry* measure = new MeasureEntry(parent);
+
+    if(settings.contains("refresh_interval"))
+        measure->ui->refresh_interval->setValue(settings["refresh_interval"]);
+
+    if(settings.contains("hardware"))
+        measure->ui->hardware->setCurrentIndex(settings["hardware"]);
+
+    if(settings.contains("hardware_feature"))
+        measure->ui->hardware_feature->setCurrentIndex(settings["hardware_feature"]);
+
+    if(settings.contains("measure_color"))
+        measure->ui->measure_color->LoadJson(settings["measure_color"]);
+
+    if(settings.contains("devices"))
+    {
+        json zones = settings["devices"];
+
+        for(auto j : zones)
+        {
+            for(ControllerZone* controller_zone: OpenRGBHardwareSyncPlugin::controller_zones)
+            {
+                if(
+                        controller_zone->controller->name        == j["name"] &&
+                        controller_zone->controller->location    == j["location"] &&
+                        controller_zone->controller->serial      == j["serial"] &&
+                        controller_zone->controller->description == j["description"] &&
+                        controller_zone->controller->version     == j["version"] &&
+                        controller_zone->controller->vendor      == j["vendor"] &&
+                        controller_zone->zone_idx                == j["zone_idx"]
+                        )
+                {
+                    measure->controller_zones.push_back(controller_zone);
+                    break;
+                }
+            }
+        }
+    }
+
+
+    return measure;
+}
+
