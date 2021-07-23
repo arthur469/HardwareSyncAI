@@ -107,14 +107,23 @@ void MeasureColor::Update()
     ui->preview->setPixmap(QPixmap::fromImage(image));
 }
 
-QColor MeasureColor::GetColor(double val)
+std::tuple<unsigned int, QColor> MeasureColor::GetColor(double val, int last_idx)
 {
     if(max_value == 0 || max_value == min_value)
     {
-        return Qt::black;
+        std::tuple<int, QColor>(0, Qt::black);
     }
 
     int idx = std::max<int>(0, std::min<int>(99, 100 * ((val - min_value) / (max_value - min_value))));
 
-    return image.pixelColor(idx, 0);
+    if(idx < last_idx)
+    {
+        idx++;
+    }
+    else if(idx > last_idx)
+    {
+        idx--;
+    }
+
+    return std::tuple<int, QColor>(idx, image.pixelColor(idx, 0));
 }

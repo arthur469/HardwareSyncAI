@@ -18,7 +18,7 @@ public:
     explicit MeasureColor(QWidget *parent = nullptr);
     ~MeasureColor();
 
-    QColor GetColor(double);
+    std::tuple<unsigned int, QColor> GetColor(double, int);
 
 private slots:
     void on_add_color_clicked();

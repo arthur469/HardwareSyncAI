@@ -41,6 +41,7 @@ private:
     std::vector<Hardware> devices;
     int hardware_id;
     int hardware_feature_id;
+    int last_idx = 0;
 
     std::vector<ControllerZone*> controller_zones;
 };

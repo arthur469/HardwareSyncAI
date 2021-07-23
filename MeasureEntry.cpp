@@ -128,7 +128,12 @@ void MeasureEntry::Tick()
                 devices[hardware_id],
                 devices[hardware_id].features[hardware_feature_id]);
 
-    QColor color = ui->measure_color->GetColor(measure);
+    std::tuple<int, QColor> data = ui->measure_color->GetColor(measure, last_idx);
+
+    last_idx = std::get<0>(data);
+
+    QColor color = std::get<1>(data);
+
     RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
 
     ui->measure->setText(QString::fromStdString(std::to_string(measure)));

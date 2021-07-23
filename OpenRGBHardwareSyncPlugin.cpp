@@ -29,8 +29,8 @@ QWidget* OpenRGBHardwareSyncPlugin::CreateGUI(QWidget*)
 
     HardwareSyncMainPage* ui = new HardwareSyncMainPage(nullptr);
 
-    RMPointer->RegisterDeviceListChangeCallback(DeviceListChangedCallback, this);
-    RMPointer->RegisterDetectionProgressCallback(DeviceListChangedCallback, this);
+    RMPointer->RegisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
+    RMPointer->RegisterDetectionProgressCallback(DeviceListChangedCallback, ui);
 
     return new HardwareSyncMainPage(ui);
 }
@@ -38,6 +38,7 @@ QWidget* OpenRGBHardwareSyncPlugin::CreateGUI(QWidget*)
 void OpenRGBHardwareSyncPlugin::DeviceListChangedCallback(void* o)
 {
     ResetControllers();
+    // todo notify measures list has changed.
 }
 
 void OpenRGBHardwareSyncPlugin::ResetControllers()
