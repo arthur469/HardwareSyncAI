@@ -31,6 +31,7 @@ public:
 private:
     static void DeviceListChangedCallback(void* ptr);
     static void ResetControllers();
+    static bool SupportsDirectMode(RGBController*);
 };
 
 #endif // OPENRGBHARDWARESYNCPLUGIN_H

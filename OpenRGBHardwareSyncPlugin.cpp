@@ -48,9 +48,27 @@ void OpenRGBHardwareSyncPlugin::ResetControllers()
 
     for(RGBController* controller: controllers)
     {
+        if(!SupportsDirectMode(controller))
+        {
+            continue;
+        }
+
         for(unsigned int i = 0; i < controller->zones.size(); i++)
         {
             controller_zones.push_back(new ControllerZone(controller, i));
         }
     }
+}
+
+bool OpenRGBHardwareSyncPlugin::SupportsDirectMode(RGBController* controller)
+{
+    for(unsigned int i = 0; i < controller->modes.size(); i++)
+    {
+        if(controller->modes[i].name == "Direct")
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
