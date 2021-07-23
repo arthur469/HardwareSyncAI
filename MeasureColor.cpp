@@ -70,7 +70,7 @@ void MeasureColor::Update()
 
     for(ColorStop* color_stop: color_stops)
     {
-        int value = color_stop->GetValue();
+        double value = color_stop->GetValue();
         max_value = value > max_value ? value : max_value;
         min_value = value < min_value ? value : min_value;
     }

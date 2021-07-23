@@ -16,18 +16,18 @@ public:
     ~ColorStop();
 
     void SetColor(QColor);
-    void SetStop(int);
+    void SetStop(double);
 
     QColor GetColor();
-    int GetValue();
+    double GetValue();
 
 private slots:
-    void on_stop_valueChanged(int);
+    void on_stop_valueChanged(double);
     void on_remove_button_clicked();
 
 signals:
-  void GradientStopChanged();
-  void RemoveRequest();
+    void GradientStopChanged();
+    void RemoveRequest();
 
 private:
     Ui::ColorStop *ui;

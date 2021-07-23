@@ -24,7 +24,7 @@ void ColorStop::SetColor(QColor color)
     ui->color_picker->SetColor(color);
 }
 
-void ColorStop::SetStop(int value)
+void ColorStop::SetStop(double value)
 {
     ui->stop->setValue(value);
 }
@@ -34,12 +34,12 @@ QColor ColorStop::GetColor()
     return stop.second;
 }
 
-int ColorStop::GetValue()
+double ColorStop::GetValue()
 {
     return ui->stop->value();
 }
 
-void ColorStop::on_stop_valueChanged(int)
+void ColorStop::on_stop_valueChanged(double)
 {
     emit GradientStopChanged();
 }
