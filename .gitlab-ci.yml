@@ -59,6 +59,24 @@ before_script:
     expire_in: 30 days
 
 #-----------------------------------------------------------------------#
+# Linux 64-bit bullseye Build Target                                    #
+#-----------------------------------------------------------------------#
+"Linux 64 - Buster":
+  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bullseye-64
+  stage: build
+  script:
+  - export QT_SELECT=qt5
+  - export $(dpkg-architecture)
+  - apt install libsensors-dev
+  - ./scripts/scripts_build-plugin.sh
+  
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Linux_64_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - ./libOpenRGBHardwareSyncPlugin.so.1.0.0
+    expire_in: 30 days
+
+#-----------------------------------------------------------------------#
 # Windows (64-bit) Build Target                                         #
 #-----------------------------------------------------------------------#
 "Windows 64":
