@@ -61,7 +61,7 @@ before_script:
 #-----------------------------------------------------------------------#
 # Linux 64-bit bullseye Build Target                                    #
 #-----------------------------------------------------------------------#
-"Linux 64 - Buster":
+"Linux 64 - Bullseye":
   image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bullseye-64
   stage: build
   script:
