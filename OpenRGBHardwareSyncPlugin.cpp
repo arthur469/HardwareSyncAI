@@ -30,16 +30,10 @@ QWidget* OpenRGBHardwareSyncPlugin::CreateGUI(QWidget*)
 
     HardwareSyncMainPage* ui = new HardwareSyncMainPage(nullptr);
 
-    RMPointer->RegisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
-    RMPointer->RegisterDetectionProgressCallback(DeviceListChangedCallback, ui);
+    RMPointer->RegisterDetectionStartCallback(DetectionStart, ui);
+    RMPointer->RegisterDetectionEndCallback(DetectionEnd, ui);
 
-    return new HardwareSyncMainPage(ui);
-}
-
-void OpenRGBHardwareSyncPlugin::DeviceListChangedCallback(void* o)
-{
-    ResetControllers();
-    // todo notify measures list has changed.
+    return ui;
 }
 
 void OpenRGBHardwareSyncPlugin::ResetControllers()
@@ -73,4 +67,20 @@ bool OpenRGBHardwareSyncPlugin::SupportsDirectMode(RGBController* controller)
     }
 
     return false;
+}
+
+void OpenRGBHardwareSyncPlugin::DetectionStart(void* o)
+{
+    printf("[OpenRGBHardwareSyncPlugin] DetectionStart\n");
+
+    controller_zones.clear();
+
+    QMetaObject::invokeMethod((HardwareSyncMainPage *)o, "Clear", Qt::QueuedConnection);
+}
+
+void OpenRGBHardwareSyncPlugin::DetectionEnd(void*)
+{
+    printf("[OpenRGBHardwareSyncPlugin] DetectionEnd\n");
+
+    ResetControllers();
 }

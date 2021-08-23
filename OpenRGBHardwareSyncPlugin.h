@@ -29,9 +29,11 @@ public:
     static std::vector<ControllerZone*> controller_zones;
 
 private:
-    static void DeviceListChangedCallback(void* ptr);
     static void ResetControllers();
     static bool SupportsDirectMode(RGBController*);
+
+    static void DetectionStart(void*);
+    static void DetectionEnd(void* );
 };
 
 #endif // OPENRGBHARDWARESYNCPLUGIN_H

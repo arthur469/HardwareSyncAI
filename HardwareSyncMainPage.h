@@ -17,6 +17,9 @@ public:
     explicit HardwareSyncMainPage(QWidget *parent = nullptr);
     ~HardwareSyncMainPage();
 
+public slots:
+    void Clear();
+
 private slots:
     void on_add_measure_clicked();
     void on_save_clicked();

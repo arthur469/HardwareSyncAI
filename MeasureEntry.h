@@ -22,6 +22,7 @@ public:
     void Start();
     void Stop();
     json ToJson();
+    void Clear();
 
     static MeasureEntry* FromJson(QWidget *parent, json);
 
@@ -32,21 +33,27 @@ private slots:
     void on_start_stop_clicked();
     void on_devices_clicked();
     void on_remove_clicked();
-    void Tick();
+    void OnMeasure(double, QColor);
 
 signals:
     void RemoveRequest();
+    void Measure(double, QColor);
 
 private:
     Ui::MeasureEntry *ui;
-    QTimer timer;
-    int refresh_interval = 100;
     std::vector<Hardware> devices;
     int hardware_id;
     int hardware_feature_id;
     int last_idx = 0;
 
+    bool running = false;
+
     std::vector<ControllerZone*> controller_zones;
+
+    std::thread* thread;
+    int refresh_interval = 100;
+    void Tick();
+
 };
 
 #endif // MEASUREENTRY_H

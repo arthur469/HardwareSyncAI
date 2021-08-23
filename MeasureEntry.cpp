@@ -21,32 +21,49 @@ MeasureEntry::MeasureEntry(QWidget *parent) :
         ui->hardware->addItem(QString::fromStdString(device.TrackDeviceName));
     }
 
-    connect(&timer, &QTimer::timeout, this, &MeasureEntry::Tick);
+    connect(this, SIGNAL(Measure(double,QColor)), this, SLOT(OnMeasure(double,QColor)));
 }
 
 MeasureEntry::~MeasureEntry()
 {
-    timer.stop();
+    Stop();
     delete ui;
+}
+
+void MeasureEntry::Clear()
+{
+   controller_zones.clear();
 }
 
 void MeasureEntry::Start()
 {
-    timer.setInterval(refresh_interval);
-    timer.start();
+    if(running)
+    {
+        return;
+    }
+
+    running = true;
+    thread = new std::thread(&MeasureEntry::Tick, this);
+
     ui->start_stop->setText("Stop");
 }
 
 void MeasureEntry::Stop()
 {
-    timer.stop();
-    ui->start_stop->setText("Start");
+    if(running)
+    {
+        running = false;
+
+        thread->join();
+        delete thread;
+
+        ui->start_stop->setText("Start");
+    }
 }
 
 void MeasureEntry::on_refresh_interval_valueChanged(int value)
 {
     refresh_interval = value;
-    timer.setInterval(refresh_interval);
 }
 
 void MeasureEntry::on_hardware_currentIndexChanged(int value)
@@ -112,7 +129,7 @@ void MeasureEntry::on_devices_clicked()
 
 void MeasureEntry::on_start_stop_clicked()
 {
-    if(timer.isActive())
+    if(running)
     {
         Stop();
     }
@@ -122,34 +139,44 @@ void MeasureEntry::on_start_stop_clicked()
     }
 }
 
-void MeasureEntry::Tick()
+void MeasureEntry::OnMeasure(double measure, QColor color)
 {
-    double measure = OpenRGBHardwareSyncPlugin::hm->GetMeasure(
-                devices[hardware_id],
-                devices[hardware_id].features[hardware_feature_id]);
-
-    std::tuple<int, QColor> data = ui->measure_color->GetColor(measure, last_idx);
-
-    last_idx = std::get<0>(data);
-
-    QColor color = std::get<1>(data);
-
-    RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
-
     ui->measure->setText(QString::fromStdString(std::to_string(measure)));
     ui->color_preview->setStyleSheet("QLabel {background-color: "+ color.name() + "; border: 1px solid black;}");
+}
 
-    std::set<RGBController*> controllers;
-
-    for(ControllerZone* controller_zone: controller_zones)
+void MeasureEntry::Tick()
+{
+    while(running)
     {
-        controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
-        controllers.insert(controller_zone->controller);
-    }
+        double measure = OpenRGBHardwareSyncPlugin::hm->GetMeasure(
+                    devices[hardware_id],
+                    devices[hardware_id].features[hardware_feature_id]);
 
-    for(RGBController* controller: controllers)
-    {
-        controller->UpdateLEDs();
+        std::tuple<int, QColor> data = ui->measure_color->GetColor(measure, last_idx);
+
+        last_idx = std::get<0>(data);
+
+        QColor color = std::get<1>(data);
+
+        RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+
+        emit Measure(measure, color);
+
+        std::set<RGBController*> controllers;
+
+        for(ControllerZone* controller_zone: controller_zones)
+        {
+            controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
+            controllers.insert(controller_zone->controller);
+        }
+
+        for(RGBController* controller: controllers)
+        {
+            controller->UpdateLEDs();
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(refresh_interval));
     }
 }
 

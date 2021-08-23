@@ -11,7 +11,7 @@ void MeasureSettings::Save(json Settings)
 {
     if(!CreateSettingsDirectory())
     {
-        printf("Cannot create settings directory.\n");
+        printf("[OpenRGBHardwareSyncPlugin] Cannot create settings directory.\n");
         return;
     }
 
@@ -24,7 +24,7 @@ void MeasureSettings::Save(json Settings)
         }
         catch(const std::exception& e)
         {
-            printf("Cannot write settings: %s\n", e.what());
+            printf("[OpenRGBHardwareSyncPlugin] Cannot write settings: %s\n", e.what());
         }
         File.close();
     }
@@ -45,7 +45,7 @@ json MeasureSettings::Load()
         }
         catch(const std::exception& e)
         {
-            printf("Cannot read settings: %s\n", e.what());
+            printf("[OpenRGBHardwareSyncPlugin] Cannot read settings: %s\n", e.what());
         }
     }
 

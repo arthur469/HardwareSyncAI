@@ -21,6 +21,15 @@ HardwareSyncMainPage::~HardwareSyncMainPage()
     delete ui;
 }
 
+void HardwareSyncMainPage::Clear()
+{
+    for(MeasureEntry* measure: measures)
+    {
+        measure->Stop();
+        measure->Clear();
+    }
+}
+
 void HardwareSyncMainPage::on_add_measure_clicked()
 {
     AddMeasure(new MeasureEntry(this));
