@@ -123,4 +123,5 @@ unix:!macx {
         dependencies/libsensors-cpp/error.cpp                           \
 
     LIBS += -lsensors
+    LIBS += -lstdc++fs
 }
