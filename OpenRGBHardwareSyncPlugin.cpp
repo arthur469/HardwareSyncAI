@@ -28,7 +28,7 @@ OpenRGBPluginInfo OpenRGBHardwareSyncPlugin::GetPluginInfo()
 
 unsigned int OpenRGBHardwareSyncPlugin::GetPluginAPIVersion()
 {
-    return 1;
+    return OPENRGB_PLUGIN_API_VERSION;
 }
 
 void OpenRGBHardwareSyncPlugin::Load(bool dark_theme, ResourceManager* resource_manager_ptr)
@@ -55,9 +55,7 @@ QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 
 QMenu* OpenRGBHardwareSyncPlugin::GetTrayMenu()
 {
-    QMenu* menu = new QMenu("Hardware sync");
-
-    return menu;
+    return nullptr;
 }
 
 void OpenRGBHardwareSyncPlugin::Unload()
