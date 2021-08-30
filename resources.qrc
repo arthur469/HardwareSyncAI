@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>OpenRGBHardwareSyncPlugin.png</file>
+    </qresource>
+</RCC>

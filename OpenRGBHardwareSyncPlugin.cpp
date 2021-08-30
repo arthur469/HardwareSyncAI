@@ -7,22 +7,39 @@ ResourceManager* OpenRGBHardwareSyncPlugin::RMPointer = nullptr;
 std::vector<ControllerZone*> OpenRGBHardwareSyncPlugin::controller_zones;
 HardwareMeasure* OpenRGBHardwareSyncPlugin::hm = nullptr;
 
-OpenRGBPluginInfo OpenRGBHardwareSyncPlugin::Initialize(bool Dt, ResourceManager *RM)
+
+OpenRGBPluginInfo OpenRGBHardwareSyncPlugin::GetPluginInfo()
 {
-    PInfo.PluginName         = "Hardware Sync";
-    PInfo.PluginDescription  = "Sync colors with hardware measures";
-    PInfo.PluginLocation     = "TopTabBar";
-    PInfo.HasCustom          = true;
-    PInfo.PluginLabel        = new QLabel("Hardware Sync");
+    OpenRGBPluginInfo info;
+    info.Name         = "Hardware Sync";
+    info.Description  = "Sync colors with hardware measures";
+    info.Version  = VERSION_STRING;
+    info.Commit  = GIT_COMMIT_ID;
+    info.URL  = "https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin";
+    info.Icon.load(":/OpenRGBHardwareSyncPlugin.png");
 
-    RMPointer                = RM;
-    DarkTheme                = Dt;
-    hm = new HardwareMeasure();
+    info.Location     =  OPENRGB_PLUGIN_LOCATION_TOP;
+    info.Label        =  "Hardware Sync";
+    info.TabIconString        =  "Hardware Sync";
+    info.TabIcon.load(":/OpenRGBHardwareSyncPlugin.png");
 
-    return PInfo;
+    return info;
 }
 
-QWidget* OpenRGBHardwareSyncPlugin::CreateGUI(QWidget*)
+unsigned int OpenRGBHardwareSyncPlugin::GetPluginAPIVersion()
+{
+    return 1;
+}
+
+void OpenRGBHardwareSyncPlugin::Load(bool dark_theme, ResourceManager* resource_manager_ptr)
+{
+    RMPointer                = resource_manager_ptr;
+    DarkTheme                = dark_theme;
+    hm = new HardwareMeasure();
+}
+
+
+QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 {
     RMPointer->WaitForDeviceDetection();
 
@@ -34,6 +51,18 @@ QWidget* OpenRGBHardwareSyncPlugin::CreateGUI(QWidget*)
     RMPointer->RegisterDetectionEndCallback(DetectionEnd, ui);
 
     return ui;
+}
+
+QMenu* OpenRGBHardwareSyncPlugin::GetTrayMenu()
+{
+    QMenu* menu = new QMenu("Hardware sync");
+
+    return menu;
+}
+
+void OpenRGBHardwareSyncPlugin::Unload()
+{
+    printf("Time to call some cleaning stuff.\n");
 }
 
 void OpenRGBHardwareSyncPlugin::ResetControllers()
@@ -83,4 +112,14 @@ void OpenRGBHardwareSyncPlugin::DetectionEnd(void*)
     printf("[OpenRGBHardwareSyncPlugin] DetectionEnd\n");
 
     ResetControllers();
+}
+
+OpenRGBHardwareSyncPlugin::~OpenRGBHardwareSyncPlugin()
+{
+    printf("[OpenRGBHardwareSyncPlugin] DetectionEnd\n");
+
+    if(hm)
+    {
+        delete hm;
+    }
 }

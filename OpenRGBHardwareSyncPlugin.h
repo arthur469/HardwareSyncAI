@@ -18,11 +18,16 @@ class OpenRGBHardwareSyncPlugin : public QObject, public OpenRGBPluginInterface
     Q_INTERFACES(OpenRGBPluginInterface)
 
 public:
-    ~OpenRGBHardwareSyncPlugin() {};
+    ~OpenRGBHardwareSyncPlugin();
 
-    OpenRGBPluginInfo       PInfo;
-    OpenRGBPluginInfo       Initialize(bool, ResourceManager*)   override;
-    QWidget*                CreateGUI(QWidget *Parent)           override;
+    OpenRGBPluginInfo   GetPluginInfo() override;
+    unsigned int        GetPluginAPIVersion() override;
+
+    void                Load(bool dark_theme, ResourceManager* resource_manager_ptr) override;
+    QWidget*            GetWidget() override;
+    QMenu*              GetTrayMenu() override;
+    void                Unload() override;
+
     static bool             DarkTheme;
     static ResourceManager* RMPointer;
     static HardwareMeasure* hm;
