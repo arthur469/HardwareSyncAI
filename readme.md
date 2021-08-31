@@ -6,23 +6,23 @@
 
 This is a plugin for [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB) that allows you sync your ARGB devices with hardware measures (CPU temperature, RAM usage, fans speed, etc...)
 
+## Downloads
+
+* [Windows 32](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows%2032)
+* [Windows 64](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows%2064)
+* [Linux 32](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2032)
+* [Linux 64](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2064)
+
 ## How do I install it?
 
-### **windows**
+* Download and extract the correct files depending on your system
+* Launch OpenRGB
+* From the Settings -> Plugins menu, click the "Install plugin" button
 
-1. download the latest [Windows pipeline](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows%2064)
+### Windows 
 
-2. copy ``OpenRGBHardwareSyncPlugin.dll`` from the 7z file to  ``C:\Users\Username\appdata\roaming\OpenRGB\plugins``
+Download and place [lhwm-wrapper.dll](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll) in the directory of `OpenRGB.exe`.
 
-3. download [lhwm-wrapper.dll](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll?inline=false)
-
-4. Place `lhwm-wrapper.dll` in the directory of `OpenRGB.exe`.
-
-### **linux**
+### Linux
 
 You need `lm-sensors` installed.
-
-1. download the latest [linux pipeline](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2064)
-
-2. Copy ``libOpenRGBHardwareSyncPlugin.so`` from the 7z to ``~/.config/OpenRGB/plugins``
-
