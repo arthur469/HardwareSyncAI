@@ -4,7 +4,6 @@
 
 bool OpenRGBHardwareSyncPlugin::DarkTheme = false;
 ResourceManager* OpenRGBHardwareSyncPlugin::RMPointer = nullptr;
-std::vector<ControllerZone*> OpenRGBHardwareSyncPlugin::controller_zones;
 HardwareMeasure* OpenRGBHardwareSyncPlugin::hm = nullptr;
 
 
@@ -43,8 +42,6 @@ QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 {
     RMPointer->WaitForDeviceDetection();
 
-    ResetControllers();
-
     HardwareSyncMainPage* ui = new HardwareSyncMainPage(nullptr);
 
     RMPointer->RegisterDetectionStartCallback(DetectionStart, ui);
@@ -63,13 +60,11 @@ void OpenRGBHardwareSyncPlugin::Unload()
     printf("Time to call some cleaning stuff.\n");
 }
 
-void OpenRGBHardwareSyncPlugin::ResetControllers()
+std::vector<ControllerZone*> OpenRGBHardwareSyncPlugin::GetControllerZones()
 {
-    controller_zones.clear();
+    std::vector<ControllerZone*> controller_zones;
 
-    std::vector<RGBController*> controllers = OpenRGBHardwareSyncPlugin::RMPointer->GetRGBControllers();
-
-    for(RGBController* controller: controllers)
+    for(RGBController* controller: OpenRGBHardwareSyncPlugin::RMPointer->GetRGBControllers())
     {
         if(!SupportsDirectMode(controller))
         {
@@ -81,6 +76,8 @@ void OpenRGBHardwareSyncPlugin::ResetControllers()
             controller_zones.push_back(new ControllerZone(controller, i));
         }
     }
+
+    return controller_zones;
 }
 
 bool OpenRGBHardwareSyncPlugin::SupportsDirectMode(RGBController* controller)
@@ -100,16 +97,12 @@ void OpenRGBHardwareSyncPlugin::DetectionStart(void* o)
 {
     printf("[OpenRGBHardwareSyncPlugin] DetectionStart\n");
 
-    controller_zones.clear();
-
     QMetaObject::invokeMethod((HardwareSyncMainPage *)o, "Clear", Qt::QueuedConnection);
 }
 
 void OpenRGBHardwareSyncPlugin::DetectionEnd(void*)
 {
     printf("[OpenRGBHardwareSyncPlugin] DetectionEnd\n");
-
-    ResetControllers();
 }
 
 OpenRGBHardwareSyncPlugin::~OpenRGBHardwareSyncPlugin()

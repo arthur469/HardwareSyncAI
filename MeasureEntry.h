@@ -48,7 +48,7 @@ private:
 
     bool running = false;
 
-    std::vector<ControllerZone*> controller_zones;
+    std::vector<ControllerZone*> assigned_zones;
 
     std::thread* thread;
     int refresh_interval = 100;

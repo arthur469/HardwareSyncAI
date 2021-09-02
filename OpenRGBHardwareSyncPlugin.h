@@ -31,10 +31,9 @@ public:
     static bool             DarkTheme;
     static ResourceManager* RMPointer;
     static HardwareMeasure* hm;
-    static std::vector<ControllerZone*> controller_zones;
+    static std::vector<ControllerZone*> GetControllerZones();
 
 private:
-    static void ResetControllers();
     static bool SupportsDirectMode(RGBController*);
 
     static void DetectionStart(void*);

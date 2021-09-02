@@ -32,7 +32,7 @@ MeasureEntry::~MeasureEntry()
 
 void MeasureEntry::Clear()
 {
-   controller_zones.clear();
+   assigned_zones.clear();
 }
 
 void MeasureEntry::Start()
@@ -96,7 +96,9 @@ void MeasureEntry::on_devices_clicked()
     QStringListModel model;
     QStringList devices;
 
-    for(ControllerZone* controller_zone: OpenRGBHardwareSyncPlugin::controller_zones)
+    std::vector<ControllerZone*> controller_zones = OpenRGBHardwareSyncPlugin::GetControllerZones();
+
+    for(ControllerZone* controller_zone: controller_zones)
     {
         devices << QString::fromStdString(controller_zone->display_name());
     }
@@ -114,13 +116,14 @@ void MeasureEntry::on_devices_clicked()
     QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 
     if (dialog.exec() == QDialog::Accepted) {
-        controller_zones.clear();
 
-        for(unsigned int i = 0; i < OpenRGBHardwareSyncPlugin::controller_zones.size(); i++)
+        assigned_zones.clear();
+
+        for(unsigned int i = 0; i < controller_zones.size(); i++)
         {
             if(list->selectionModel()->isRowSelected(i, QModelIndex()))
             {
-                controller_zones.push_back(OpenRGBHardwareSyncPlugin::controller_zones[i]);
+                assigned_zones.push_back(controller_zones[i]);
             }
         }
     }
@@ -165,7 +168,7 @@ void MeasureEntry::Tick()
 
         std::set<RGBController*> controllers;
 
-        for(ControllerZone* controller_zone: controller_zones)
+        for(ControllerZone* controller_zone: assigned_zones)
         {
             controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
             controllers.insert(controller_zone->controller);
@@ -188,10 +191,11 @@ json MeasureEntry::ToJson()
     j["hardware"] = ui->hardware->currentIndex();
     j["hardware_feature"] = ui->hardware_feature->currentIndex();
     j["measure_color"] = ui->measure_color->ToJson();
+    j["running"] = running;
 
     std::vector<json> devices;
 
-    for(ControllerZone* controller_zone: controller_zones)
+    for(ControllerZone* controller_zone: assigned_zones)
     {
         devices.push_back(controller_zone->to_json());
     }
@@ -223,7 +227,7 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
 
         for(auto j : zones)
         {
-            for(ControllerZone* controller_zone: OpenRGBHardwareSyncPlugin::controller_zones)
+            for(ControllerZone* controller_zone: OpenRGBHardwareSyncPlugin::GetControllerZones())
             {
                 if(
                         controller_zone->controller->name        == j["name"] &&
@@ -235,13 +239,22 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                         controller_zone->zone_idx                == j["zone_idx"]
                         )
                 {
-                    measure->controller_zones.push_back(controller_zone);
+                    measure->assigned_zones.push_back(controller_zone);
                     break;
                 }
             }
         }
     }
 
+    if(settings.contains("running"))
+    {
+        bool was_running = settings["running"];
+
+        if(was_running)
+        {
+            measure->Start();
+        }
+    }
 
     return measure;
 }

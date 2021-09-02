@@ -8,12 +8,16 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     ui->setupUi(this);
     ui->measures->setLayout(new QVBoxLayout());
 
-    json measure_list = MeasureSettings::Load();
+    // Make sure to wait a bit before all other plugins are loaded
+    QTimer::singleShot(2000, [=](){
+        json measure_list = MeasureSettings::Load();
 
-    for(json measure : measure_list)
-    {
-        AddMeasure(MeasureEntry::FromJson(this, measure));
-    }
+        for(json measure : measure_list)
+        {
+            AddMeasure(MeasureEntry::FromJson(this, measure));
+        }
+    });
+
 }
 
 HardwareSyncMainPage::~HardwareSyncMainPage()
