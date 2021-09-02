@@ -21,7 +21,8 @@ MeasureEntry::MeasureEntry(QWidget *parent) :
         ui->hardware->addItem(QString::fromStdString(device.TrackDeviceName));
     }
 
-    connect(this, SIGNAL(Measure(double,QColor)), this, SLOT(OnMeasure(double,QColor)));
+    connect(this, SIGNAL(Measure(double)), this, SLOT(OnMeasure(double)));
+    connect(this, SIGNAL(Color(QColor)), this, SLOT(OnColor(QColor)));
 }
 
 MeasureEntry::~MeasureEntry()
@@ -32,7 +33,7 @@ MeasureEntry::~MeasureEntry()
 
 void MeasureEntry::Clear()
 {
-   assigned_zones.clear();
+    assigned_zones.clear();
 }
 
 void MeasureEntry::Start()
@@ -43,7 +44,8 @@ void MeasureEntry::Start()
     }
 
     running = true;
-    thread = new std::thread(&MeasureEntry::Tick, this);
+    measure_thread = new std::thread(&MeasureEntry::Tick, this);
+    leds_thread = new std::thread(&MeasureEntry::UpdateLEDsThread, this);
 
     ui->start_stop->setText("Stop");
 }
@@ -54,8 +56,11 @@ void MeasureEntry::Stop()
     {
         running = false;
 
-        thread->join();
-        delete thread;
+        measure_thread->join();
+        delete measure_thread;
+
+        leds_thread->join();
+        delete leds_thread;
 
         ui->start_stop->setText("Start");
     }
@@ -142,29 +147,29 @@ void MeasureEntry::on_start_stop_clicked()
     }
 }
 
-void MeasureEntry::OnMeasure(double measure, QColor color)
+void MeasureEntry::OnMeasure(double measure)
 {
     ui->measure->setText(QString::fromStdString(std::to_string(measure)));
+}
+
+void MeasureEntry::OnColor(QColor color)
+{
     ui->color_preview->setStyleSheet("QLabel {background-color: "+ color.name() + "; border: 1px solid black;}");
 }
 
-void MeasureEntry::Tick()
+void MeasureEntry::UpdateLEDsThread()
 {
     while(running)
     {
-        double measure = OpenRGBHardwareSyncPlugin::hm->GetMeasure(
-                    devices[hardware_id],
-                    devices[hardware_id].features[hardware_feature_id]);
-
         std::tuple<int, QColor> data = ui->measure_color->GetColor(measure, last_idx);
 
         last_idx = std::get<0>(data);
 
         QColor color = std::get<1>(data);
 
-        RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+        emit Color(color);
 
-        emit Measure(measure, color);
+        RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
 
         std::set<RGBController*> controllers;
 
@@ -178,6 +183,20 @@ void MeasureEntry::Tick()
         {
             controller->UpdateLEDs();
         }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(leds_refresh_interval));
+    }
+}
+
+void MeasureEntry::Tick()
+{
+    while(running)
+    {
+        measure = OpenRGBHardwareSyncPlugin::hm->GetMeasure(
+                    devices[hardware_id],
+                    devices[hardware_id].features[hardware_feature_id]);
+
+        emit Measure(measure);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(refresh_interval));
     }

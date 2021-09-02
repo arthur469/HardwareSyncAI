@@ -33,11 +33,13 @@ private slots:
     void on_start_stop_clicked();
     void on_devices_clicked();
     void on_remove_clicked();
-    void OnMeasure(double, QColor);
+    void OnMeasure(double);
+    void OnColor(QColor color);
 
 signals:
     void RemoveRequest();
-    void Measure(double, QColor);
+    void Measure(double);
+    void Color(QColor);
 
 private:
     Ui::MeasureEntry *ui;
@@ -50,9 +52,16 @@ private:
 
     std::vector<ControllerZone*> assigned_zones;
 
-    std::thread* thread;
+    std::thread* measure_thread;
     int refresh_interval = 100;
+
+    std::thread* leds_thread;
+    int leds_refresh_interval = 20;
+
+    double measure = 0.0;
+
     void Tick();
+    void UpdateLEDsThread();
 
 };
 
