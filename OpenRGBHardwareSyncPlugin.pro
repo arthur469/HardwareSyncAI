@@ -3,16 +3,9 @@ QT +=                  \
     widgets            \
     core               \
 
-win32:CONFIG += QTPLUGIN
 
 TEMPLATE = lib
 DEFINES += ORGBHARDWARESYNCPLUGIN_LIBRARY
-
-win32:CONFIG += c++17
-
-unix:!macx {
-  QMAKE_CXXFLAGS += -std=c++17
-}
 
 #-----------------------------------------------------------------------------------------------#
 # Application Configuration                                                                     #
@@ -52,8 +45,9 @@ INCLUDEPATH +=                                                      \
     OpenRGB/dependencies/ColorWheel                                 \
 
 HEADERS +=                                                          \
-    ControllerZone.h \
-    MeasureSettings.h \
+    ControllerZone.h                                                \
+    MeasureSettings.h                                               \
+    OpenRGB/filesystem.h                                            \
     OpenRGB/dependencies/ColorWheel/ColorWheel.h                    \
     HardwareSyncMainPage.h                                          \
     MeasureColor.h                                                  \
@@ -66,7 +60,7 @@ HEADERS +=                                                          \
     ColorStop.h                                                     \
 
 SOURCES +=                                                          \
-    MeasureSettings.cpp \
+    MeasureSettings.cpp                                             \
     OpenRGB/dependencies/ColorWheel/ColorWheel.cpp                  \
     HardwareSyncMainPage.cpp                                        \
     MeasureColor.cpp                                                \
@@ -86,6 +80,10 @@ FORMS += \
 #-------------------------------------------------------------------#
 # Windows GitLab CI Configuration                                   #
 #-------------------------------------------------------------------#
+
+win32:CONFIG += QTPLUGIN
+win32:CONFIG += c++17
+
 win32:CONFIG(debug, debug|release) {
     win32:DESTDIR = debug
 }
@@ -148,8 +146,8 @@ unix:!macx {
         dependencies/libsensors-cpp/sensors.cpp                         \
         dependencies/libsensors-cpp/error.cpp                           \
 
-    LIBS += -lsensors
-    LIBS += -lstdc++fs
+    LIBS += -lsensors -lstdc++fs
+    QMAKE_CXXFLAGS += -std=c++17
 }
 
 

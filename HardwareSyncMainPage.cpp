@@ -55,12 +55,16 @@ void HardwareSyncMainPage::on_save_clicked()
 {
     std::vector<json> v;
 
+    printf("[HardwareSyncMainPage] preparing json structure...\n");
+
     for(MeasureEntry* measure: measures)
     {
         v.push_back(measure->ToJson());
     }
 
-    json j = v;
+    printf("[HardwareSyncMainPage] json ready to be saved\n");
+
+    json j = v;    
 
     MeasureSettings::Save(j);
 }

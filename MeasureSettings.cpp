@@ -4,62 +4,103 @@
 #include "filesystem.h"
 #include "OpenRGBHardwareSyncPlugin.h"
 
-const std::string MeasureSettings::SettingsFolder = "/plugins/settings/";
-const std::string MeasureSettings::SettingsFileName = "MeasureSettings.json";
-
-void MeasureSettings::Save(json Settings)
+bool MeasureSettings::Save(json j)
 {
+    printf("[OpenRGBHardwareSyncPlugin] Saving file.\n");
+
     if(!CreateSettingsDirectory())
     {
         printf("[OpenRGBHardwareSyncPlugin] Cannot create settings directory.\n");
-        return;
+        return false;
     }
 
-    std::ofstream File((OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() + SettingsFolder + SettingsFileName), std::ios::out | std::ios::binary);
-
-    if(File)
-    {
-        try{
-            File << Settings.dump(4);
-        }
-        catch(const std::exception& e)
-        {
-            printf("[OpenRGBHardwareSyncPlugin] Cannot write settings: %s\n", e.what());
-        }
-        File.close();
-    }
+    return write_file(SettingsFolder() + folder_separator() + "MeasureSettings.json", j);
 }
 
 json MeasureSettings::Load()
 {
+    printf("[OpenRGBHardwareSyncPlugin] Loading file.\n");
+
     json Settings;
 
-    std::ifstream SFile(OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() + SettingsFolder + SettingsFileName, std::ios::in | std::ios::binary);
+    if(!CreateSettingsDirectory())
+    {
+        return Settings;
+    }
 
-    if(SFile)
+    return load_json_file(SettingsFolder() + folder_separator() + "MeasureSettings.json");
+}
+
+
+std::string MeasureSettings::folder_separator()
+{
+#if defined(WIN32) || defined(_WIN32)
+    return "\\";
+#else
+    return "/";
+#endif
+}
+
+bool MeasureSettings::write_file(std::string file_name, json j)
+{
+    std::ofstream file(file_name, std::ios::out | std::ios::binary);
+
+    if(file)
     {
         try
         {
-            SFile >> Settings;
-            SFile.close();
+            file << j.dump(4);
+            file.close();
         }
         catch(const std::exception& e)
         {
-            printf("[OpenRGBHardwareSyncPlugin] Cannot read settings: %s\n", e.what());
+            printf("[OpenRGBHardwareSyncPlugin] Cannot write file: %s\n", e.what());
+            return false;
         }
     }
 
-    return Settings;
+    return true;
 }
 
-bool MeasureSettings::CreateSettingsDirectory()
+json MeasureSettings::load_json_file(std::string file_name)
 {
-    std::string directory = OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() + SettingsFolder;
+    json j;
 
+    std::ifstream file(file_name);
+
+    if(file)
+    {
+        try
+        {
+            file >> j;
+            file.close();
+        }
+        catch(const std::exception& e)
+        {
+             printf("[OpenRGBHardwareSyncPlugin] Cannot read file: %s\n", e.what());
+        }
+    }
+
+    return j;
+}
+
+bool MeasureSettings::create_dir(std::string directory)
+{
     if(filesystem::exists(directory))
     {
         return true;
     }
 
-    return filesystem::create_directory(directory);
+    return filesystem::create_directories(directory);
+}
+
+
+std::string MeasureSettings::SettingsFolder()
+{
+    return OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() + "plugins" + folder_separator() + "settings";
+}
+
+bool MeasureSettings::CreateSettingsDirectory()
+{
+     return create_dir(SettingsFolder());
 }
