@@ -1,4 +1,6 @@
 #include "HardwareMeasure.h"
+#include <stdio.h>
+#include <string.h>
 
 #ifndef _WIN32
 #include "error.h"
@@ -85,8 +87,6 @@ int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
 }
 
 #elif __linux__
-
-
 
 HardwareMeasure::HardwareMeasure()
 {
@@ -215,8 +215,68 @@ double HardwareMeasure::GetTemperature(Hardware Dev, HardwareFeature FTR)
 
 double HardwareMeasure::GetRamUsagePercent()
 {
-    sysinfo(&info);
-    return 100.0f * (info.totalram - info.freeram) / info.totalram;
+
+    int MemTotal = 0;
+    int MemAvailable = 0;
+
+    int ret = read_meminfo(&MemTotal, &MemAvailable);
+
+    if(ret == 0)
+    {
+        if(MemTotal > 0)
+        {
+            return 100.0f * (MemTotal - MemAvailable) / MemTotal;
+        }
+
+        return 0.;
+    }
+    else
+    {
+        sysinfo(&info);
+        return 100.0f * (info.totalram - info.freeram) / info.totalram;
+    }
+}
+
+int HardwareMeasure::read_meminfo(int *MemTotal, int *MemAvailable)
+{
+    FILE *file_handle;
+    const char * meminfo_file ="/proc/meminfo";
+    char buffer[128];
+    int len = 0;
+    char *p1;
+    file_handle = fopen(meminfo_file,"r");
+
+    if (file_handle == NULL)
+    {
+        return -1;
+    }
+
+    while ( fgets(buffer,sizeof(buffer) - 1, file_handle) != NULL)
+    {
+        p1 = strchr(buffer, ':');
+
+        if (! strncmp(buffer,"MemTotal", p1 - buffer))
+        {
+            char mem_total[256];
+            sscanf(p1+1,"%s%*s",mem_total);
+            len = strlen(mem_total);
+            *(mem_total+len) = ' ';
+            sscanf(p1+1,"%*s%s",mem_total+len+1);
+            sscanf(mem_total, "%d kB", MemTotal);
+        }
+        else if (! strncmp(buffer,"MemAvailable", p1 - buffer))
+        {
+            char mem_available[256];
+            sscanf(p1,"%*s%s",mem_available);
+            len = strlen(mem_available);
+            *(mem_available+len) = ' ';
+            sscanf(p1+1,"%*s%s",mem_available+len+1);
+            sscanf(mem_available, "%d kB", MemAvailable);
+            break;
+        }
+    }
+    fclose(file_handle);
+    return 0;
 }
 
 static float last_total = 0, last_used = 0;

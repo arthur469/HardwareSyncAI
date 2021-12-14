@@ -77,6 +77,7 @@ private:
     #elif __linux__
     std::vector<chip_name> chips;
     std::vector<subfeature> subfeatures;
+    int read_meminfo(int*, int*);
     struct sysinfo info;
 
     #endif
