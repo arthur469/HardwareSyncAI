@@ -1,6 +1,5 @@
 #include "OpenRGBHardwareSyncPlugin.h"
 #include <QHBoxLayout>
-#include "HardwareSyncMainPage.h"
 
 bool OpenRGBHardwareSyncPlugin::DarkTheme = false;
 ResourceManager* OpenRGBHardwareSyncPlugin::RMPointer = nullptr;
@@ -42,7 +41,7 @@ QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 {
     RMPointer->WaitForDeviceDetection();
 
-    HardwareSyncMainPage* ui = new HardwareSyncMainPage(nullptr);
+    ui = new HardwareSyncMainPage(nullptr);
 
     RMPointer->RegisterDetectionStartCallback(DetectionStart, ui);
     RMPointer->RegisterDetectionEndCallback(DetectionEnd, ui);
@@ -58,6 +57,9 @@ QMenu* OpenRGBHardwareSyncPlugin::GetTrayMenu()
 void OpenRGBHardwareSyncPlugin::Unload()
 {
     printf("Time to call some cleaning stuff.\n");
+
+    RMPointer->UnregisterDetectionStartCallback(DetectionStart, ui);
+    RMPointer->UnregisterDetectionEndCallback(DetectionEnd, ui);
 }
 
 std::vector<ControllerZone*> OpenRGBHardwareSyncPlugin::GetControllerZones()

@@ -5,6 +5,7 @@
 #include "ResourceManager.h"
 #include "ControllerZone.h"
 #include "HardwareMeasure.h"
+#include "HardwareSyncMainPage.h"
 
 #include <QObject>
 #include <QString>
@@ -38,6 +39,8 @@ private:
 
     static void DetectionStart(void*);
     static void DetectionEnd(void* );
+
+    HardwareSyncMainPage* ui;
 };
 
 #endif // OPENRGBHARDWARESYNCPLUGIN_H
