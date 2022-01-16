@@ -4,6 +4,7 @@
 #include <QStringListModel>
 #include <QListView>
 #include <QDialog>
+#include <QCheckBox>
 #include <QFormLayout>
 #include <QDialogButtonBox>
 #include <set>
@@ -114,6 +115,9 @@ void MeasureEntry::on_devices_clicked()
 
     form.addRow(list);
 
+    QCheckBox* percentageFill_checkBox = new QCheckBox("Percentage Fill", this);
+    form.addRow(percentageFill_checkBox);
+
     QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
     form.addRow(&buttonBox);
 
@@ -128,6 +132,7 @@ void MeasureEntry::on_devices_clicked()
         {
             if(list->selectionModel()->isRowSelected(i, QModelIndex()))
             {
+                percentage_fill = percentageFill_checkBox->isChecked();
                 assigned_zones.push_back(controller_zones[i]);
             }
         }
@@ -169,14 +174,41 @@ void MeasureEntry::UpdateLEDsThread()
 
         emit Color(color);
 
-        RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
-
         std::set<RGBController*> controllers;
 
-        for(ControllerZone* controller_zone: assigned_zones)
-        {
-            controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
-            controllers.insert(controller_zone->controller);
+        if(percentage_fill) {
+
+            int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
+
+            for(ControllerZone* controller_zone: assigned_zones)
+            {
+                unsigned int ledsCount = controller_zone->leds_count();
+                int ledScale = maxRange / ledsCount;
+                int maxLed = (measure - ui->measure_color->min_value) / ledScale;
+                for(int i = 0; i < maxLed; ++i) {
+                    int val = i * ledScale;
+                    int idx = std::max<int>(0, std::min<int>(99, 100 * ((val - ui->measure_color->min_value) / (ui->measure_color->max_value - ui->measure_color->min_value))));
+                    std::tuple<int, QColor> data = ui->measure_color->GetColor(val, idx);
+
+                    QColor color = std::get<1>(data);
+                    RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+                    controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = rgb;
+                }
+                for(int i = maxLed; i < ledsCount; i++) {
+                    controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = 0;
+                }
+
+                controllers.insert(controller_zone->controller);
+            }
+        }
+        else{
+            RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+
+            for(ControllerZone* controller_zone: assigned_zones)
+            {
+                controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
+                controllers.insert(controller_zone->controller);
+            }
         }
 
         for(RGBController* controller: controllers)
@@ -211,6 +243,7 @@ json MeasureEntry::ToJson()
     j["hardware_feature"] = ui->hardware_feature->currentIndex();
     j["measure_color"] = ui->measure_color->ToJson();
     j["running"] = running;
+    j["percentage_fill"] = percentage_fill;
 
     std::vector<json> devices;
 
@@ -263,6 +296,11 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                 }
             }
         }
+    }
+
+    if(settings.contains("percentage_fill"))
+    {
+        measure->percentage_fill = settings["percentage_fill"];
     }
 
     if(settings.contains("running"))

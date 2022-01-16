@@ -25,6 +25,9 @@ public:
     json ToJson();
     void LoadJson(json);
 
+    float min_value;
+    float max_value;
+
 private slots:
     void on_add_color_clicked();
 
@@ -34,9 +37,6 @@ private:
     std::vector<ColorStop*> color_stops;
     void AddColorStop(ColorStop* color);
     void Update();
-
-    float min_value;
-    float max_value;
 };
 
 #endif // MEASURECOLOR_H

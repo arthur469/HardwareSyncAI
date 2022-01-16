@@ -48,6 +48,8 @@ private:
     int hardware_feature_id;
     int last_idx = 0;
 
+    bool percentage_fill = false;
+
     bool running = false;
 
     std::vector<ControllerZone*> assigned_zones;
