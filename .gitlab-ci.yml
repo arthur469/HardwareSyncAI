@@ -23,24 +23,6 @@ before_script:
  - echo "started by ${GITLAB_USER_NAME}"
 
 #-----------------------------------------------------------------------#
-# Linux 64-bit stretch Build Target                                     #
-#-----------------------------------------------------------------------#
-"Linux 64 - Stretch":
-  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:stretch-64
-  stage: build
-  script:
-  - export QT_SELECT=qt5
-  - export $(dpkg-architecture)
-  - apt install libsensors4-dev
-  - ./scripts/scripts_build-plugin.sh
-  
-  artifacts:
-    name: "${CI_PROJECT_NAME}_Linux_64_${CI_COMMIT_SHORT_SHA}"
-    paths:
-    - ./libOpenRGBHardwareSyncPlugin.so.1.0.0
-    expire_in: 30 days
-
-#-----------------------------------------------------------------------#
 # Linux 64-bit buster Build Target                                      #
 #-----------------------------------------------------------------------#
 "Linux 64 - Buster":
