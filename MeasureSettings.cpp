@@ -1,7 +1,9 @@
 #include "MeasureSettings.h"
 #include <fstream>
 #include <iostream>
-#include "filesystem.h"
+#include <QFile>
+#include <QString>
+#include <QDir>
 #include "OpenRGBHardwareSyncPlugin.h"
 
 bool MeasureSettings::Save(json j)
@@ -86,12 +88,14 @@ json MeasureSettings::load_json_file(std::string file_name)
 
 bool MeasureSettings::create_dir(std::string directory)
 {
-    if(filesystem::exists(directory))
+    QDir dir(QString::fromStdString(directory));
+
+    if(dir.exists())
     {
         return true;
     }
 
-    return filesystem::create_directories(directory);
+    return QDir().mkpath(dir.path());
 }
 
 

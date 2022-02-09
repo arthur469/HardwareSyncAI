@@ -47,7 +47,6 @@ INCLUDEPATH +=                                                      \
 HEADERS +=                                                          \
     ControllerZone.h                                                \
     MeasureSettings.h                                               \
-    OpenRGB/filesystem.h                                            \
     OpenRGB/dependencies/ColorWheel/ColorWheel.h                    \
     HardwareSyncMainPage.h                                          \
     MeasureColor.h                                                  \
@@ -146,7 +145,7 @@ unix:!macx {
         dependencies/libsensors-cpp/sensors.cpp                         \
         dependencies/libsensors-cpp/error.cpp                           \
 
-    LIBS += -lsensors -lstdc++fs
+    LIBS += -lsensors
     QMAKE_CXXFLAGS += -std=c++17
 }
 
