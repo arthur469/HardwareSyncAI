@@ -42,12 +42,10 @@ INCLUDEPATH +=                                                      \
     OpenRGB/RGBController                                           \
     OpenRGB/net_port                                                \
     OpenRGB/dependencies/json                                       \
-    OpenRGB/dependencies/ColorWheel                                 \
 
 HEADERS +=                                                          \
     ControllerZone.h                                                \
     MeasureSettings.h                                               \
-    OpenRGB/dependencies/ColorWheel/ColorWheel.h                    \
     HardwareSyncMainPage.h                                          \
     MeasureColor.h                                                  \
     MeasureEntry.h                                                  \
@@ -60,7 +58,6 @@ HEADERS +=                                                          \
 
 SOURCES +=                                                          \
     MeasureSettings.cpp                                             \
-    OpenRGB/dependencies/ColorWheel/ColorWheel.cpp                  \
     HardwareSyncMainPage.cpp                                        \
     MeasureColor.cpp                                                \
     MeasureEntry.cpp                                                \
