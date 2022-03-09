@@ -33,20 +33,45 @@ void OpenRGBHardwareSyncPlugin::Load(bool dark_theme, ResourceManager* resource_
 {
     RMPointer                = resource_manager_ptr;
     DarkTheme                = dark_theme;
-    hm = new HardwareMeasure();
+
+#ifdef _WIN32
+    can_load = QFile(QCoreApplication::applicationDirPath()+"\\lhwm-wrapper.dll").exists();
+#endif
+
+    if(can_load)
+    {
+        hm = new HardwareMeasure();
+    }
 }
 
 
 QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 {
-    RMPointer->WaitForDeviceDetection();
+    if(can_load)
+    {
+        RMPointer->WaitForDeviceDetection();
 
-    ui = new HardwareSyncMainPage(nullptr);
+        ui = new HardwareSyncMainPage(nullptr);
 
-    RMPointer->RegisterDetectionStartCallback(DetectionStart, ui);
-    RMPointer->RegisterDetectionEndCallback(DetectionEnd, ui);
+        RMPointer->RegisterDetectionStartCallback(DetectionStart, ui);
+        RMPointer->RegisterDetectionEndCallback(DetectionEnd, ui);
 
-    return ui;
+        return ui;
+    }
+    else
+    {
+        QLabel* label = new QLabel(
+                    "<h1>Cannot load the plugin.</h1>"
+                    "<p>Make sure you downloaded <a href=\"https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll\">lhwm-wrapper.dll</a></p>"
+                    "<p>Place this DLL inside  <b>" + QCoreApplication::applicationDirPath() +  "</b> and restart OpenRGB.</p>"
+        );
+
+        label->setTextFormat(Qt::RichText);
+        label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        label->setOpenExternalLinks(true);
+
+        return label;
+    }
 }
 
 QMenu* OpenRGBHardwareSyncPlugin::GetTrayMenu()

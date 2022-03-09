@@ -41,6 +41,8 @@ private:
     static void DetectionEnd(void* );
 
     HardwareSyncMainPage* ui;
+
+    bool can_load = true;
 };
 
 #endif // OPENRGBHARDWARESYNCPLUGIN_H
