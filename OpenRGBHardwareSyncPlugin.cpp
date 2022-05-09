@@ -53,8 +53,8 @@ QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 
         ui = new HardwareSyncMainPage(nullptr);
 
-        RMPointer->RegisterDetectionStartCallback(DetectionStart, ui);
-        RMPointer->RegisterDetectionEndCallback(DetectionEnd, ui);
+        RMPointer->RegisterDetectionStartCallback(DetectionStart, this);
+        RMPointer->RegisterDetectionEndCallback(DetectionEnd, this);
 
         return ui;
     }
@@ -123,8 +123,7 @@ bool OpenRGBHardwareSyncPlugin::SupportsDirectMode(RGBController* controller)
 void OpenRGBHardwareSyncPlugin::DetectionStart(void* o)
 {
     printf("[OpenRGBHardwareSyncPlugin] DetectionStart\n");
-
-    QMetaObject::invokeMethod((HardwareSyncMainPage *)o, "Clear", Qt::QueuedConnection);
+    ((OpenRGBHardwareSyncPlugin*)o)->ui->Clear();
 }
 
 void OpenRGBHardwareSyncPlugin::DetectionEnd(void*)
