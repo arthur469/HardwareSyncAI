@@ -54,6 +54,11 @@ public:
     std::vector<Hardware> GetAvailableDevices();
     double GetMeasure(Hardware, HardwareFeature);
 
+#ifdef _WIN32
+    int GetHardwareIndex(std::string identifier);
+    int GetHardwareFeatureIndex(std::string identifier);
+#endif
+
 private:
     std::vector<Hardware> HardwareList;
 
@@ -61,6 +66,8 @@ private:
     double GetRamUsagePercent();
 
     #ifdef _WIN32
+    std::map<std::string, int> IdentifierToHardwareDropdownIdx;
+    std::map<std::string, int> IdentifierToFeatureDropdownIdx;
 
     #elif __linux__
     std::vector<chip_name> chips;

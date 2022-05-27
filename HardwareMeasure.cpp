@@ -17,10 +17,13 @@ HardwareMeasure::HardwareMeasure()
     std::map<std::string, std::vector<std::tuple<std::string, std::string, std::string>>>
             hs_map = LHWM::GetHardwareSensorMap();
 
+    int hardwareIdx = 0;
     for (auto const& [key, val] : hs_map)
     {
         Hardware hw;
         hw.TrackDeviceName = key;
+
+        int featureIdx = 0;
 
         for(auto const& tup : val)
         {
@@ -32,9 +35,17 @@ HardwareMeasure::HardwareMeasure()
             feature.SubFeatureIndex = 0;
 
             hw.features.push_back(feature);
+
+            IdentifierToHardwareDropdownIdx[feature.Identifier] = hardwareIdx;
+            IdentifierToFeatureDropdownIdx[feature.Identifier] = featureIdx;
+            featureIdx++;
         }
 
-        HardwareList.push_back(hw);
+        if (hw.features.size() > 0)
+        {
+            HardwareList.push_back(hw);
+            hardwareIdx++;
+        }
     }
 
 }
@@ -52,6 +63,16 @@ double HardwareMeasure::GetTemperature(Hardware Dev, HardwareFeature Feature)
 double HardwareMeasure::GetRamUsagePercent()
 {
     return 0.0f;
+}
+
+int HardwareMeasure::GetHardwareIndex(std::string identifier)
+{
+    return IdentifierToHardwareDropdownIdx[identifier];
+}
+
+int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
+{
+    return IdentifierToFeatureDropdownIdx[identifier];
 }
 
 #elif __linux__

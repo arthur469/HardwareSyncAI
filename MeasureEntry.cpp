@@ -79,7 +79,7 @@ void MeasureEntry::on_hardware_currentIndexChanged(int value)
 
     for(HardwareFeature& feature: devices[hardware_id].features)
     {
-        ui->hardware_feature->addItem(QString::fromStdString(feature.Name));
+        ui->hardware_feature->addItem(QString::fromStdString(feature.Name), QString::fromStdString(feature.Identifier));
     }
 }
 
@@ -224,11 +224,14 @@ void MeasureEntry::Tick()
 {
     while(running)
     {
-        measure = OpenRGBHardwareSyncPlugin::hm->GetMeasure(
-                    devices[hardware_id],
-                    devices[hardware_id].features[hardware_feature_id]);
+        if(hardware_id < devices.size() && hardware_feature_id < devices[hardware_id].features.size())
+        {
+            measure = OpenRGBHardwareSyncPlugin::hm->GetMeasure(
+                        devices[hardware_id],
+                        devices[hardware_id].features[hardware_feature_id]);
 
-        emit Measure(measure);
+            emit Measure(measure);
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(refresh_interval));
     }
@@ -241,6 +244,9 @@ json MeasureEntry::ToJson()
     j["refresh_interval"] = refresh_interval;
     j["hardware"] = ui->hardware->currentIndex();
     j["hardware_feature"] = ui->hardware_feature->currentIndex();
+#ifdef _WIN32
+    j["hardware_identifier"] = ui->hardware_feature->currentData().toString().toStdString();
+#endif
     j["measure_color"] = ui->measure_color->ToJson();
     j["running"] = running;
     j["percentage_fill"] = percentage_fill;
@@ -264,11 +270,27 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
     if(settings.contains("refresh_interval"))
         measure->ui->refresh_interval->setValue(settings["refresh_interval"]);
 
+#ifdef _WIN32
+    if (settings.contains("hardware_identifier"))
+    {
+        measure->ui->hardware->setCurrentIndex(OpenRGBHardwareSyncPlugin::hm->HardwareMeasure::GetHardwareIndex(settings["hardware_identifier"]));
+        measure->ui->hardware_feature->setCurrentIndex(OpenRGBHardwareSyncPlugin::hm->HardwareMeasure::GetHardwareFeatureIndex(settings["hardware_identifier"]));
+    }
+    else
+    {
+        if(settings.contains("hardware"))
+            measure->ui->hardware->setCurrentIndex(settings["hardware"]);
+
+        if(settings.contains("hardware_feature"))
+            measure->ui->hardware_feature->setCurrentIndex(settings["hardware_feature"]);
+    }
+#else
     if(settings.contains("hardware"))
         measure->ui->hardware->setCurrentIndex(settings["hardware"]);
 
     if(settings.contains("hardware_feature"))
         measure->ui->hardware_feature->setCurrentIndex(settings["hardware_feature"]);
+#endif
 
     if(settings.contains("measure_color"))
         measure->ui->measure_color->LoadJson(settings["measure_color"]);
