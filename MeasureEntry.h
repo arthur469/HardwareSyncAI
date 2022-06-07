@@ -23,6 +23,8 @@ public:
     void Stop();
     json ToJson();
     void Clear();
+    void Rename(std::string);
+    std::string GetName();
 
     static MeasureEntry* FromJson(QWidget *parent, json);
 
@@ -32,23 +34,28 @@ private slots:
     void on_hardware_feature_currentIndexChanged(int);
     void on_start_stop_clicked();
     void on_devices_clicked();
-    void on_remove_clicked();
+    void on_percentage_fill_stateChanged(int);
+    void on_fps_valueChanged(int);
+    void on_auto_start_stateChanged(int);
     void OnMeasure(double);
     void OnColor(QColor color);
 
 signals:
-    void RemoveRequest();
     void Measure(double);
     void Color(QColor);
+    void Renamed(std::string);
 
 private:
     Ui::MeasureEntry *ui;
     std::vector<Hardware> devices;
     int hardware_id;
     int hardware_feature_id;
-    int last_idx = 0;
+    float last_idx = 0;
+
+    std::string name = "Untitled";
 
     bool percentage_fill = false;
+    bool auto_start = false;
 
     bool running = false;
 
@@ -56,6 +63,7 @@ private:
 
     std::thread* measure_thread;
     int refresh_interval = 100;
+    int fps = 60;
 
     std::thread* leds_thread;
     int leds_refresh_interval = 20;

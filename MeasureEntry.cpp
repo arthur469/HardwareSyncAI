@@ -37,6 +37,17 @@ void MeasureEntry::Clear()
     assigned_zones.clear();
 }
 
+void MeasureEntry::Rename(std::string value)
+{
+    name = value;
+    emit Renamed(value);
+}
+
+std::string MeasureEntry::GetName()
+{
+    return name;
+}
+
 void MeasureEntry::Start()
 {
     if(running)
@@ -72,6 +83,11 @@ void MeasureEntry::on_refresh_interval_valueChanged(int value)
     refresh_interval = value;
 }
 
+void MeasureEntry::on_fps_valueChanged(int value)
+{
+    fps = value;
+}
+
 void MeasureEntry::on_hardware_currentIndexChanged(int value)
 {
     hardware_id = value;
@@ -88,9 +104,14 @@ void MeasureEntry::on_hardware_feature_currentIndexChanged(int value)
     hardware_feature_id = value;
 }
 
-void MeasureEntry::on_remove_clicked()
+void MeasureEntry::on_percentage_fill_stateChanged(int state)
 {
-    emit RemoveRequest();
+    percentage_fill = state;
+}
+
+void MeasureEntry::on_auto_start_stateChanged(int state)
+{
+    auto_start = state;
 }
 
 void MeasureEntry::on_devices_clicked()
@@ -115,25 +136,23 @@ void MeasureEntry::on_devices_clicked()
 
     form.addRow(list);
 
-    QCheckBox* percentageFill_checkBox = new QCheckBox("Percentage Fill", this);
-    form.addRow(percentageFill_checkBox);
-
     QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
     form.addRow(&buttonBox);
 
     QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
     QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 
-    if (dialog.exec() == QDialog::Accepted) {
-
+    if (dialog.exec() == QDialog::Accepted)
+    {
         assigned_zones.clear();
+        ui->devices_list_view->clear();
 
         for(unsigned int i = 0; i < controller_zones.size(); i++)
         {
             if(list->selectionModel()->isRowSelected(i, QModelIndex()))
             {
-                percentage_fill = percentageFill_checkBox->isChecked();
                 assigned_zones.push_back(controller_zones[i]);
+                ui->devices_list_view->addItem(QString::fromStdString(controller_zones[i]->display_name()));
             }
         }
     }
@@ -166,7 +185,7 @@ void MeasureEntry::UpdateLEDsThread()
 {
     while(running)
     {
-        std::tuple<int, QColor> data = ui->measure_color->GetColor(measure, last_idx);
+        std::tuple<float, QColor> data = ui->measure_color->GetColor(measure, last_idx, fps);
 
         last_idx = std::get<0>(data);
 
@@ -188,7 +207,7 @@ void MeasureEntry::UpdateLEDsThread()
                 for(int i = 0; i < maxLed; ++i) {
                     int val = i * ledScale;
                     int idx = std::max<int>(0, std::min<int>(99, 100 * ((val - ui->measure_color->min_value) / (ui->measure_color->max_value - ui->measure_color->min_value))));
-                    std::tuple<int, QColor> data = ui->measure_color->GetColor(val, idx);
+                    std::tuple<float, QColor> data = ui->measure_color->GetColor(val, idx, fps);
 
                     QColor color = std::get<1>(data);
                     RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
@@ -216,7 +235,8 @@ void MeasureEntry::UpdateLEDsThread()
             controller->UpdateLEDs();
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(leds_refresh_interval));
+        unsigned int sleep = 1000./fps;
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
     }
 }
 
@@ -250,6 +270,9 @@ json MeasureEntry::ToJson()
     j["measure_color"] = ui->measure_color->ToJson();
     j["running"] = running;
     j["percentage_fill"] = percentage_fill;
+    j["auto_start"] = auto_start;
+    j["fps"] = fps;
+    j["name"] = name;
 
     std::vector<json> devices;
 
@@ -314,6 +337,7 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                         )
                 {
                     measure->assigned_zones.push_back(controller_zone);
+
                     break;
                 }
             }
@@ -322,17 +346,32 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
 
     if(settings.contains("percentage_fill"))
     {
-        measure->percentage_fill = settings["percentage_fill"];
+        measure->ui->percentage_fill->setChecked(settings["percentage_fill"]);
     }
 
-    if(settings.contains("running"))
+    if(settings.contains("fps"))
     {
-        bool was_running = settings["running"];
+        measure->ui->fps->setValue(settings["fps"]);
+    }
 
-        if(was_running)
+    if(settings.contains("name"))
+    {
+        measure->name = settings["name"];
+    }
+
+    if(settings.contains("auto_start"))
+    {       
+        measure->ui->auto_start->setChecked(settings["auto_start"]);
+
+        if(measure->auto_start)
         {
             measure->Start();
         }
+    }
+
+    for(unsigned int i = 0; i < measure->assigned_zones.size(); i++)
+    {
+       measure->ui->devices_list_view->addItem(QString::fromStdString(measure->assigned_zones[i]->display_name()));
     }
 
     return measure;

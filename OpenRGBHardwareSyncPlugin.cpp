@@ -93,10 +93,10 @@ std::vector<ControllerZone*> OpenRGBHardwareSyncPlugin::GetControllerZones()
 
     for(RGBController* controller: OpenRGBHardwareSyncPlugin::RMPointer->GetRGBControllers())
     {
-        if(!SupportsDirectMode(controller))
-        {
-            continue;
-        }
+//        if(!SupportsDirectMode(controller))
+//        {
+//            continue;
+//        }
 
         for(unsigned int i = 0; i < controller->zones.size(); i++)
         {

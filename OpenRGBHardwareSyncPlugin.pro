@@ -21,6 +21,10 @@ GIT_COMMIT_ID   = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PR
 GIT_COMMIT_DATE = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ show -s --format=%ci HEAD)
 GIT_BRANCH      = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ rev-parse --abbrev-ref HEAD)
 
+
+win32:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows 64"
+unix:!macx:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux 64 - Bullseye"
+
 #-----------------------------------------------------------------------------------------------#
 # Inject vars in defines                                                                        #
 #-----------------------------------------------------------------------------------------------#
@@ -55,6 +59,9 @@ HEADERS +=                                                          \
     HardwareMeasure.h                                               \
     ColorPicker.h                                                   \
     ColorStop.h                                                     \
+    PluginInfo.h \
+    TabHeader.h\
+    EditableLabel.h
 
 SOURCES +=                                                          \
     MeasureSettings.cpp                                             \
@@ -65,6 +72,9 @@ SOURCES +=                                                          \
     HardwareMeasure.cpp                                             \
     ColorPicker.cpp                                                 \
     ColorStop.cpp                                                   \
+    PluginInfo.cpp \
+    TabHeader.cpp \
+    EditableLabel.cpp
 
 FORMS += \
     HardwareSyncMainPage.ui                                             \
@@ -72,6 +82,8 @@ FORMS += \
     MeasureEntry.ui                                                     \
     ColorPicker.ui                                                      \
     ColorStop.ui                                                        \
+    PluginInfo.ui \
+    TabHeader.ui
 
 #-------------------------------------------------------------------#
 # Windows GitLab CI Configuration                                   #

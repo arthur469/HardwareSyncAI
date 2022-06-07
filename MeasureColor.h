@@ -21,7 +21,7 @@ public:
     explicit MeasureColor(QWidget *parent = nullptr);
     ~MeasureColor();
 
-    std::tuple<unsigned int, QColor> GetColor(double, int);
+    std::tuple<float, QColor> GetColor(double, float, int);
     json ToJson();
     void LoadJson(json);
 

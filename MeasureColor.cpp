@@ -108,25 +108,31 @@ void MeasureColor::Update()
     ui->preview->setPixmap(QPixmap::fromImage(image));
 }
 
-std::tuple<unsigned int, QColor> MeasureColor::GetColor(double val, int last_idx)
+std::tuple<float, QColor> MeasureColor::GetColor(double val, float last_idx, int fps)
 {
     if(max_value == 0 || max_value == min_value)
     {
-        std::tuple<int, QColor>(0, Qt::black);
+        return std::tuple<float, QColor>(0, Qt::black);
     }
 
-    int idx = std::max<int>(0, std::min<int>(99, 100 * ((val - min_value) / (max_value - min_value))));
+    float idx = std::max<float>(0, std::min<float>(99, 100 * ((val - min_value) / (max_value - min_value))));
+
+    float delta = 1./fps;
+
+    float gap = fabs(last_idx - idx);
 
     if(idx < last_idx)
     {
-        idx = last_idx - 1;
+        idx = last_idx - gap * delta;
     }
     else if(idx > last_idx)
     {
-        idx = last_idx + 1;
+        idx = last_idx + gap * delta;
     }
 
-    return std::tuple<int, QColor>(idx, image.pixelColor(idx, 0));
+    //printf("idx=%f, last_idx=%f, gap=%f, delta=%f\n", idx, last_idx,gap, delta);
+
+    return std::tuple<float, QColor>(idx, image.pixelColor((unsigned int)idx, 0));
 }
 
 json MeasureColor::ToJson()
