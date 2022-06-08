@@ -1,5 +1,9 @@
 #include "HardwareMeasure.h"
 
+#ifndef _WIN32
+#include "error.h"
+#endif
+
 HardwareMeasure::~HardwareMeasure()
 {
 
@@ -79,16 +83,31 @@ int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
 
 HardwareMeasure::HardwareMeasure()
 {
-    chips = get_detected_chips();
+    std::vector<chip_name> detected_chips = get_detected_chips();
 
-    for (int ChipID = 0; ChipID < (int)chips.size(); ChipID++)
+    chips.clear();
+
+    printf("## HardwareMeasure chips: %d\n", (int)chips.size());
+
+    for (unsigned int ChipID = 0; ChipID < detected_chips.size(); ChipID++)
     {
         Hardware NewDev;
-        NewDev.TrackDeviceName = chips[ChipID].name();
+
+        try
+        {
+            NewDev.TrackDeviceName = detected_chips[ChipID].name();
+        }
+        catch(const sensors::io_error& ex)
+        {
+            printf("##### sensors::io_error for chip[%d]: %s\n", ChipID, ex.what());
+            continue;
+        }
+
         NewDev.DeviceIndex = ChipID;
 
-        chip_name chip = chips[ChipID];
-        for (int ChipFeatureID = 0; ChipFeatureID < (int)chip.features().size(); ChipFeatureID++)
+        const chip_name& chip = detected_chips[ChipID];
+
+        for (unsigned int ChipFeatureID = 0; ChipFeatureID < chip.features().size(); ChipFeatureID++)
         {
             feature FTR = chip.features()[ChipFeatureID];
             std::string BaseFeatureName = (std::string)FTR.name();
@@ -96,6 +115,7 @@ HardwareMeasure::HardwareMeasure()
             for(int SubFeatureID = 0; SubFeatureID < (int)FTR.subfeatures().size(); SubFeatureID++)
             {
                 subfeature SubFTR = FTR.subfeatures()[SubFeatureID];
+
                 if(SubFTR.type() == subfeature_type::input)
                 {
                     std::string FTRName = (BaseFeatureName + std::string(SubFTR.name()).c_str());
@@ -109,9 +129,11 @@ HardwareMeasure::HardwareMeasure()
                 }
             }
         }
+
         if (NewDev.features.size() > 0)
         {
             HardwareList.push_back(NewDev);
+            chips.push_back(detected_chips[ChipID]);
         }
     }
 
@@ -147,7 +169,15 @@ double HardwareMeasure::GetMeasure(Hardware Dev, HardwareFeature FTR)
 
 double HardwareMeasure::GetTemperature(Hardware Dev, HardwareFeature FTR)
 {
-    return chips[Dev.DeviceIndex].features()[FTR.PrimaryFeatureIndex].subfeatures()[FTR.SubFeatureIndex].read();
+    try
+    {
+        return chips[Dev.DeviceIndex].features()[FTR.PrimaryFeatureIndex].subfeatures()[FTR.SubFeatureIndex].read();
+    }
+    catch(const sensors::io_error& ex)
+    {
+        printf("##### sensors::io_error while reading value: %s\n", ex.what());
+        return 0.;
+    }
 }
 
 double HardwareMeasure::GetRamUsagePercent()
