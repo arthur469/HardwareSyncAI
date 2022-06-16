@@ -202,25 +202,29 @@ void MeasureEntry::UpdateLEDsThread()
             for(ControllerZone* controller_zone: assigned_zones)
             {
                 unsigned int ledsCount = controller_zone->leds_count();
-                int ledScale = maxRange / ledsCount;
-                int maxLed = (measure - ui->measure_color->min_value) / ledScale;
-                for(int i = 0; i < maxLed; ++i) {
-                    int val = i * ledScale;
-                    int idx = std::max<int>(0, std::min<int>(99, 100 * ((val - ui->measure_color->min_value) / (ui->measure_color->max_value - ui->measure_color->min_value))));
-                    std::tuple<float, QColor> data = ui->measure_color->GetColor(val, idx, fps);
+                double ledScale = 1.0 * maxRange / ledsCount;
+                double maxLed = (measure - ui->measure_color->min_value) / ledScale;
 
+                for(int i = 0; i < maxLed; ++i)
+                {
+                    double val = i * ledScale;
+                    float idx = std::max<float>(0, std::min<float>(99, 100 * (val / (maxRange))));
+                    std::tuple<float, QColor> data = ui->measure_color->GetColor(val, idx, fps);
                     QColor color = std::get<1>(data);
                     RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
                     controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = rgb;
                 }
-                for(int i = maxLed; i < ledsCount; i++) {
+
+                for(unsigned int i = maxLed; i < ledsCount; i++)
+                {
                     controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = 0;
                 }
 
                 controllers.insert(controller_zone->controller);
             }
         }
-        else{
+        else
+        {
             RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
 
             for(ControllerZone* controller_zone: assigned_zones)
