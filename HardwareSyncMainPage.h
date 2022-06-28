@@ -22,12 +22,14 @@ public slots:
 
 private slots:
     void on_save_clicked();
+    void on_start_stop_all_clicked();
     void AddTabSlot();
 
 private:
     Ui::HardwareSyncMainPage *ui;
     std::vector<MeasureEntry*> measures;
     void AddMeasure(MeasureEntry*);
+    bool HasStartedMeasures();
 };
 
 #endif // HARDWARESYNCMAINPAGE_H

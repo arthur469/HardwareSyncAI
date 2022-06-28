@@ -125,7 +125,39 @@ void HardwareSyncMainPage::on_save_clicked()
 
     printf("[HardwareSyncMainPage] json ready to be saved\n");
 
-    json j = v;    
+    json j = v;
 
     MeasureSettings::Save(j);
 }
+
+void HardwareSyncMainPage::on_start_stop_all_clicked()
+{
+    if(HasStartedMeasures())
+    {
+        for(MeasureEntry* measure: measures)
+        {
+            measure->Stop();
+        }
+    }
+
+    else
+    {
+        for(MeasureEntry* measure: measures)
+        {
+            measure->Start();
+        }
+    }
+
+}
+
+bool HardwareSyncMainPage::HasStartedMeasures()
+{
+    for(MeasureEntry* measure: measures)
+    {
+        if(measure->IsRunning())
+            return true;
+    }
+
+    return false;
+}
+

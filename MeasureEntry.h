@@ -21,6 +21,7 @@ public:
 
     void Start();
     void Stop();
+    bool IsRunning();
     json ToJson();
     void Clear();
     void Rename(std::string);

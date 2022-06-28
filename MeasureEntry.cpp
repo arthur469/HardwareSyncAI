@@ -78,6 +78,11 @@ void MeasureEntry::Stop()
     }
 }
 
+bool MeasureEntry::IsRunning()
+{
+    return running;
+}
+
 void MeasureEntry::on_refresh_interval_valueChanged(int value)
 {
     refresh_interval = value;
