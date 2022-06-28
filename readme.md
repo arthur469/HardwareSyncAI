@@ -27,3 +27,9 @@ Notice: some of the hardware measures may require that you run OpenRGB as admin.
 ### Linux
 
 You need `lm-sensors` installed.
+
+## How do I use it?
+
+Here is a link to find the documentation you need.
+
+[HardwareSync Help](https://gitlab.com/OpenRGBDevelopers/OpenRGB-Wiki/-/blob/stable/Plugins/HardwareSync/HardwareSync.md)
