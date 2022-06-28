@@ -3,6 +3,8 @@
 #include "PluginInfo.h"
 #include "TabHeader.h"
 #include <QToolButton>
+#include <QMainWindow>
+#include <QAction>
 
 HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     QWidget(parent),
@@ -46,6 +48,19 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
         }
     });
 
+    for (QWidget *w : QApplication::topLevelWidgets())
+    {
+        if (QMainWindow* mainWin = qobject_cast<QMainWindow*>(w))
+        {
+            QAction* actionLightsOff = mainWin->findChild<QAction *>("ActionLightsOff");
+
+            if(actionLightsOff)
+            {
+                connect(actionLightsOff, SIGNAL(triggered()), this, SLOT(OnStopMeasures()));
+                break;
+            }
+        }
+    }
 }
 
 HardwareSyncMainPage::~HardwareSyncMainPage()
@@ -161,3 +176,10 @@ bool HardwareSyncMainPage::HasStartedMeasures()
     return false;
 }
 
+void HardwareSyncMainPage::OnStopMeasures()
+{
+    for(MeasureEntry* measure: measures)
+    {
+        measure->Stop();
+    }
+}

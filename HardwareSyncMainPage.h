@@ -24,6 +24,7 @@ private slots:
     void on_save_clicked();
     void on_start_stop_all_clicked();
     void AddTabSlot();
+    void OnStopMeasures();
 
 private:
     Ui::HardwareSyncMainPage *ui;
