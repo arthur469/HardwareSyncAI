@@ -110,7 +110,7 @@ HardwareMeasure::HardwareMeasure()
         for (unsigned int ChipFeatureID = 0; ChipFeatureID < chip.features().size(); ChipFeatureID++)
         {
             feature FTR = chip.features()[ChipFeatureID];
-            std::string BaseFeatureName = (std::string)FTR.name();
+            std::string BaseFeatureName = (std::string)FTR.label();
 
             for(int SubFeatureID = 0; SubFeatureID < (int)FTR.subfeatures().size(); SubFeatureID++)
             {
@@ -118,7 +118,11 @@ HardwareMeasure::HardwareMeasure()
 
                 if(SubFTR.type() == subfeature_type::input)
                 {
-                    std::string FTRName = (BaseFeatureName + std::string(SubFTR.name()).c_str());
+                    std::string FTRName;
+                    if (SubFeatureID == 0)
+                        FTRName = (BaseFeatureName);
+                    else
+                        FTRName = (BaseFeatureName + " "+ std::string(SubFTR.name().c_str()));
                     HardwareFeature feature;
                     feature.Name = FTRName;
                     feature.PrimaryFeatureIndex = ChipFeatureID;
