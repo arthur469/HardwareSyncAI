@@ -246,6 +246,8 @@ void MeasureEntry::UpdateLEDsThread()
 
         std::set<RGBController*> controllers;
 
+        int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
+
         for(unsigned int z = 0; z < assigned_zones.size(); z++)
         {
             ControllerZoneListItemWidget* custom_widget =
@@ -253,24 +255,35 @@ void MeasureEntry::UpdateLEDsThread()
 
             if(custom_widget->isPercentageFill())
             {
-                int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
                 unsigned int ledsCount = assigned_zones[z]->leds_count();
                 double ledScale = 1.0 * maxRange / ledsCount;
-                double maxLed = (measure - ui->measure_color->min_value) / ledScale;
+                double maxLed = 0.01 * last_idx * ledsCount;
 
-                for(int i = 0; i < maxLed; ++i)
+                for(unsigned int i = 0; i < ledsCount; ++i)
                 {
-                    double val = i * ledScale;
-                    float idx = std::max<float>(0, std::min<float>(99, 100 * (val / (maxRange))));
-                    std::tuple<float, QColor> data = ui->measure_color->GetColor(val, idx, fps);
-                    QColor color = std::get<1>(data);
-                    RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
-                    assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
-                }
+                    if(i <= maxLed)
+                    {
+                        double val = i * ledScale;
+                        float idx = std::max<float>(0, std::min<float>(99, 100 * (val / (maxRange))));
+                        std::tuple<float, QColor> data = ui->measure_color->GetColor(val, idx, fps);
+                        QColor color = std::get<1>(data);
 
-                for(unsigned int i = maxLed; i < ledsCount; i++)
-                {
-                    assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = 0;
+                        if(i == (unsigned int) maxLed)
+                        {
+                            float dimm = maxLed - (unsigned int) maxLed;
+                            RGBColor rgb = ToRGBColor((int)(dimm*color.red()), (int)(dimm*color.green()), (int)(dimm*color.blue()));
+                            assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
+                        }
+                        else
+                        {
+                            RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+                            assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
+                        }
+                    }
+                    else
+                    {
+                        assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = 0;
+                    }
                 }
 
                 controllers.insert(assigned_zones[z]->controller);
