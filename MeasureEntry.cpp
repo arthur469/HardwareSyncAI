@@ -10,13 +10,15 @@
 #include <QDialogButtonBox>
 #include <set>
 
-
 MeasureEntry::MeasureEntry(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MeasureEntry)
 {
     ui->setupUi(this);
 
+    /*---------------------------------------------------------*\
+    | Populate the hardware combobox (measures)                 |
+    \*---------------------------------------------------------*/
     devices = OpenRGBHardwareSyncPlugin::hm->GetAvailableDevices();
 
     for(Hardware& device: devices)
@@ -24,12 +26,18 @@ MeasureEntry::MeasureEntry(QWidget *parent) :
         ui->hardware->addItem(QString::fromStdString(device.TrackDeviceName));
     }
 
+    /*---------------------------------------------------------*\
+    | Internal bindings cause of multi-threading                |
+    \*---------------------------------------------------------*/
     connect(this, SIGNAL(Measure(double)), this, SLOT(OnMeasure(double)));
     connect(this, SIGNAL(Color(QColor)), this, SLOT(OnColor(QColor)));
 }
 
 MeasureEntry::~MeasureEntry()
 {
+    /*---------------------------------------------------------*\
+    | Stop measures in destructor                               |
+    \*---------------------------------------------------------*/
     Stop();
     delete ui;
 }
@@ -57,6 +65,9 @@ void MeasureEntry::Start()
         return;
     }
 
+    /*---------------------------------------------------------*\
+    | Start measure and leds update threads                     |
+    \*---------------------------------------------------------*/
     running = true;
     measure_thread = new std::thread(&MeasureEntry::Tick, this);
     leds_thread = new std::thread(&MeasureEntry::UpdateLEDsThread, this);
@@ -70,6 +81,9 @@ void MeasureEntry::Stop()
     {
         running = false;
 
+        /*---------------------------------------------------------*\
+        | Wait for the threads to finish                            |
+        \*---------------------------------------------------------*/
         measure_thread->join();
         delete measure_thread;
 
@@ -97,6 +111,9 @@ void MeasureEntry::on_fps_valueChanged(int value)
 
 void MeasureEntry::on_hardware_currentIndexChanged(int value)
 {
+    /*---------------------------------------------------------*\
+    | Set the sub features on hardware changed                  |
+    \*---------------------------------------------------------*/
     hardware_id = value;
     ui->hardware_feature->clear();
 
@@ -113,6 +130,9 @@ void MeasureEntry::on_hardware_feature_currentIndexChanged(int value)
 
 void MeasureEntry::on_percentage_fill_stateChanged(int state)
 {
+    /*---------------------------------------------------------*\
+    | Update % checkboxes with the global state                 |
+    \*---------------------------------------------------------*/
     for(int i = 0; i < ui->devices_list_view->count(); i++)
     {
         ControllerZoneListItemWidget* custom_widget =
@@ -129,6 +149,9 @@ void MeasureEntry::on_auto_start_stateChanged(int state)
 
 void MeasureEntry::on_devices_clicked()
 {
+    /*---------------------------------------------------------*\
+    | Open a dialog to choose which RGB devices to assign       |
+    \*---------------------------------------------------------*/
     QDialog dialog(this);
     QFormLayout form(&dialog);
     QListView* list = new QListView(this);
@@ -160,12 +183,14 @@ void MeasureEntry::on_devices_clicked()
         assigned_zones.clear();
         ui->devices_list_view->clear();
 
+        /*---------------------------------------------------------*\
+        | Create the devices list widgets                           |
+        \*---------------------------------------------------------*/
         for(unsigned int i = 0; i < controller_zones.size(); i++)
         {
             if(list->selectionModel()->isRowSelected(i, QModelIndex()))
             {
                 assigned_zones.push_back(controller_zones[i]);
-                //    ui->devices_list_view->addItem(QString::fromStdString(controller_zones[i]->display_name()));
 
                 QListWidgetItem* item = new QListWidgetItem();
                 ControllerZoneListItemWidget* custom_widget =

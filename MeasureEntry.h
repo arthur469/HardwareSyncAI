@@ -49,8 +49,8 @@ signals:
 private:
     Ui::MeasureEntry *ui;
     std::vector<Hardware> devices;
-    int hardware_id;
-    int hardware_feature_id;
+    unsigned int hardware_id;
+    unsigned int hardware_feature_id;
     float last_idx = 0;
 
     std::string name = "Untitled";
