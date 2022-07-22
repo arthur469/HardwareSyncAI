@@ -55,7 +55,6 @@ private:
 
     std::string name = "Untitled";
 
-    bool percentage_fill = false;
     bool auto_start = false;
 
     bool running = false;

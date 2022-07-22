@@ -49,6 +49,7 @@ INCLUDEPATH +=                                                      \
 
 HEADERS +=                                                          \
     ControllerZone.h                                                \
+    ControllerZoneListItemWidget.h                                  \
     MeasureSettings.h                                               \
     HardwareSyncMainPage.h                                          \
     MeasureColor.h                                                  \
@@ -64,6 +65,7 @@ HEADERS +=                                                          \
     EditableLabel.h
 
 SOURCES +=                                                          \
+    ControllerZoneListItemWidget.cpp                                \
     MeasureSettings.cpp                                             \
     HardwareSyncMainPage.cpp                                        \
     MeasureColor.cpp                                                \
@@ -77,11 +79,12 @@ SOURCES +=                                                          \
     EditableLabel.cpp
 
 FORMS += \
-    HardwareSyncMainPage.ui                                             \
-    MeasureColor.ui                                                     \
-    MeasureEntry.ui                                                     \
-    ColorPicker.ui                                                      \
-    ColorStop.ui                                                        \
+    ControllerZoneListItemWidget.ui                                 \
+    HardwareSyncMainPage.ui                                         \
+    MeasureColor.ui                                                 \
+    MeasureEntry.ui                                                 \
+    ColorPicker.ui                                                  \
+    ColorStop.ui                                                    \
     PluginInfo.ui \
     TabHeader.ui
 

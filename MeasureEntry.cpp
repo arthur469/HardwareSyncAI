@@ -1,3 +1,4 @@
+#include "ControllerZoneListItemWidget.h"
 #include "MeasureEntry.h"
 #include "OpenRGBHardwareSyncPlugin.h"
 #include <QStringList>
@@ -8,6 +9,7 @@
 #include <QFormLayout>
 #include <QDialogButtonBox>
 #include <set>
+
 
 MeasureEntry::MeasureEntry(QWidget *parent) :
     QWidget(parent),
@@ -111,7 +113,13 @@ void MeasureEntry::on_hardware_feature_currentIndexChanged(int value)
 
 void MeasureEntry::on_percentage_fill_stateChanged(int state)
 {
-    percentage_fill = state;
+    for(int i = 0; i < ui->devices_list_view->count(); i++)
+    {
+        ControllerZoneListItemWidget* custom_widget =
+                (ControllerZoneListItemWidget*) ui->devices_list_view->itemWidget(ui->devices_list_view->item(i));
+
+        custom_widget->setPercentageFill(state);
+    }
 }
 
 void MeasureEntry::on_auto_start_stateChanged(int state)
@@ -157,7 +165,20 @@ void MeasureEntry::on_devices_clicked()
             if(list->selectionModel()->isRowSelected(i, QModelIndex()))
             {
                 assigned_zones.push_back(controller_zones[i]);
-                ui->devices_list_view->addItem(QString::fromStdString(controller_zones[i]->display_name()));
+                //    ui->devices_list_view->addItem(QString::fromStdString(controller_zones[i]->display_name()));
+
+                QListWidgetItem* item = new QListWidgetItem();
+                ControllerZoneListItemWidget* custom_widget =
+                        new ControllerZoneListItemWidget(
+                            QString::fromStdString(controller_zones[i]->display_name()),
+                            false,
+                            ui->devices_list_view
+                            );
+
+                item->setSizeHint(custom_widget->sizeHint());
+
+                ui->devices_list_view->addItem(item);
+                ui->devices_list_view->setItemWidget(item, custom_widget);
             }
         }
     }
@@ -200,13 +221,15 @@ void MeasureEntry::UpdateLEDsThread()
 
         std::set<RGBController*> controllers;
 
-        if(percentage_fill) {
+        for(unsigned int z = 0; z < assigned_zones.size(); z++)
+        {
+            ControllerZoneListItemWidget* custom_widget =
+                    (ControllerZoneListItemWidget*) ui->devices_list_view->itemWidget(ui->devices_list_view->item(z));
 
-            int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
-
-            for(ControllerZone* controller_zone: assigned_zones)
+            if(custom_widget->isPercentageFill())
             {
-                unsigned int ledsCount = controller_zone->leds_count();
+                int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
+                unsigned int ledsCount = assigned_zones[z]->leds_count();
                 double ledScale = 1.0 * maxRange / ledsCount;
                 double maxLed = (measure - ui->measure_color->min_value) / ledScale;
 
@@ -217,27 +240,25 @@ void MeasureEntry::UpdateLEDsThread()
                     std::tuple<float, QColor> data = ui->measure_color->GetColor(val, idx, fps);
                     QColor color = std::get<1>(data);
                     RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
-                    controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = rgb;
+                    assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
                 }
 
                 for(unsigned int i = maxLed; i < ledsCount; i++)
                 {
-                    controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = 0;
+                    assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = 0;
                 }
 
-                controllers.insert(controller_zone->controller);
+                controllers.insert(assigned_zones[z]->controller);
             }
-        }
-        else
-        {
-            RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
 
-            for(ControllerZone* controller_zone: assigned_zones)
+            else
             {
-                controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
-                controllers.insert(controller_zone->controller);
+                RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+                assigned_zones[z]->controller->SetAllZoneLEDs(assigned_zones[z]->zone_idx, rgb);
+                controllers.insert(assigned_zones[z]->controller);
             }
         }
+
 
         for(RGBController* controller: controllers)
         {
@@ -278,7 +299,6 @@ json MeasureEntry::ToJson()
 #endif
     j["measure_color"] = ui->measure_color->ToJson();
     j["running"] = running;
-    j["percentage_fill"] = percentage_fill;
     j["auto_start"] = auto_start;
     j["fps"] = fps;
     j["name"] = name;
@@ -292,6 +312,17 @@ json MeasureEntry::ToJson()
 
     j["devices"] = devices;
 
+    std::vector<bool> devices_percentage_fill;
+
+    for(int i = 0; i < ui->devices_list_view->count(); i++)
+    {
+        ControllerZoneListItemWidget* custom_widget =
+                (ControllerZoneListItemWidget*) ui->devices_list_view->itemWidget(ui->devices_list_view->item(i));
+
+        devices_percentage_fill.push_back(custom_widget->isPercentageFill());
+    }
+
+    j["devices_percentage_fill"] = devices_percentage_fill;
     return j;
 }
 
@@ -342,7 +373,7 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                         (
                             ignore_location ||
                             controller_zone->controller->location == j["location"]
-                        ) &&
+                            ) &&
                         controller_zone->controller->serial       == j["serial"] &&
                         controller_zone->controller->description  == j["description"] &&
                         controller_zone->controller->version      == j["version"] &&
@@ -358,10 +389,6 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
         }
     }
 
-    if(settings.contains("percentage_fill"))
-    {
-        measure->ui->percentage_fill->setChecked(settings["percentage_fill"]);
-    }
 
     if(settings.contains("fps"))
     {
@@ -373,19 +400,44 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
         measure->name = settings["name"];
     }
 
+    std::vector<bool> devices_percentage_fill;
+
+    if(settings.contains("devices_percentage_fill"))
+    {
+        for(bool b: settings["devices_percentage_fill"])
+        {
+            devices_percentage_fill.push_back(b);
+        }
+    }
+    else
+    {
+        devices_percentage_fill.resize(measure->assigned_zones.size());
+    }
+
+    for(unsigned int i = 0; i < measure->assigned_zones.size(); i++)
+    {
+        QListWidgetItem* item = new QListWidgetItem();
+        ControllerZoneListItemWidget* custom_widget =
+                new ControllerZoneListItemWidget(
+                    QString::fromStdString(measure->assigned_zones[i]->display_name()),
+                    devices_percentage_fill[i],
+                    measure->ui->devices_list_view
+                    );
+
+        item->setSizeHint(custom_widget->sizeHint());
+
+        measure->ui->devices_list_view->addItem(item);
+        measure->ui->devices_list_view->setItemWidget(item, custom_widget);
+    }
+
     if(settings.contains("auto_start"))
-    {       
+    {
         measure->ui->auto_start->setChecked(settings["auto_start"]);
 
         if(measure->auto_start)
         {
             measure->Start();
         }
-    }
-
-    for(unsigned int i = 0; i < measure->assigned_zones.size(); i++)
-    {
-       measure->ui->devices_list_view->addItem(QString::fromStdString(measure->assigned_zones[i]->display_name()));
     }
 
     return measure;
