@@ -60,9 +60,10 @@ HEADERS +=                                                          \
     HardwareMeasure.h                                               \
     ColorPicker.h                                                   \
     ColorStop.h                                                     \
-    PluginInfo.h \
-    TabHeader.h\
-    EditableLabel.h
+    PluginInfo.h                                                    \
+    QTooltipedSlider.h                                              \
+    TabHeader.h                                                     \
+    EditableLabel.h                                                 \
 
 SOURCES +=                                                          \
     ControllerZoneListItemWidget.cpp                                \
@@ -74,19 +75,20 @@ SOURCES +=                                                          \
     HardwareMeasure.cpp                                             \
     ColorPicker.cpp                                                 \
     ColorStop.cpp                                                   \
-    PluginInfo.cpp \
-    TabHeader.cpp \
-    EditableLabel.cpp
+    PluginInfo.cpp                                                  \
+    QTooltipedSlider.cpp                                            \
+    TabHeader.cpp                                                   \
+    EditableLabel.cpp                                               \
 
-FORMS += \
+FORMS +=                                                            \
     ControllerZoneListItemWidget.ui                                 \
     HardwareSyncMainPage.ui                                         \
     MeasureColor.ui                                                 \
     MeasureEntry.ui                                                 \
     ColorPicker.ui                                                  \
     ColorStop.ui                                                    \
-    PluginInfo.ui \
-    TabHeader.ui
+    PluginInfo.ui                                                   \
+    TabHeader.ui                                                    \
 
 #-------------------------------------------------------------------#
 # Windows GitLab CI Configuration                                   #
@@ -162,5 +164,5 @@ unix:!macx {
 }
 
 
-RESOURCES += \
+RESOURCES +=                                                            \
     resources.qrc

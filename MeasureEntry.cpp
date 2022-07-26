@@ -109,6 +109,11 @@ void MeasureEntry::on_fps_valueChanged(int value)
     fps = value;
 }
 
+void MeasureEntry::on_brightness_valueChanged(int value)
+{
+    brightness = value;
+}
+
 void MeasureEntry::on_hardware_currentIndexChanged(int value)
 {
     /*---------------------------------------------------------*\
@@ -247,6 +252,7 @@ void MeasureEntry::UpdateLEDsThread()
         std::set<RGBController*> controllers;
 
         int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
+        float b = brightness/100.0;
 
         for(unsigned int z = 0; z < assigned_zones.size(); z++)
         {
@@ -271,12 +277,12 @@ void MeasureEntry::UpdateLEDsThread()
                         if(i == (unsigned int) maxLed)
                         {
                             float dimm = maxLed - (unsigned int) maxLed;
-                            RGBColor rgb = ToRGBColor((int)(dimm*color.red()), (int)(dimm*color.green()), (int)(dimm*color.blue()));
+                            RGBColor rgb = ToRGBColor((int)(b*dimm*color.red()), (int)(b*dimm*color.green()), (int)(b*dimm*color.blue()));
                             assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
                         }
                         else
                         {
-                            RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+                            RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
                             assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
                         }
                     }
@@ -291,7 +297,7 @@ void MeasureEntry::UpdateLEDsThread()
 
             else
             {
-                RGBColor rgb = ToRGBColor(color.red(), color.green(), color.blue());
+                RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
                 assigned_zones[z]->controller->SetAllZoneLEDs(assigned_zones[z]->zone_idx, rgb);
                 controllers.insert(assigned_zones[z]->controller);
             }
@@ -340,7 +346,7 @@ json MeasureEntry::ToJson()
     j["auto_start"] = auto_start;
     j["fps"] = fps;
     j["name"] = name;
-
+    j["brightness"] = brightness;
     std::vector<json> devices;
 
     for(ControllerZone* controller_zone: assigned_zones)
@@ -436,6 +442,11 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
     if(settings.contains("name"))
     {
         measure->name = settings["name"];
+    }
+
+    if(settings.contains("brightness"))
+    {
+        measure->ui->brightness->setValue(settings["brightness"]);
     }
 
     std::vector<bool> devices_percentage_fill;

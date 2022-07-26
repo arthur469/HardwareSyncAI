@@ -40,6 +40,7 @@ private slots:
     void on_auto_start_stateChanged(int);
     void OnMeasure(double);
     void OnColor(QColor color);
+    void on_brightness_valueChanged(int);
 
 signals:
     void Measure(double);
@@ -73,6 +74,7 @@ private:
     void Tick();
     void UpdateLEDsThread();
 
+    int brightness = 100;
 };
 
 #endif // MEASUREENTRY_H
