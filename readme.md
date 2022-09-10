@@ -20,7 +20,7 @@ This is a plugin for [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB) that 
 
 ### Windows 
 
-Download and place [lhwm-wrapper.dll](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll) in the directory of `OpenRGB.exe`.
+Download and place [lhwm-wrapper.dll](https://gitlab.com/OpenRGBDevelopers/lhwm-wrapper/-/jobs/artifacts/master/download?job=main_build) in the directory of `OpenRGB.exe`.
 
 Notice: some of the hardware measures may require that you run OpenRGB as admin.
 
