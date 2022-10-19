@@ -69,6 +69,11 @@ double HardwareMeasure::GetRamUsagePercent()
     return 0.0f;
 }
 
+double HardwareMeasure::GetCPURate()
+{
+    return 0.0f;
+}
+
 int HardwareMeasure::GetHardwareIndex(std::string identifier)
 {
     return IdentifierToHardwareDropdownIdx[identifier];
@@ -80,6 +85,8 @@ int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
 }
 
 #elif __linux__
+
+
 
 HardwareMeasure::HardwareMeasure()
 {
@@ -154,18 +161,40 @@ HardwareMeasure::HardwareMeasure()
     RamDev.features.push_back(feature);
 
     HardwareList.push_back(RamDev);
+
+    Hardware CPU;
+    CPU.TrackDeviceName = "CPU";
+    CPU.DeviceIndex = 0;
+
+    HardwareFeature cpu_rate_feature;
+    cpu_rate_feature.Name = "CPU rate";
+    cpu_rate_feature.ValueType = HWTYPE_CPU_RATE;
+    cpu_rate_feature.PrimaryFeatureIndex = 0;
+    cpu_rate_feature.SubFeatureIndex = 0;
+
+    CPU.features.push_back(cpu_rate_feature);
+
+    HardwareList.push_back(CPU);
 }
 
 double HardwareMeasure::GetMeasure(Hardware Dev, HardwareFeature FTR)
 {
-    if(FTR.ValueType == HWTYPE_TEMP_VALUE)
-    {
-        return GetTemperature(Dev, FTR);
-    }
+    switch (FTR.ValueType) {
 
-    if(FTR.ValueType == HWTYPE_USAGE_PERCENT)
-    {
-        return GetRamUsagePercent();
+    case HWTYPE_TEMP_VALUE:
+            return GetTemperature(Dev, FTR);
+        break;
+
+    case HWTYPE_USAGE_PERCENT:
+            return GetRamUsagePercent();
+        break;
+
+    case HWTYPE_CPU_RATE:
+            return GetCPURate();
+        break;
+
+    default:
+        break;
     }
 
     return 0.0f;
@@ -188,6 +217,33 @@ double HardwareMeasure::GetRamUsagePercent()
 {
     sysinfo(&info);
     return 100.0f * (info.totalram - info.freeram) / info.totalram;
+}
+
+static float last_total = 0, last_used = 0;
+
+double HardwareMeasure::GetCPURate()
+{
+    glibtop_cpu cpu;
+
+    unsigned long int used = 0, dt = 0;
+
+    double cpu_rate = 0;
+
+    glibtop_get_cpu(&cpu);
+
+    used = cpu.user + cpu.nice + cpu.sys;
+
+    dt = cpu.total - last_total;
+
+    if (dt)
+        cpu_rate = 100.0 * (used - last_used) / dt;
+    else
+        cpu_rate = 0;
+
+    last_used = used;
+    last_total = cpu.total;
+
+    return cpu_rate;
 }
 
 #endif

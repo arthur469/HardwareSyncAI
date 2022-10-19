@@ -148,6 +148,7 @@ win32:CONFIG(release, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
 #-----------------------------------------------------------------------#
 unix:!macx {
 
+    # lm sensors
     INCLUDEPATH +=                                                      \
         dependencies/libsensors-cpp                                     \
 
@@ -161,6 +162,14 @@ unix:!macx {
 
     LIBS += -lsensors
     QMAKE_CXXFLAGS += -std=c++17
+
+    # libgtop
+    INCLUDEPATH += \
+        /usr/include/glib-2.0/                                          \
+        /usr/include/libgtop-2.0/                                       \
+        /usr/lib/x86_64-linux-gnu/glib-2.0/include/                     \
+
+    LIBS += -lgtop-2.0 -lglib-2.0
 }
 
 

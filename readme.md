@@ -26,7 +26,11 @@ Notice: some of the hardware measures may require that you run OpenRGB as admin.
 
 ### Linux
 
-You need `lm-sensors` installed.
+Dependencies
+
+- `lm-sensors`
+- `libgtop2`
+- `libglib2`
 
 ## How do I use it?
 

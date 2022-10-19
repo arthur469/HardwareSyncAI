@@ -19,6 +19,9 @@
 #include "sensors.h"
 
 using namespace sensors;
+
+#include <glibtop.h>
+#include <glibtop/sysinfo.h>
 #endif
 
 
@@ -26,6 +29,7 @@ enum TrackingTypes
 {
     HWTYPE_USAGE_PERCENT,
     HWTYPE_TEMP_VALUE,
+    HWTYPE_CPU_RATE,
 };
 
 struct HardwareFeature
@@ -64,6 +68,7 @@ private:
 
     double GetTemperature(Hardware, HardwareFeature);
     double GetRamUsagePercent();
+    double GetCPURate();
 
     #ifdef _WIN32
     std::map<std::string, int> IdentifierToHardwareDropdownIdx;

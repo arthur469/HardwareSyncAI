@@ -31,7 +31,7 @@ before_script:
   script:
   - export QT_SELECT=qt5
   - export $(dpkg-architecture)
-  - apt install libsensors4-dev
+  - apt install -y libsensors4-dev libgtop2-dev libglib2.0-dev
   - ./scripts/scripts_build-plugin.sh
   
   artifacts:
@@ -49,7 +49,7 @@ before_script:
   script:
   - export QT_SELECT=qt5
   - export $(dpkg-architecture)
-  - apt install libsensors-dev
+  - apt install -y libsensors-dev libgtop2-dev libglib2.0-dev
   - ./scripts/scripts_build-plugin.sh
   
   artifacts:
