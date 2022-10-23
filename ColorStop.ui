@@ -107,6 +107,9 @@
          <height>26</height>
         </size>
        </property>
+       <property name="minimum">
+        <double>-999999999.000000000000000</double>
+       </property>
        <property name="maximum">
         <double>999999999.990000009536743</double>
        </property>
