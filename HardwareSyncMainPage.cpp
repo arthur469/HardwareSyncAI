@@ -73,13 +73,27 @@ void HardwareSyncMainPage::AddTabSlot()
     AddMeasure(new MeasureEntry(this));
 }
 
+void HardwareSyncMainPage::StopAll()
+{
+    for(MeasureEntry* measure: measures)
+    {
+        measure->Stop();
+    }
+}
 
 void HardwareSyncMainPage::Clear()
 {
     for(MeasureEntry* measure: measures)
     {
-        measure->Stop();
         measure->Clear();
+    }
+}
+
+void HardwareSyncMainPage::InitDevicesList()
+{
+    for(MeasureEntry* measure: measures)
+    {
+        measure->InitDevicesList();
     }
 }
 

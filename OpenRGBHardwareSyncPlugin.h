@@ -3,7 +3,6 @@
 
 #include "OpenRGBPluginInterface.h"
 #include "ResourceManager.h"
-#include "ControllerZone.h"
 #include "HardwareMeasure.h"
 #include "HardwareSyncMainPage.h"
 
@@ -32,13 +31,10 @@ public:
     static bool             DarkTheme;
     static ResourceManager* RMPointer;
     static HardwareMeasure* hm;
-    static std::vector<ControllerZone*> GetControllerZones();
 
 private:
-    static bool SupportsDirectMode(RGBController*);
 
-    static void DetectionStart(void*);
-    static void DetectionEnd(void* );
+    static void DeviceListChangedCallback(void*);
 
     HardwareSyncMainPage* ui;
 

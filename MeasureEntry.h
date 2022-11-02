@@ -6,6 +6,7 @@
 #include "ui_MeasureEntry.h"
 #include "HardwareMeasure.h"
 #include "ControllerZone.h"
+#include "ControllerZoneListItemWidget.h"
 
 namespace Ui {
 class MeasureEntry;
@@ -24,6 +25,7 @@ public:
     bool IsRunning();
     json ToJson();
     void Clear();
+    void InitDevicesList();
     void Rename(std::string);
     std::string GetName();
 
@@ -34,13 +36,15 @@ private slots:
     void on_hardware_currentIndexChanged(int);
     void on_hardware_feature_currentIndexChanged(int);
     void on_start_stop_clicked();
-    void on_devices_clicked();
-    void on_percentage_fill_toggled(bool);
     void on_fps_valueChanged(int);
     void on_auto_start_stateChanged(int);
+    void on_brightness_valueChanged(int);
+    void on_percentage_fill_all_toggled(bool);
+    void on_enable_all_toggled(bool);
+    void on_toggle_brightness_toggled(bool);
+
     void OnMeasure(double);
     void OnColor(QColor color);
-    void on_brightness_valueChanged(int);
 
 signals:
     void Measure(double);
@@ -60,7 +64,8 @@ private:
 
     bool running = false;
 
-    std::vector<ControllerZone*> assigned_zones;
+    std::map<ControllerZone*, ControllerZoneListItemWidget*> controller_zones_widgets;
+    std::vector<ControllerZone*> controller_zones;
 
     std::thread* measure_thread;
     int refresh_interval = 100;

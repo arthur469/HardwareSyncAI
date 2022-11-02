@@ -1,13 +1,23 @@
+#include "ControllerZoneManager.h"
 #include "ControllerZoneListItemWidget.h"
 #include "ui_ControllerZoneListItemWidget.h"
 
-ControllerZoneListItemWidget::ControllerZoneListItemWidget(QString zone_name, bool percentage_fill, QWidget *parent) :
+ControllerZoneListItemWidget::ControllerZoneListItemWidget(QWidget *parent, ControllerZone* controller_zone) :
     QWidget(parent),
-    ui(new Ui::ControllerZoneListItemWidget)
+    ui(new Ui::ControllerZoneListItemWidget),
+    controller_zone(controller_zone)
 {
     ui->setupUi(this);
-    ui->zone_name->setText(zone_name);
-    ui->percentage_fill->setChecked(percentage_fill);
+    ui->zone_name->setText(QString::fromStdString(controller_zone->display_name()));
+    ui->percentage_fill->setChecked(controller_zone->is_percentage_fill);
+    ui->enabled->setChecked(controller_zone->enabled);
+    ui->no_direct_mode_warning->setVisible(!ControllerZoneManager::SupportsDirectMode(controller_zone->controller));
+    ui->brightness->setVisible(false);
+}
+
+ControllerZoneListItemWidget::~ControllerZoneListItemWidget()
+{
+    delete ui;
 }
 
 bool ControllerZoneListItemWidget::isPercentageFill()
@@ -20,16 +30,37 @@ void ControllerZoneListItemWidget::setPercentageFill(bool percentage_fill)
     ui->percentage_fill->setChecked(percentage_fill);
 }
 
-ControllerZoneListItemWidget::~ControllerZoneListItemWidget()
+bool ControllerZoneListItemWidget::isEnabled()
 {
-    delete ui;
+    return ui->percentage_fill->isEnabled();
 }
 
-void ControllerZoneListItemWidget::showEvent(QShowEvent *event)
+void ControllerZoneListItemWidget::setEnabled(bool enabled)
 {
-    int cb_width = ui->percentage_fill->width();
-    int p_width = parentWidget()->width();
-    int w = p_width - cb_width * 2;
+    ui->enabled->setChecked(enabled);
+}
 
-    ui->zone_name->setFixedWidth(w);
+void ControllerZoneListItemWidget::setBrightness(int value)
+{
+    ui->brightness->setValue(value);
+}
+
+void ControllerZoneListItemWidget::showBrightnessSlider(bool state)
+{
+    ui->brightness->setVisible(state);
+}
+
+void ControllerZoneListItemWidget::on_enabled_toggled(bool state)
+{
+    controller_zone->enabled = state;
+}
+
+void ControllerZoneListItemWidget::on_percentage_fill_toggled(bool state)
+{
+    controller_zone->is_percentage_fill = state;
+}
+
+void ControllerZoneListItemWidget::on_brightness_valueChanged(int value)
+{
+    controller_zone->brightness = value;
 }

@@ -1,25 +1,25 @@
 #include "OpenRGBHardwareSyncPlugin.h"
 #include <QHBoxLayout>
 
-bool OpenRGBHardwareSyncPlugin::DarkTheme = false;
-ResourceManager* OpenRGBHardwareSyncPlugin::RMPointer = nullptr;
-HardwareMeasure* OpenRGBHardwareSyncPlugin::hm = nullptr;
-
+bool OpenRGBHardwareSyncPlugin::DarkTheme               = false;
+ResourceManager* OpenRGBHardwareSyncPlugin::RMPointer   = nullptr;
+HardwareMeasure* OpenRGBHardwareSyncPlugin::hm          = nullptr;
 
 OpenRGBPluginInfo OpenRGBHardwareSyncPlugin::GetPluginInfo()
 {
     OpenRGBPluginInfo info;
-    info.Name         = "Hardware Sync";
-    info.Description  = "Sync colors with hardware measures";
-    info.Version  = VERSION_STRING;
-    info.Commit  = GIT_COMMIT_ID;
-    info.URL  = "https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin";
-    info.Icon.load(":/OpenRGBHardwareSyncPlugin.png");
 
-    info.Location     =  OPENRGB_PLUGIN_LOCATION_TOP;
-    info.Label        =  "Hardware Sync";
-    info.TabIconString        =  "Hardware Sync";
+    info.Name           = "Hardware Sync";
+    info.Description    = "Sync colors with hardware measures";
+    info.Version        = VERSION_STRING;
+    info.Commit         = GIT_COMMIT_ID;
+    info.URL            = "https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin";
+    info.Location       =  OPENRGB_PLUGIN_LOCATION_TOP;
+    info.Label          =  "Hardware Sync";
+    info.TabIconString  =  "Hardware Sync";
+
     info.TabIcon.load(":/OpenRGBHardwareSyncPlugin.png");
+    info.Icon.load(":/OpenRGBHardwareSyncPlugin.png");
 
     return info;
 }
@@ -31,8 +31,8 @@ unsigned int OpenRGBHardwareSyncPlugin::GetPluginAPIVersion()
 
 void OpenRGBHardwareSyncPlugin::Load(bool dark_theme, ResourceManager* resource_manager_ptr)
 {
-    RMPointer                = resource_manager_ptr;
-    DarkTheme                = dark_theme;
+    RMPointer = resource_manager_ptr;
+    DarkTheme = dark_theme;
 
 #ifdef _WIN32
     can_load = QFile(QCoreApplication::applicationDirPath()+"\\lhwm-wrapper.dll").exists();
@@ -53,17 +53,17 @@ QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 
         ui = new HardwareSyncMainPage(nullptr);
 
-        RMPointer->RegisterDetectionStartCallback(DetectionStart, this);
-        RMPointer->RegisterDetectionEndCallback(DetectionEnd, this);
+        RMPointer->RegisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
+        RMPointer->RegisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
 
         return ui;
     }
     else
     {
         QLabel* label = new QLabel(
-                    "<h1>Cannot load the plugin.</h1>"
-                    "<p>Make sure you downloaded <a href=\"https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll\">lhwm-wrapper.dll</a></p>"
-                    "<p>Place this DLL inside  <b>" + QCoreApplication::applicationDirPath() +  "</b> and restart OpenRGB.</p>"
+            "<h1>Cannot load the plugin.</h1>"
+            "<p>Make sure you downloaded <a href=\"https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll\">lhwm-wrapper.dll</a></p>"
+            "<p>Place this DLL inside  <b>" + QCoreApplication::applicationDirPath() +  "</b> and restart OpenRGB.</p>"
         );
 
         label->setTextFormat(Qt::RichText);
@@ -81,59 +81,22 @@ QMenu* OpenRGBHardwareSyncPlugin::GetTrayMenu()
 
 void OpenRGBHardwareSyncPlugin::Unload()
 {
-    printf("Time to call some cleaning stuff.\n");
-
-    RMPointer->UnregisterDetectionStartCallback(DetectionStart, ui);
-    RMPointer->UnregisterDetectionEndCallback(DetectionEnd, ui);
+    printf("[OpenRGBHardwareSyncPlugin] Unload.\n");
+    RMPointer->UnregisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
+    RMPointer->UnregisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
 }
 
-std::vector<ControllerZone*> OpenRGBHardwareSyncPlugin::GetControllerZones()
+void OpenRGBHardwareSyncPlugin::DeviceListChangedCallback(void* o)
 {
-    std::vector<ControllerZone*> controller_zones;
-
-    for(RGBController* controller: OpenRGBHardwareSyncPlugin::RMPointer->GetRGBControllers())
-    {
-//        if(!SupportsDirectMode(controller))
-//        {
-//            continue;
-//        }
-
-        for(unsigned int i = 0; i < controller->zones.size(); i++)
-        {
-            controller_zones.push_back(new ControllerZone(controller, i));
-        }
-    }
-
-    return controller_zones;
-}
-
-bool OpenRGBHardwareSyncPlugin::SupportsDirectMode(RGBController* controller)
-{
-    for(unsigned int i = 0; i < controller->modes.size(); i++)
-    {
-        if(controller->modes[i].name == "Direct")
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void OpenRGBHardwareSyncPlugin::DetectionStart(void* o)
-{
-    printf("[OpenRGBHardwareSyncPlugin] DetectionStart\n");
-    ((OpenRGBHardwareSyncPlugin*)o)->ui->Clear();
-}
-
-void OpenRGBHardwareSyncPlugin::DetectionEnd(void*)
-{
-    printf("[OpenRGBHardwareSyncPlugin] DetectionEnd\n");
+    printf("[OpenRGBHardwareSyncPlugin] DeviceListChangedCallback\n");
+    ((HardwareSyncMainPage *)o)->StopAll();
+    QMetaObject::invokeMethod((HardwareSyncMainPage *)o, "Clear", Qt::QueuedConnection);
+    QMetaObject::invokeMethod((HardwareSyncMainPage *)o, "InitDevicesList", Qt::QueuedConnection);
 }
 
 OpenRGBHardwareSyncPlugin::~OpenRGBHardwareSyncPlugin()
 {
-    printf("[OpenRGBHardwareSyncPlugin] DetectionEnd\n");
+    printf("[OpenRGBHardwareSyncPlugin] Destructor\n");
 
     if(hm)
     {

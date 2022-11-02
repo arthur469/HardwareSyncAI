@@ -17,8 +17,11 @@ public:
     explicit HardwareSyncMainPage(QWidget *parent = nullptr);
     ~HardwareSyncMainPage();
 
+    void StopAll();
+
 public slots:
     void Clear();
+    void InitDevicesList();
 
 private slots:
     void on_save_clicked();

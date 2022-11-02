@@ -50,6 +50,7 @@ INCLUDEPATH +=                                                      \
 HEADERS +=                                                          \
     ControllerZone.h                                                \
     ControllerZoneListItemWidget.h                                  \
+    ControllerZoneManager.h \
     MeasureSettings.h                                               \
     HardwareSyncMainPage.h                                          \
     MeasureColor.h                                                  \
@@ -67,6 +68,7 @@ HEADERS +=                                                          \
 
 SOURCES +=                                                          \
     ControllerZoneListItemWidget.cpp                                \
+    ControllerZoneManager.cpp \
     MeasureSettings.cpp                                             \
     HardwareSyncMainPage.cpp                                        \
     MeasureColor.cpp                                                \

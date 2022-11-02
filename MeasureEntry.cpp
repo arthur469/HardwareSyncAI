@@ -1,6 +1,6 @@
-#include "ControllerZoneListItemWidget.h"
 #include "MeasureEntry.h"
 #include "OpenRGBHardwareSyncPlugin.h"
+#include "ControllerZoneManager.h"
 #include <QStringList>
 #include <QStringListModel>
 #include <QListView>
@@ -15,6 +15,9 @@ MeasureEntry::MeasureEntry(QWidget *parent) :
     ui(new Ui::MeasureEntry)
 {
     ui->setupUi(this);
+    ui->devices_list->setLayout(new QVBoxLayout(ui->devices_list));
+
+    InitDevicesList();
 
     /*---------------------------------------------------------*\
     | Populate the hardware combobox (measures)                 |
@@ -42,9 +45,32 @@ MeasureEntry::~MeasureEntry()
     delete ui;
 }
 
+void MeasureEntry::InitDevicesList()
+{
+    /*---------------------------------------------------------*\
+    | Populate the device list                                  |
+    \*---------------------------------------------------------*/
+    controller_zones = ControllerZoneManager::GetControllerZones();
+
+    for(ControllerZone* controller_zone: controller_zones)
+    {
+        ControllerZoneListItemWidget* controller_zones_widget = new ControllerZoneListItemWidget(ui->devices_list, controller_zone);
+        ui->devices_list->layout()->addWidget(controller_zones_widget);
+        controller_zones_widgets[controller_zone] = controller_zones_widget;
+    }
+}
+
 void MeasureEntry::Clear()
 {
-    assigned_zones.clear();
+    controller_zones_widgets.clear();
+    controller_zones.clear();
+
+    QLayoutItem *child;
+
+    while ((child = ui->devices_list->layout()->takeAt(0)) != 0)
+    {
+        delete child->widget();
+    }
 }
 
 void MeasureEntry::Rename(std::string value)
@@ -59,7 +85,25 @@ std::string MeasureEntry::GetName()
 }
 
 void MeasureEntry::Start()
-{
+{    
+    /*---------------------------------------------------------*\
+    | Make sure the controllers are set to direct mode          |
+    \*---------------------------------------------------------*/   
+    for(ControllerZone* controller_zone: controller_zones)
+    {
+        if(controller_zone->enabled)
+        {
+            for(unsigned int i = 0 ; i < controller_zone->controller->modes.size(); i++)
+            {
+                if(controller_zone->controller->modes[i].name == "Direct")
+                {
+                    controller_zone->controller->SetMode(i);
+                    break;
+                }
+            }
+        }
+    }
+
     if(running)
     {
         return;
@@ -133,17 +177,41 @@ void MeasureEntry::on_hardware_feature_currentIndexChanged(int value)
     hardware_feature_id = value;
 }
 
-void MeasureEntry::on_percentage_fill_toggled(bool state)
+void MeasureEntry::on_percentage_fill_all_toggled(bool state)
 {
     /*---------------------------------------------------------*\
     | Update % checkboxes with the global state                 |
     \*---------------------------------------------------------*/
-    for(int i = 0; i < ui->devices_list_view->count(); i++)
-    {
-        ControllerZoneListItemWidget* custom_widget =
-                (ControllerZoneListItemWidget*) ui->devices_list_view->itemWidget(ui->devices_list_view->item(i));
+    auto children = ui->devices_list->findChildren<ControllerZoneListItemWidget *>();
 
+    for (auto custom_widget : children)
+    {
         custom_widget->setPercentageFill(state);
+    }
+}
+
+void MeasureEntry::on_enable_all_toggled(bool state)
+{
+    /*---------------------------------------------------------*\
+    | Update enabled checkboxes with the global state           |
+    \*---------------------------------------------------------*/
+    auto children = ui->devices_list->findChildren<ControllerZoneListItemWidget *>();
+
+    for (auto custom_widget : children)
+    {
+        custom_widget->setEnabled(state);
+    }
+}
+void MeasureEntry::on_toggle_brightness_toggled(bool state)
+{
+    /*---------------------------------------------------------*\
+    | Update enabled checkboxes with the global state           |
+    \*---------------------------------------------------------*/
+    auto children = ui->devices_list->findChildren<ControllerZoneListItemWidget *>();
+
+    for (auto custom_widget : children)
+    {
+        custom_widget->showBrightnessSlider(state);
     }
 }
 
@@ -151,12 +219,9 @@ void MeasureEntry::on_auto_start_stateChanged(int state)
 {
     auto_start = state;
 }
-
+/*
 void MeasureEntry::on_devices_clicked()
 {
-    /*---------------------------------------------------------*\
-    | Open a dialog to choose which RGB devices to assign       |
-    \*---------------------------------------------------------*/
     QDialog dialog(this);
     QFormLayout form(&dialog);
     QListView* list = new QListView(this);
@@ -188,9 +253,6 @@ void MeasureEntry::on_devices_clicked()
         assigned_zones.clear();
         ui->devices_list_view->clear();
 
-        /*---------------------------------------------------------*\
-        | Create the devices list widgets                           |
-        \*---------------------------------------------------------*/
         for(unsigned int i = 0; i < controller_zones.size(); i++)
         {
             if(list->selectionModel()->isRowSelected(i, QModelIndex()))
@@ -214,6 +276,7 @@ void MeasureEntry::on_devices_clicked()
     }
 
 }
+*/
 
 void MeasureEntry::on_start_stop_clicked()
 {
@@ -252,16 +315,20 @@ void MeasureEntry::UpdateLEDsThread()
         std::set<RGBController*> controllers;
 
         int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
-        float b = brightness/100.0;
+        float global_brightness = brightness/100.0;
 
-        for(unsigned int z = 0; z < assigned_zones.size(); z++)
+        for(ControllerZone* controller_zone: controller_zones)
         {
-            ControllerZoneListItemWidget* custom_widget =
-                    (ControllerZoneListItemWidget*) ui->devices_list_view->itemWidget(ui->devices_list_view->item(z));
-
-            if(custom_widget->isPercentageFill())
+            if(!controller_zone->enabled)
             {
-                unsigned int ledsCount = assigned_zones[z]->leds_count();
+                continue;
+            }
+
+            float b = global_brightness * controller_zone->brightness * 0.01;
+
+            if(controller_zone->is_percentage_fill)
+            {
+                unsigned int ledsCount = controller_zone->leds_count();
                 double ledScale = 1.0 * maxRange / ledsCount;
                 double maxLed = 0.01 * last_idx * ledsCount;
 
@@ -278,31 +345,30 @@ void MeasureEntry::UpdateLEDsThread()
                         {
                             float dimm = maxLed - (unsigned int) maxLed;
                             RGBColor rgb = ToRGBColor((int)(b*dimm*color.red()), (int)(b*dimm*color.green()), (int)(b*dimm*color.blue()));
-                            assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
+                            controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = rgb;
                         }
                         else
                         {
                             RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
-                            assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = rgb;
+                            controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = rgb;
                         }
                     }
                     else
                     {
-                        assigned_zones[z]->controller->zones[assigned_zones[z]->zone_idx].colors[i] = 0;
+                        controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = 0;
                     }
                 }
 
-                controllers.insert(assigned_zones[z]->controller);
+                controllers.insert(controller_zone->controller);
             }
 
             else
             {
                 RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
-                assigned_zones[z]->controller->SetAllZoneLEDs(assigned_zones[z]->zone_idx, rgb);
-                controllers.insert(assigned_zones[z]->controller);
+                controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
+                controllers.insert(controller_zone->controller);
             }
         }
-
 
         for(RGBController* controller: controllers)
         {
@@ -349,24 +415,16 @@ json MeasureEntry::ToJson()
     j["brightness"] = brightness;
     std::vector<json> devices;
 
-    for(ControllerZone* controller_zone: assigned_zones)
+    for(ControllerZone* controller_zone: controller_zones)
     {
-        devices.push_back(controller_zone->to_json());
+        if(controller_zone->enabled)
+        {
+            devices.push_back(controller_zone->to_json());
+        }
     }
 
     j["devices"] = devices;
 
-    std::vector<bool> devices_percentage_fill;
-
-    for(int i = 0; i < ui->devices_list_view->count(); i++)
-    {
-        ControllerZoneListItemWidget* custom_widget =
-                (ControllerZoneListItemWidget*) ui->devices_list_view->itemWidget(ui->devices_list_view->item(i));
-
-        devices_percentage_fill.push_back(custom_widget->isPercentageFill());
-    }
-
-    j["devices_percentage_fill"] = devices_percentage_fill;
     return j;
 }
 
@@ -408,10 +466,11 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
 
         for(auto j : zones)
         {
-            for(ControllerZone* controller_zone: OpenRGBHardwareSyncPlugin::GetControllerZones())
+            for(ControllerZone* controller_zone: measure->controller_zones)
             {
                 auto location = j["location"].get<std::string>();
                 bool ignore_location = (location.find("HID: ") == 0);
+
                 if(
                         controller_zone->controller->name         == j["name"] &&
                         (
@@ -425,14 +484,35 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                         controller_zone->zone_idx                 == j["zone_idx"]
                         )
                 {
-                    measure->assigned_zones.push_back(controller_zone);
+                    controller_zone->enabled = true;
+
+                    if(j.contains("is_percentage_fill"))
+                    {
+                        controller_zone->is_percentage_fill = j["is_percentage_fill"];
+                    }
+                    else
+                    {
+                        controller_zone->is_percentage_fill = false;
+                    }
+
+                    if(j.contains("brightness"))
+                    {
+                        controller_zone->brightness = j["brightness"];
+                    }
+                    else
+                    {
+                        controller_zone->brightness = 100;
+                    }
+
+                    measure->controller_zones_widgets[controller_zone]->setPercentageFill(controller_zone->is_percentage_fill);
+                    measure->controller_zones_widgets[controller_zone]->setEnabled(controller_zone->enabled);
+                    measure->controller_zones_widgets[controller_zone]->setBrightness(controller_zone->brightness);
 
                     break;
                 }
             }
         }
     }
-
 
     if(settings.contains("fps"))
     {
@@ -447,36 +527,6 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
     if(settings.contains("brightness"))
     {
         measure->ui->brightness->setValue(settings["brightness"]);
-    }
-
-    std::vector<bool> devices_percentage_fill;
-
-    if(settings.contains("devices_percentage_fill"))
-    {
-        for(bool b: settings["devices_percentage_fill"])
-        {
-            devices_percentage_fill.push_back(b);
-        }
-    }
-    else
-    {
-        devices_percentage_fill.resize(measure->assigned_zones.size());
-    }
-
-    for(unsigned int i = 0; i < measure->assigned_zones.size(); i++)
-    {
-        QListWidgetItem* item = new QListWidgetItem();
-        ControllerZoneListItemWidget* custom_widget =
-                new ControllerZoneListItemWidget(
-                    QString::fromStdString(measure->assigned_zones[i]->display_name()),
-                    devices_percentage_fill[i],
-                    measure->ui->devices_list_view
-                    );
-
-        item->setSizeHint(custom_widget->sizeHint());
-
-        measure->ui->devices_list_view->addItem(item);
-        measure->ui->devices_list_view->setItemWidget(item, custom_widget);
     }
 
     if(settings.contains("auto_start"))

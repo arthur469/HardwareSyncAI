@@ -1,4 +1,4 @@
-#ifndef CONTROLLERZONE_H
+﻿#ifndef CONTROLLERZONE_H
 #define CONTROLLERZONE_H
 
 #include "RGBController.h"
@@ -8,16 +8,24 @@ using json = nlohmann::json;
 
 class ControllerZone
 {
-
 public:
-
-    ControllerZone(RGBController* controller, unsigned int zone_idx):
+    ControllerZone(RGBController* controller,
+                   unsigned int zone_idx,
+                   bool enabled,
+                   bool is_percentage_fill,
+                   int brightness):
         controller(controller),
-        zone_idx(zone_idx)
+        zone_idx(zone_idx),
+        enabled(enabled),
+        is_percentage_fill(is_percentage_fill),
+        brightness(brightness)
     {};
 
     RGBController* controller;
     unsigned int zone_idx;
+    bool enabled;
+    bool is_percentage_fill;
+    int brightness;
 
     zone_type type()
     {
@@ -70,6 +78,8 @@ public:
         json j;
         j["zone_idx"] = zone_idx;
         j["name"] = controller->name;
+        j["is_percentage_fill"] = is_percentage_fill;
+        j["brightness"] = brightness;
         j["location"] = controller->location;
         j["serial"] = controller->serial;
         j["description"] = controller->description;
