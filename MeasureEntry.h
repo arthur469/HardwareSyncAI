@@ -35,7 +35,7 @@ private slots:
     void on_hardware_feature_currentIndexChanged(int);
     void on_start_stop_clicked();
     void on_devices_clicked();
-    void on_percentage_fill_stateChanged(int);
+    void on_percentage_fill_toggled(bool);
     void on_fps_valueChanged(int);
     void on_auto_start_stateChanged(int);
     void OnMeasure(double);

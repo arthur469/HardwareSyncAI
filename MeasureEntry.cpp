@@ -133,7 +133,7 @@ void MeasureEntry::on_hardware_feature_currentIndexChanged(int value)
     hardware_feature_id = value;
 }
 
-void MeasureEntry::on_percentage_fill_stateChanged(int state)
+void MeasureEntry::on_percentage_fill_toggled(bool state)
 {
     /*---------------------------------------------------------*\
     | Update % checkboxes with the global state                 |
