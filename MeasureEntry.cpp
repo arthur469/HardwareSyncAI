@@ -202,10 +202,11 @@ void MeasureEntry::on_enable_all_toggled(bool state)
         custom_widget->setEnabled(state);
     }
 }
+
 void MeasureEntry::on_toggle_brightness_toggled(bool state)
 {
     /*---------------------------------------------------------*\
-    | Update enabled checkboxes with the global state           |
+    | Update brightness slider visibility                       |
     \*---------------------------------------------------------*/
     auto children = ui->devices_list->findChildren<ControllerZoneListItemWidget *>();
 
@@ -215,68 +216,23 @@ void MeasureEntry::on_toggle_brightness_toggled(bool state)
     }
 }
 
+void MeasureEntry::on_reverse_all_toggled(bool state)
+{
+    /*---------------------------------------------------------*\
+    | Update reverse checkboxes with the global state           |
+    \*---------------------------------------------------------*/
+    auto children = ui->devices_list->findChildren<ControllerZoneListItemWidget *>();
+
+    for (auto custom_widget : children)
+    {
+        custom_widget->setReverse(state);
+    }
+}
+
 void MeasureEntry::on_auto_start_stateChanged(int state)
 {
     auto_start = state;
 }
-/*
-void MeasureEntry::on_devices_clicked()
-{
-    QDialog dialog(this);
-    QFormLayout form(&dialog);
-    QListView* list = new QListView(this);
-    list->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    QStringListModel model;
-    QStringList devices;
-
-    std::vector<ControllerZone*> controller_zones = OpenRGBHardwareSyncPlugin::GetControllerZones();
-
-    for(ControllerZone* controller_zone: controller_zones)
-    {
-        devices << QString::fromStdString(controller_zone->display_name());
-    }
-
-    model.setStringList(devices);
-
-    list->setModel(&model);
-
-    form.addRow(list);
-
-    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
-    form.addRow(&buttonBox);
-
-    QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
-    QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        assigned_zones.clear();
-        ui->devices_list_view->clear();
-
-        for(unsigned int i = 0; i < controller_zones.size(); i++)
-        {
-            if(list->selectionModel()->isRowSelected(i, QModelIndex()))
-            {
-                assigned_zones.push_back(controller_zones[i]);
-
-                QListWidgetItem* item = new QListWidgetItem();
-                ControllerZoneListItemWidget* custom_widget =
-                        new ControllerZoneListItemWidget(
-                            QString::fromStdString(controller_zones[i]->display_name()),
-                            false,
-                            ui->devices_list_view
-                            );
-
-                item->setSizeHint(custom_widget->sizeHint());
-
-                ui->devices_list_view->addItem(item);
-                ui->devices_list_view->setItemWidget(item, custom_widget);
-            }
-        }
-    }
-
-}
-*/
 
 void MeasureEntry::on_start_stop_clicked()
 {
@@ -331,6 +287,7 @@ void MeasureEntry::UpdateLEDsThread()
                 unsigned int ledsCount = controller_zone->leds_count();
                 double ledScale = 1.0 * maxRange / ledsCount;
                 double maxLed = 0.01 * last_idx * ledsCount;
+                bool reverse = controller_zone->reverse;
 
                 for(unsigned int i = 0; i < ledsCount; ++i)
                 {
@@ -345,17 +302,17 @@ void MeasureEntry::UpdateLEDsThread()
                         {
                             float dimm = maxLed - (unsigned int) maxLed;
                             RGBColor rgb = ToRGBColor((int)(b*dimm*color.red()), (int)(b*dimm*color.green()), (int)(b*dimm*color.blue()));
-                            controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = rgb;
+                            controller_zone->controller->zones[controller_zone->zone_idx].colors[reverse ? ledsCount - i - 1 : i] = rgb;
                         }
                         else
                         {
                             RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
-                            controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = rgb;
+                            controller_zone->controller->zones[controller_zone->zone_idx].colors[reverse ? ledsCount - i - 1 : i] = rgb;
                         }
                     }
                     else
                     {
-                        controller_zone->controller->zones[controller_zone->zone_idx].colors[i] = 0;
+                        controller_zone->controller->zones[controller_zone->zone_idx].colors[reverse ? ledsCount - i - 1 : i] = 0;
                     }
                 }
 
@@ -504,9 +461,19 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                         controller_zone->brightness = 100;
                     }
 
+                    if(j.contains("reverse"))
+                    {
+                        controller_zone->reverse = j["reverse"];
+                    }
+                    else
+                    {
+                        controller_zone->reverse = false;
+                    }
+
                     measure->controller_zones_widgets[controller_zone]->setPercentageFill(controller_zone->is_percentage_fill);
                     measure->controller_zones_widgets[controller_zone]->setEnabled(controller_zone->enabled);
                     measure->controller_zones_widgets[controller_zone]->setBrightness(controller_zone->brightness);
+                    measure->controller_zones_widgets[controller_zone]->setReverse(controller_zone->reverse);
 
                     break;
                 }

@@ -13,12 +13,14 @@ public:
                    unsigned int zone_idx,
                    bool enabled,
                    bool is_percentage_fill,
-                   int brightness):
+                   int brightness,
+                   bool reverse):
         controller(controller),
         zone_idx(zone_idx),
         enabled(enabled),
         is_percentage_fill(is_percentage_fill),
-        brightness(brightness)
+        brightness(brightness),
+        reverse(reverse)
     {};
 
     RGBController* controller;
@@ -26,6 +28,7 @@ public:
     bool enabled;
     bool is_percentage_fill;
     int brightness;
+    bool reverse;
 
     zone_type type()
     {
@@ -80,6 +83,7 @@ public:
         j["name"] = controller->name;
         j["is_percentage_fill"] = is_percentage_fill;
         j["brightness"] = brightness;
+        j["reverse"] = reverse;
         j["location"] = controller->location;
         j["serial"] = controller->serial;
         j["description"] = controller->description;

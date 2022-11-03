@@ -17,6 +17,8 @@ public:
     ~ControllerZoneListItemWidget();
     bool isPercentageFill();
     void setPercentageFill(bool);
+    bool isReverse();
+    void setReverse(bool);
 
     bool isEnabled();
     void setEnabled(bool);
@@ -27,6 +29,7 @@ private slots:
     void on_enabled_toggled(bool);
     void on_percentage_fill_toggled(bool);
     void on_brightness_valueChanged(int);
+    void on_reverse_toggled(bool);
 
 private:
     Ui::ControllerZoneListItemWidget *ui;

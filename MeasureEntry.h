@@ -42,6 +42,7 @@ private slots:
     void on_percentage_fill_all_toggled(bool);
     void on_enable_all_toggled(bool);
     void on_toggle_brightness_toggled(bool);
+    void on_reverse_all_toggled(bool);
 
     void OnMeasure(double);
     void OnColor(QColor color);

@@ -32,12 +32,22 @@ void ControllerZoneListItemWidget::setPercentageFill(bool percentage_fill)
 
 bool ControllerZoneListItemWidget::isEnabled()
 {
-    return ui->percentage_fill->isEnabled();
+    return ui->enabled->isChecked();
 }
 
-void ControllerZoneListItemWidget::setEnabled(bool enabled)
+void ControllerZoneListItemWidget::setEnabled(bool state)
 {
-    ui->enabled->setChecked(enabled);
+    ui->enabled->setChecked(state);
+}
+
+bool ControllerZoneListItemWidget::isReverse()
+{
+    return ui->reverse->isChecked();
+}
+
+void ControllerZoneListItemWidget::setReverse(bool state)
+{
+    ui->reverse->setChecked(state);
 }
 
 void ControllerZoneListItemWidget::setBrightness(int value)
@@ -63,4 +73,9 @@ void ControllerZoneListItemWidget::on_percentage_fill_toggled(bool state)
 void ControllerZoneListItemWidget::on_brightness_valueChanged(int value)
 {
     controller_zone->brightness = value;
+}
+
+void ControllerZoneListItemWidget::on_reverse_toggled(bool state)
+{
+    controller_zone->reverse = state;
 }
