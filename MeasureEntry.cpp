@@ -62,6 +62,9 @@ void MeasureEntry::InitDevicesList()
 
 void MeasureEntry::Clear()
 {
+    /*---------------------------------------------------------*\
+    | Clear all widgets and memory                              |
+    \*---------------------------------------------------------*/
     controller_zones_widgets.clear();
     controller_zones.clear();
 
@@ -258,6 +261,9 @@ void MeasureEntry::OnColor(QColor color)
 
 void MeasureEntry::UpdateLEDsThread()
 {
+    /*---------------------------------------------------------*\
+    | LEDs thread                                               |
+    \*---------------------------------------------------------*/
     while(running)
     {
         std::tuple<float, QColor> data = ui->measure_color->GetColor(measure, last_idx, fps);
@@ -282,6 +288,9 @@ void MeasureEntry::UpdateLEDsThread()
 
             float b = global_brightness * controller_zone->brightness * 0.01;
 
+            /*---------------------------------------------------------*\
+            | Percentage fill mode                                      |
+            \*---------------------------------------------------------*/
             if(controller_zone->is_percentage_fill)
             {
                 unsigned int ledsCount = controller_zone->leds_count();
@@ -291,6 +300,10 @@ void MeasureEntry::UpdateLEDsThread()
 
                 for(unsigned int i = 0; i < ledsCount; ++i)
                 {
+
+                    RGBColor rgb = 0;
+                    int led_id = reverse ? ledsCount - i - 1 : i;
+
                     if(i <= maxLed)
                     {
                         double val = i * ledScale;
@@ -298,27 +311,19 @@ void MeasureEntry::UpdateLEDsThread()
                         std::tuple<float, QColor> data = ui->measure_color->GetColor(val, idx, fps);
                         QColor color = std::get<1>(data);
 
-                        if(i == (unsigned int) maxLed)
-                        {
-                            float dimm = maxLed - (unsigned int) maxLed;
-                            RGBColor rgb = ToRGBColor((int)(b*dimm*color.red()), (int)(b*dimm*color.green()), (int)(b*dimm*color.blue()));
-                            controller_zone->controller->zones[controller_zone->zone_idx].colors[reverse ? ledsCount - i - 1 : i] = rgb;
-                        }
-                        else
-                        {
-                            RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
-                            controller_zone->controller->zones[controller_zone->zone_idx].colors[reverse ? ledsCount - i - 1 : i] = rgb;
-                        }
+                        float dimm = i == (unsigned int) maxLed ? maxLed - (unsigned int) maxLed : 1.0;
+                        rgb = ToRGBColor((int)(b*dimm*color.red()), (int)(b*dimm*color.green()), (int)(b*dimm*color.blue()));
                     }
-                    else
-                    {
-                        controller_zone->controller->zones[controller_zone->zone_idx].colors[reverse ? ledsCount - i - 1 : i] = 0;
-                    }
+
+                    controller_zone->controller->zones[controller_zone->zone_idx].colors[led_id] = rgb;
+
                 }
 
                 controllers.insert(controller_zone->controller);
             }
-
+            /*---------------------------------------------------------*\
+            | Normal mode (plain color)                                 |
+            \*---------------------------------------------------------*/
             else
             {
                 RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
@@ -339,6 +344,9 @@ void MeasureEntry::UpdateLEDsThread()
 
 void MeasureEntry::Tick()
 {
+    /*---------------------------------------------------------*\
+    | Measure thread                                            |
+    \*---------------------------------------------------------*/
     while(running)
     {
         if(hardware_id < devices.size() && hardware_feature_id < devices[hardware_id].features.size())
@@ -358,18 +366,6 @@ json MeasureEntry::ToJson()
 {
     json j;
 
-    j["refresh_interval"] = refresh_interval;
-    j["hardware"] = ui->hardware->currentIndex();
-    j["hardware_feature"] = ui->hardware_feature->currentIndex();
-#ifdef _WIN32
-    j["hardware_identifier"] = ui->hardware_feature->currentData().toString().toStdString();
-#endif
-    j["measure_color"] = ui->measure_color->ToJson();
-    j["running"] = running;
-    j["auto_start"] = auto_start;
-    j["fps"] = fps;
-    j["name"] = name;
-    j["brightness"] = brightness;
     std::vector<json> devices;
 
     for(ControllerZone* controller_zone: controller_zones)
@@ -380,7 +376,20 @@ json MeasureEntry::ToJson()
         }
     }
 
-    j["devices"] = devices;
+    j["devices"]            = devices;
+    j["refresh_interval"]   = refresh_interval;
+    j["hardware"]           = ui->hardware->currentIndex();
+    j["hardware_feature"]   = ui->hardware_feature->currentIndex();
+    j["measure_color"]      = ui->measure_color->ToJson();
+    j["running"]            = running;
+    j["auto_start"]         = auto_start;
+    j["fps"]                = fps;
+    j["name"]               = name;
+    j["brightness"]         = brightness;
+
+#ifdef _WIN32
+    j["hardware_identifier"] = ui->hardware_feature->currentData().toString().toStdString();
+#endif
 
     return j;
 }
@@ -389,8 +398,7 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
 {
     MeasureEntry* measure = new MeasureEntry(parent);
 
-    if(settings.contains("refresh_interval"))
-        measure->ui->refresh_interval->setValue(settings["refresh_interval"]);
+    if(settings.contains("refresh_interval"))   measure->ui->refresh_interval->setValue(settings["refresh_interval"]);
 
 #ifdef _WIN32
     if (settings.contains("hardware_identifier"))
@@ -407,15 +415,12 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
             measure->ui->hardware_feature->setCurrentIndex(settings["hardware_feature"]);
     }
 #else
-    if(settings.contains("hardware"))
-        measure->ui->hardware->setCurrentIndex(settings["hardware"]);
+    if(settings.contains("hardware"))           measure->ui->hardware->setCurrentIndex(settings["hardware"]);
 
-    if(settings.contains("hardware_feature"))
-        measure->ui->hardware_feature->setCurrentIndex(settings["hardware_feature"]);
+    if(settings.contains("hardware_feature"))   measure->ui->hardware_feature->setCurrentIndex(settings["hardware_feature"]);
 #endif
 
-    if(settings.contains("measure_color"))
-        measure->ui->measure_color->LoadJson(settings["measure_color"]);
+    if(settings.contains("measure_color"))      measure->ui->measure_color->LoadJson(settings["measure_color"]);
 
     if(settings.contains("devices"))
     {
@@ -481,20 +486,9 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
         }
     }
 
-    if(settings.contains("fps"))
-    {
-        measure->ui->fps->setValue(settings["fps"]);
-    }
-
-    if(settings.contains("name"))
-    {
-        measure->name = settings["name"];
-    }
-
-    if(settings.contains("brightness"))
-    {
-        measure->ui->brightness->setValue(settings["brightness"]);
-    }
+    if(settings.contains("fps"))        measure->ui->fps->setValue(settings["fps"]);
+    if(settings.contains("name"))       measure->name = settings["name"];
+    if(settings.contains("brightness")) measure->ui->brightness->setValue(settings["brightness"]);
 
     if(settings.contains("auto_start"))
     {
