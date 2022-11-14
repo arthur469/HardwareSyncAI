@@ -5,6 +5,8 @@
 #include <QToolButton>
 #include <QMainWindow>
 #include <QAction>
+#include <QMenu>
+#include <QDialog>
 
 HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     QWidget(parent),
@@ -20,23 +22,26 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     ui->tabs->setStyleSheet("QTabBar::close-button{image:url(:images/close.png);}");
     ui->tabs->tabBar()->setStyleSheet("QTabBar::tab:hover {text-decoration: underline;}");
 
+    QMenu* main_menu = new QMenu(this);
+
+    QLabel* no_measure = new QLabel("You have no measure.\n You can add one by clicking the HWSync button.");
+    no_measure->setAlignment(Qt::AlignCenter);
+
     // First tab: add button
-    QToolButton *new_measure_button = new QToolButton();
-    new_measure_button->setText("New measure");
-    ui->tabs->addTab(new PluginInfo(), QString(""));
-    ui->tabs->tabBar()->setTabButton(0, QTabBar::RightSide, new_measure_button);
+    QPushButton* main_menu_button = new QPushButton();
+    main_menu_button->setText("HWSync");
+    ui->tabs->addTab(no_measure, QString(""));
+    ui->tabs->tabBar()->setTabButton(0, QTabBar::RightSide, main_menu_button);
     ui->tabs->setTabEnabled(0, false);
+    main_menu_button->setMenu(main_menu);
 
-    // 2nd tab: plugin info
-    QToolButton *dummy_button = new QToolButton();
-    dummy_button->setText("");
-    ui->tabs->addTab(new PluginInfo(), QString("Plugin info"));
-    ui->tabs->tabBar()->setTabButton(1, QTabBar::RightSide, dummy_button);
-    dummy_button->setFixedWidth(0);
-    dummy_button->setFixedHeight(0);
-    dummy_button->hide();
+    QAction* new_measure = new QAction("New measure", this);
+    connect(new_measure, &QAction::triggered, this, &HardwareSyncMainPage::AddTabSlot);
+    main_menu->addAction(new_measure);
 
-    connect(new_measure_button, SIGNAL(clicked()), this, SLOT(AddTabSlot()));
+    QAction* about = new QAction("About", this);
+    connect(about, &QAction::triggered, this, &HardwareSyncMainPage::AboutSlot);
+    main_menu->addAction(about);
 
     // Make sure to wait a bit before all other plugins are loaded
     QTimer::singleShot(2000, [=](){
@@ -71,6 +76,22 @@ HardwareSyncMainPage::~HardwareSyncMainPage()
 void HardwareSyncMainPage::AddTabSlot()
 {
     AddMeasure(new MeasureEntry(this));
+}
+
+void HardwareSyncMainPage::AboutSlot()
+{
+    QDialog* dialog = new QDialog();
+    dialog->setWindowTitle("Hardware Sync");
+    dialog->setMinimumSize(300,320);
+    dialog->setModal(true);
+
+    QVBoxLayout* dialog_layout = new QVBoxLayout(dialog);
+
+    PluginInfo* plugin_info = new PluginInfo(dialog);
+
+    dialog_layout->addWidget(plugin_info);
+
+    dialog->exec();
 }
 
 void HardwareSyncMainPage::StopAll()
