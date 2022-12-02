@@ -165,13 +165,8 @@ unix:!macx {
     LIBS += -lsensors
     QMAKE_CXXFLAGS += -std=c++17
 
-    # libgtop
-    INCLUDEPATH += \
-        /usr/include/glib-2.0/                                          \
-        /usr/include/libgtop-2.0/                                       \
-        /usr/lib/x86_64-linux-gnu/glib-2.0/include/                     \
-
-    LIBS += -lgtop-2.0 -lglib-2.0
+    CONFIG += link_pkgconfig
+    PKGCONFIG += glib-2.0 libgtop-2.0
 }
 
 
