@@ -167,6 +167,9 @@ unix:!macx {
 
     CONFIG += link_pkgconfig
     PKGCONFIG += glib-2.0 libgtop-2.0
+
+    target.path=$$PREFIX/lib/
+    INSTALLS += target
 }
 
 
