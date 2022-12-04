@@ -13,84 +13,108 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0,0,0">
-   <item row="0" column="3">
-    <widget class="QToolButton" name="percentage_fill">
-     <property name="toolTip">
-      <string>Toggle percentage fill</string>
-     </property>
-     <property name="text">
-      <string>%</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
+  <layout class="QGridLayout" name="gridLayout" columnstretch="0">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
-    <widget class="QLabel" name="zone_name">
-     <property name="text">
-      <string>TextLabel</string>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="wordWrap">
-      <bool>true</bool>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QLabel" name="no_direct_mode_warning">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string>This device doesn't have direct mode
+     <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0,0,0,0">
+      <item row="0" column="0">
+       <widget class="QLabel" name="zone_name">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="no_direct_mode_warning">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>This device doesn't have direct mode
 Using an effect on a device WILL damage the flash or controller</string>
-     </property>
-     <property name="text">
-      <string>⚠</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2">
-    <widget class="QToolButton" name="enabled">
-     <property name="toolTip">
-      <string>Add to current measure</string>
-     </property>
-     <property name="text">
-      <string>✓</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="4">
-    <widget class="QToolButton" name="reverse">
-     <property name="text">
-      <string>⇔</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="5">
-    <widget class="QTooltipedSlider" name="brightness">
-     <property name="maximum">
-      <number>100</number>
-     </property>
-     <property name="value">
-      <number>100</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
+        </property>
+        <property name="text">
+         <string>⚠</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QToolButton" name="enabled">
+        <property name="toolTip">
+         <string>Add to current measure</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QToolButton" name="percentage_fill">
+        <property name="toolTip">
+         <string>Toggle percentage fill</string>
+        </property>
+        <property name="text">
+         <string>%</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QToolButton" name="reverse">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="5">
+       <widget class="QTooltipedSlider" name="brightness">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

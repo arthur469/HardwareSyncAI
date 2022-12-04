@@ -16,13 +16,17 @@ public:
     ~TabHeader();
     void Rename(QString);
 
+    void ToogleRunningIndicator(bool);
+
 signals:
     void CloseRequest();
     void RenameRequest(QString);
+    void StartStopRequest();
 
 private slots:
     void on_close_clicked();
     void on_editor_editingFinished();
+    void on_start_stop_clicked();
 
 private:
     Ui::TabHeader *ui;

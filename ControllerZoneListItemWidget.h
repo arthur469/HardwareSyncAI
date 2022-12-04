@@ -34,6 +34,7 @@ private slots:
 private:
     Ui::ControllerZoneListItemWidget *ui;
     ControllerZone* controller_zone;
+    void UpdateCheckState();
 };
 
 #endif // CONTROLLERZONELISTITEMWIDGET_H

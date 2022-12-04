@@ -1,6 +1,7 @@
 #include "MeasureEntry.h"
 #include "OpenRGBHardwareSyncPlugin.h"
 #include "ControllerZoneManager.h"
+#include "OpenRGBPluginsFont.h"
 #include <QStringList>
 #include <QStringListModel>
 #include <QListView>
@@ -15,6 +16,13 @@ MeasureEntry::MeasureEntry(QWidget *parent) :
     ui(new Ui::MeasureEntry)
 {
     ui->setupUi(this);
+
+    ui->brightness_label->setFont(OpenRGBPluginsFont::GetFont());
+    ui->toggle_brightness->setFont(OpenRGBPluginsFont::GetFont());
+
+    ui->brightness_label->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::sun));
+    ui->toggle_brightness->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::sun));
+
     ui->devices_list->setLayout(new QVBoxLayout(ui->devices_list));
 
     InitDevicesList();
@@ -119,7 +127,7 @@ void MeasureEntry::Start()
     measure_thread = new std::thread(&MeasureEntry::Tick, this);
     leds_thread = new std::thread(&MeasureEntry::UpdateLEDsThread, this);
 
-    ui->start_stop->setText("Stop");
+    emit MeasureState(true);
 }
 
 void MeasureEntry::Stop()
@@ -137,7 +145,7 @@ void MeasureEntry::Stop()
         leds_thread->join();
         delete leds_thread;
 
-        ui->start_stop->setText("Start");
+        emit MeasureState(false);
     }
 }
 
@@ -235,18 +243,6 @@ void MeasureEntry::on_reverse_all_toggled(bool state)
 void MeasureEntry::on_auto_start_stateChanged(int state)
 {
     auto_start = state;
-}
-
-void MeasureEntry::on_start_stop_clicked()
-{
-    if(running)
-    {
-        Stop();
-    }
-    else
-    {
-        Start();
-    }
 }
 
 void MeasureEntry::OnMeasure(double measure)

@@ -19,7 +19,7 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
 
     // define tab style + settings
     ui->tabs->setTabsClosable(true);
-    ui->tabs->setStyleSheet("QTabBar::close-button{image:url(:images/close.png);}");
+//    ui->tabs->setStyleSheet("QTabBar::close-button{image:url(:images/close.png);}");
     ui->tabs->tabBar()->setStyleSheet("QTabBar::tab:hover {text-decoration: underline;}");
 
     QMenu* main_menu = new QMenu(this);
@@ -136,6 +136,10 @@ void HardwareSyncMainPage::AddMeasure(MeasureEntry* measure_entry_tab)
     ui->tabs->insertTab(tab_position, measure_entry_tab , "");
     ui->tabs->tabBar()->setTabButton(tab_position, QTabBar::RightSide, tab_header);
 
+    connect(measure_entry_tab, &MeasureEntry::MeasureState, [=](bool state){
+        tab_header->ToogleRunningIndicator(state);
+    });
+
     ui->tabs->setCurrentIndex(tab_position);
 
     connect(measure_entry_tab, &MeasureEntry::Renamed, [=](std::string new_name){
@@ -156,6 +160,20 @@ void HardwareSyncMainPage::AddMeasure(MeasureEntry* measure_entry_tab)
         delete measure_entry_tab;
         delete tab_header;
     });
+
+    connect(tab_header, &TabHeader::StartStopRequest, [=](){
+
+        if(measure_entry_tab->IsRunning())
+        {
+            measure_entry_tab->Stop();
+        }
+        else
+        {
+            measure_entry_tab->Start();
+        }
+    });
+
+    tab_header->ToogleRunningIndicator(measure_entry_tab->auto_start);
 
     ui->tabs->update();
 

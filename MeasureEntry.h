@@ -28,6 +28,7 @@ public:
     void InitDevicesList();
     void Rename(std::string);
     std::string GetName();
+    bool auto_start = false;
 
     static MeasureEntry* FromJson(QWidget *parent, json);
 
@@ -35,7 +36,6 @@ private slots:
     void on_refresh_interval_valueChanged(int);
     void on_hardware_currentIndexChanged(int);
     void on_hardware_feature_currentIndexChanged(int);
-    void on_start_stop_clicked();
     void on_fps_valueChanged(int);
     void on_auto_start_stateChanged(int);
     void on_brightness_valueChanged(int);
@@ -51,6 +51,7 @@ signals:
     void Measure(double);
     void Color(QColor);
     void Renamed(std::string);
+    void MeasureState(bool);
 
 private:
     Ui::MeasureEntry *ui;
@@ -60,8 +61,6 @@ private:
     float last_idx = 0;
 
     std::string name = "Untitled";
-
-    bool auto_start = false;
 
     bool running = false;
 

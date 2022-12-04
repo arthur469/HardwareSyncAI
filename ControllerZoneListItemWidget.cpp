@@ -1,6 +1,7 @@
 #include "ControllerZoneManager.h"
 #include "ControllerZoneListItemWidget.h"
 #include "ui_ControllerZoneListItemWidget.h"
+#include "OpenRGBPluginsFont.h"
 
 ControllerZoneListItemWidget::ControllerZoneListItemWidget(QWidget *parent, ControllerZone* controller_zone) :
     QWidget(parent),
@@ -8,6 +9,15 @@ ControllerZoneListItemWidget::ControllerZoneListItemWidget(QWidget *parent, Cont
     controller_zone(controller_zone)
 {
     ui->setupUi(this);
+
+    ui->enabled->setFont(OpenRGBPluginsFont::GetFont());
+    ui->reverse->setFont(OpenRGBPluginsFont::GetFont());
+    ui->no_direct_mode_warning->setFont(OpenRGBPluginsFont::GetFont());
+
+    ui->enabled->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::check));
+    ui->reverse->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::arrows_exchange));
+    ui->no_direct_mode_warning->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::danger));
+
     ui->zone_name->setText(QString::fromStdString(controller_zone->display_name()));
     ui->percentage_fill->setChecked(controller_zone->is_percentage_fill);
     ui->enabled->setChecked(controller_zone->enabled);
@@ -63,6 +73,7 @@ void ControllerZoneListItemWidget::showBrightnessSlider(bool state)
 void ControllerZoneListItemWidget::on_enabled_toggled(bool state)
 {
     controller_zone->enabled = state;
+    UpdateCheckState();
 }
 
 void ControllerZoneListItemWidget::on_percentage_fill_toggled(bool state)
@@ -78,4 +89,13 @@ void ControllerZoneListItemWidget::on_brightness_valueChanged(int value)
 void ControllerZoneListItemWidget::on_reverse_toggled(bool state)
 {
     controller_zone->reverse = state;
+}
+
+void ControllerZoneListItemWidget::UpdateCheckState()
+{
+    ui->enabled->setText(
+                ui->enabled->isChecked()?
+                    OpenRGBPluginsFont::icon(OpenRGBPluginsFont::check_o):
+                    OpenRGBPluginsFont::icon(OpenRGBPluginsFont::check)
+                    );
 }

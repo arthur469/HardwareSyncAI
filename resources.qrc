@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>OpenRGBHardwareSyncPlugin.png</file>
-        <file>images/close.png</file>
+        <file>OpenRGBPlugins.ttf</file>
     </qresource>
 </RCC>

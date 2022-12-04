@@ -61,6 +61,7 @@ HEADERS +=                                                          \
     HardwareMeasure.h                                               \
     ColorPicker.h                                                   \
     ColorStop.h                                                     \
+    OpenRGBPluginsFont.h \
     PluginInfo.h                                                    \
     QTooltipedSlider.h                                              \
     TabHeader.h                                                     \
@@ -77,6 +78,7 @@ SOURCES +=                                                          \
     HardwareMeasure.cpp                                             \
     ColorPicker.cpp                                                 \
     ColorStop.cpp                                                   \
+    OpenRGBPluginsFont.cpp \
     PluginInfo.cpp                                                  \
     QTooltipedSlider.cpp                                            \
     TabHeader.cpp                                                   \
