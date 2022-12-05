@@ -11,7 +11,7 @@ TabHeader::TabHeader(QWidget *parent) :
     ui->start_stop->setFont(OpenRGBPluginsFont::GetFont());
     ui->close->setFont(OpenRGBPluginsFont::GetFont());
 
-    ui->close->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::close_o));
+    ui->close->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::close));
 
     ToogleRunningIndicator(false);
 }
