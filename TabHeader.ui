@@ -43,6 +43,18 @@
    </property>
    <item row="0" column="0">
     <widget class="QToolButton" name="start_stop">
+     <property name="minimumSize">
+      <size>
+       <width>26</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>26</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -60,6 +72,18 @@
    </item>
    <item row="0" column="2">
     <widget class="QToolButton" name="close">
+     <property name="minimumSize">
+      <size>
+       <width>26</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>26</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="text">
       <string/>
      </property>
