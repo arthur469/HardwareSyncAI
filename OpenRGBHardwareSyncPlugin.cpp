@@ -68,6 +68,7 @@ QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 
         label->setTextFormat(Qt::RichText);
         label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        label->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
         label->setOpenExternalLinks(true);
 
         return label;
