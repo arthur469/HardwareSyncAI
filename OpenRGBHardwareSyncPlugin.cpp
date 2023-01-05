@@ -83,6 +83,9 @@ QMenu* OpenRGBHardwareSyncPlugin::GetTrayMenu()
 void OpenRGBHardwareSyncPlugin::Unload()
 {
     printf("[OpenRGBHardwareSyncPlugin] Unload.\n");
+
+    ui->StopAll();
+
     RMPointer->UnregisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
     RMPointer->UnregisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
 }
