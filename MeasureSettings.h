@@ -2,6 +2,7 @@
 #define MEASURESETTINGS_H
 
 #include "json.hpp"
+#include "filesystem.h"
 
 using json = nlohmann::json;
 
@@ -13,13 +14,11 @@ public:
 
 private:
     static bool CreateSettingsDirectory();
+    static filesystem::path SettingsFolder();
 
-    static std::string folder_separator();
-    static std::string SettingsFolder();
-
-    static bool create_dir(std::string);
-    static json load_json_file(std::string);
-    static bool write_file(std::string, json);
+    static bool create_dir(filesystem::path);
+    static json load_json_file(filesystem::path);
+    static bool write_file(filesystem::path, json);
 };
 
 #endif // MEASURESETTINGS_H

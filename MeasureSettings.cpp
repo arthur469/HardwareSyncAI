@@ -16,7 +16,7 @@ bool MeasureSettings::Save(json j)
         return false;
     }
 
-    return write_file(SettingsFolder() + folder_separator() + "MeasureSettings.json", j);
+    return write_file(SettingsFolder() / "MeasureSettings.json", j);
 }
 
 json MeasureSettings::Load()
@@ -30,20 +30,10 @@ json MeasureSettings::Load()
         return Settings;
     }
 
-    return load_json_file(SettingsFolder() + folder_separator() + "MeasureSettings.json");
+    return load_json_file(SettingsFolder() / "MeasureSettings.json");
 }
 
-
-std::string MeasureSettings::folder_separator()
-{
-#if defined(WIN32) || defined(_WIN32)
-    return "\\";
-#else
-    return "/";
-#endif
-}
-
-bool MeasureSettings::write_file(std::string file_name, json j)
+bool MeasureSettings::write_file(filesystem::path file_name, json j)
 {
     std::ofstream file(file_name, std::ios::out | std::ios::binary);
 
@@ -64,7 +54,7 @@ bool MeasureSettings::write_file(std::string file_name, json j)
     return true;
 }
 
-json MeasureSettings::load_json_file(std::string file_name)
+json MeasureSettings::load_json_file(filesystem::path file_name)
 {
     json j;
 
@@ -86,9 +76,9 @@ json MeasureSettings::load_json_file(std::string file_name)
     return j;
 }
 
-bool MeasureSettings::create_dir(std::string directory)
+bool MeasureSettings::create_dir(filesystem::path directory)
 {
-    QDir dir(QString::fromStdString(directory));
+    QDir dir(QString::fromStdString(directory.string()));
 
     if(dir.exists())
     {
@@ -99,9 +89,9 @@ bool MeasureSettings::create_dir(std::string directory)
 }
 
 
-std::string MeasureSettings::SettingsFolder()
+filesystem::path MeasureSettings::SettingsFolder()
 {
-    return OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() + "plugins" + folder_separator() + "settings";
+    return OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() / "plugins" / "settings";
 }
 
 bool MeasureSettings::CreateSettingsDirectory()

@@ -20,8 +20,8 @@ PluginInfo::PluginInfo(QWidget *parent) :
 
 void PluginInfo::on_open_plugin_folder_clicked()
 {
-    std::string config_dir = OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() + "plugins";
-    QUrl url = QUrl::fromLocalFile(QString::fromStdString(config_dir));
+    filesystem::path config_dir = OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() / "plugins";
+    QUrl url = QUrl::fromLocalFile(QString::fromStdString(config_dir.string()));
 
     QDesktopServices::openUrl(url);
 }
