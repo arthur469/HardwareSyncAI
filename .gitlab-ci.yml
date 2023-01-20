@@ -31,11 +31,12 @@ before_script:
   script:
   - export QT_SELECT=qt5
   - export $(dpkg-architecture)
+  - apt update
   - apt install -y libsensors4-dev libgtop2-dev libglib2.0-dev
   - ./scripts/scripts_build-plugin.sh
   
   artifacts:
-    name: "${CI_PROJECT_NAME}_Linux_64_${CI_COMMIT_SHORT_SHA}"
+    name: "${CI_PROJECT_NAME}_Buster_64_${CI_COMMIT_SHORT_SHA}"
     paths:
     - ./libOpenRGBHardwareSyncPlugin.so.1.0.0
     expire_in: 30 days
@@ -49,11 +50,31 @@ before_script:
   script:
   - export QT_SELECT=qt5
   - export $(dpkg-architecture)
+  - apt update
   - apt install -y libsensors-dev libgtop2-dev libglib2.0-dev
   - ./scripts/scripts_build-plugin.sh
   
   artifacts:
-    name: "${CI_PROJECT_NAME}_Linux_64_${CI_COMMIT_SHORT_SHA}"
+    name: "${CI_PROJECT_NAME}_Bullseye_64_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - ./libOpenRGBHardwareSyncPlugin.so.1.0.0
+    expire_in: 30 days
+
+#-----------------------------------------------------------------------#
+# Linux 64-bit bookworm Build Target                                    #
+#-----------------------------------------------------------------------#
+"Linux 64 - Bookworm":
+  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bookworm-64
+  stage: build
+  script:
+  - export QT_SELECT=qt5
+  - export $(dpkg-architecture)
+  - apt update
+  - apt install -y libsensors-dev libgtop2-dev libglib2.0-dev
+  - ./scripts/scripts_build-plugin.sh
+
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Bookworm_64_${CI_COMMIT_SHORT_SHA}"
     paths:
     - ./libOpenRGBHardwareSyncPlugin.so.1.0.0
     expire_in: 30 days
