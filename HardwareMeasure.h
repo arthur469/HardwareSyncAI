@@ -7,6 +7,7 @@
 #include <string>
 #include "RGBController.h"
 #include <map>
+#include <functional>
 
 #ifdef _WIN32
 #include <lhwm-cpp-wrapper.h>
@@ -39,6 +40,8 @@ struct HardwareFeature
     int PrimaryFeatureIndex;
     int SubFeatureIndex;
     std::string Identifier;
+    // get measure lambda
+    std::function<double()> GetMeasure = nullptr;
 };
 
 struct Hardware
@@ -80,6 +83,8 @@ private:
     int read_meminfo(int*, int*);
     struct sysinfo info;
 
+    // Deteect GPU and add it to the list if present
+    void AddNvidiaGPUMeasurements();
     #endif
 
 };
