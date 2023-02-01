@@ -1,6 +1,7 @@
 #include "HardwareMeasure.h"
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
 
 #ifndef _WIN32
 #include "error.h"
@@ -175,10 +176,25 @@ HardwareMeasure::HardwareMeasure()
     CPU.features.push_back(cpu_rate_feature);
 
     HardwareList.push_back(CPU);
+
+    AddNvidiaGPUMeasurements();
 }
 
 double HardwareMeasure::GetMeasure(Hardware Dev, HardwareFeature FTR)
 {
+    if (FTR.GetMeasure != nullptr)
+    {
+        try
+        {
+            return FTR.GetMeasure();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+            return 0.0;
+        }
+    }
+
     switch (FTR.ValueType) {
 
     case HWTYPE_TEMP_VALUE:
@@ -304,6 +320,90 @@ double HardwareMeasure::GetCPURate()
     last_total = cpu.total;
 
     return cpu_rate;
+}
+
+void HardwareMeasure::AddNvidiaGPUMeasurements()
+{
+    char line[128];
+    std::string result;
+    std::string cmd = "nvidia-smi --query-gpu=gpu_name,index --format=csv,noheader";
+
+    FILE *pipe = popen(cmd.c_str(), "r");
+    if (!pipe)
+    {
+        return;
+    }
+
+    while (!feof(pipe))
+    {
+        if (fgets(line, 128, pipe) != NULL)
+        {
+            result += line;
+        }
+    }
+
+    pclose(pipe);
+
+    if (result.empty())
+    {
+        printf("GPU not found\n");
+        return;
+    }
+    else
+    {
+        printf("GPU found: %s\n", result.c_str());
+    }
+
+    // extract GPU name and index
+    std::string gpu_name = result.substr(0, result.find(","));
+    std::string gpu_index = result.substr(result.find(",") + 1, result.length());
+
+    Hardware GPU;
+    GPU.TrackDeviceName = gpu_name;
+    GPU.DeviceIndex = std::stoi(gpu_index);
+
+    HardwareFeature gpu_temperature_feature;
+    gpu_temperature_feature.Name = "GPU temperature";
+    gpu_temperature_feature.ValueType = HWTYPE_TEMP_VALUE;
+    gpu_temperature_feature.PrimaryFeatureIndex = 0;
+    gpu_temperature_feature.SubFeatureIndex = 0;
+
+    gpu_temperature_feature.GetMeasure = [gpu_index]()
+    {
+        char line[128];
+        std::string result;
+        std::string cmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits -i " + gpu_index;
+
+        FILE *pipe = popen(cmd.c_str(), "r");
+        if (!pipe)
+            return 0.0;
+
+        while (!feof(pipe))
+        {
+            if (fgets(line, 128, pipe) != NULL)
+            {
+                result += line;
+            }
+        }
+
+        pclose(pipe);
+
+        if (result.empty())
+        {
+            // printf("GPU temperature not found\n");
+            return 0.0;
+        }
+        else
+        {
+            // printf("GPU temperature found: %s\n", result.c_str());
+        }
+
+        return std::stod(result);
+    };
+
+    GPU.features.push_back(gpu_temperature_feature);
+
+    HardwareList.push_back(GPU);
 }
 
 #endif
