@@ -26,21 +26,10 @@ using namespace sensors;
 #endif
 
 
-enum TrackingTypes
-{
-    HWTYPE_USAGE_PERCENT,
-    HWTYPE_TEMP_VALUE,
-    HWTYPE_CPU_RATE,
-};
-
 struct HardwareFeature
 {
-    std::string     Name;
-    TrackingTypes   ValueType;
-    int PrimaryFeatureIndex;
-    int SubFeatureIndex;
+    std::string Name;
     std::string Identifier;
-    // get measure lambda
     std::function<double()> GetMeasure = nullptr;
 };
 
@@ -59,7 +48,7 @@ public:
     ~HardwareMeasure();
 
     std::vector<Hardware> GetAvailableDevices();
-    double GetMeasure(Hardware, HardwareFeature);
+    double GetMeasure(const Hardware&, const HardwareFeature&);
 
 #ifdef _WIN32
     int GetHardwareIndex(std::string identifier);
@@ -69,7 +58,6 @@ public:
 private:
     std::vector<Hardware> HardwareList;
 
-    double GetTemperature(Hardware, HardwareFeature);
     double GetRamUsagePercent();
     double GetCPURate();
 
@@ -78,15 +66,12 @@ private:
     std::map<std::string, int> IdentifierToFeatureDropdownIdx;
 
     #elif __linux__
-    std::vector<chip_name> chips;
-    std::vector<subfeature> subfeatures;
     int read_meminfo(int*, int*);
     struct sysinfo info;
 
     // Deteect GPU and add it to the list if present
     void AddNvidiaGPUMeasurements();
     #endif
-
 };
 
 #endif // HARDWAREMEASURE

@@ -17,6 +17,24 @@ std::vector<Hardware> HardwareMeasure::GetAvailableDevices()
     return HardwareList;
 }
 
+double HardwareMeasure::GetMeasure(const Hardware& /*Dev*/, const HardwareFeature& FTR)
+{
+    if (FTR.GetMeasure != nullptr)
+    {
+        try
+        {
+            return FTR.GetMeasure();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+            return 0.0;
+        }
+    }
+
+    return 0.0f;
+}
+
 #ifdef _WIN32
 
 HardwareMeasure::HardwareMeasure()
@@ -36,10 +54,9 @@ HardwareMeasure::HardwareMeasure()
         {
             HardwareFeature feature;
             feature.Name = std::get<0>(tup) + " (" + std::get<1>(tup) + ")";
-            feature.ValueType = HWTYPE_TEMP_VALUE;
-            feature.Identifier = std::get<2>(tup);
-            feature.PrimaryFeatureIndex = 0;
-            feature.SubFeatureIndex = 0;
+            const auto identifier = std::get<2>(tup);
+            feature.Identifier = identifier;
+            feature.GetMeasure = [identifier](){return LHWM::GetSensorValue(identifier);};
 
             hw.features.push_back(feature);
 
@@ -55,16 +72,6 @@ HardwareMeasure::HardwareMeasure()
         }
     }
 
-}
-
-double HardwareMeasure::GetMeasure(Hardware Dev, HardwareFeature FTR)
-{
-    return LHWM::GetSensorValue(FTR.Identifier);
-}
-
-double HardwareMeasure::GetTemperature(Hardware Dev, HardwareFeature Feature)
-{
-    return 0.0f;
 }
 
 double HardwareMeasure::GetRamUsagePercent()
@@ -92,10 +99,7 @@ int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
 HardwareMeasure::HardwareMeasure()
 {
     std::vector<chip_name> detected_chips = get_detected_chips();
-
-    chips.clear();
-
-    printf("## HardwareMeasure chips: %d\n", (int)chips.size());
+    printf("## HardwareMeasure chips: %d\n", (int)detected_chips.size());
 
     for (unsigned int ChipID = 0; ChipID < detected_chips.size(); ChipID++)
     {
@@ -133,9 +137,18 @@ HardwareMeasure::HardwareMeasure()
                         FTRName = (BaseFeatureName + " "+ std::string(SubFTR.name().c_str()));
                     HardwareFeature feature;
                     feature.Name = FTRName;
-                    feature.PrimaryFeatureIndex = ChipFeatureID;
-                    feature.SubFeatureIndex = SubFeatureID;
-                    feature.ValueType = HWTYPE_TEMP_VALUE;
+                    feature.GetMeasure = [this, chip, ChipFeatureID, SubFeatureID]()
+                    {
+                        try
+                        {
+                            return chip.features()[ChipFeatureID].subfeatures()[SubFeatureID].read();
+                        }
+                        catch (const sensors::io_error &ex)
+                        {
+                            printf("##### sensors::io_error while reading value: %s\n", ex.what());
+                            return 0.;
+                        }
+                    };
 
                     NewDev.features.push_back(feature);
                 }
@@ -145,10 +158,8 @@ HardwareMeasure::HardwareMeasure()
         if (NewDev.features.size() > 0)
         {
             HardwareList.push_back(NewDev);
-            chips.push_back(detected_chips[ChipID]);
         }
     }
-
 
     Hardware RamDev;
     RamDev.TrackDeviceName = "Ram usage";
@@ -156,9 +167,7 @@ HardwareMeasure::HardwareMeasure()
 
     HardwareFeature feature;
     feature.Name = "Percent usage";
-    feature.ValueType = HWTYPE_USAGE_PERCENT;
-    feature.PrimaryFeatureIndex = 0;
-    feature.SubFeatureIndex = 0;
+    feature.GetMeasure = [this](){return GetRamUsagePercent();};
     RamDev.features.push_back(feature);
 
     HardwareList.push_back(RamDev);
@@ -169,64 +178,13 @@ HardwareMeasure::HardwareMeasure()
 
     HardwareFeature cpu_rate_feature;
     cpu_rate_feature.Name = "CPU rate";
-    cpu_rate_feature.ValueType = HWTYPE_CPU_RATE;
-    cpu_rate_feature.PrimaryFeatureIndex = 0;
-    cpu_rate_feature.SubFeatureIndex = 0;
+    cpu_rate_feature.GetMeasure = [this](){return GetCPURate();};
 
     CPU.features.push_back(cpu_rate_feature);
 
     HardwareList.push_back(CPU);
 
     AddNvidiaGPUMeasurements();
-}
-
-double HardwareMeasure::GetMeasure(Hardware Dev, HardwareFeature FTR)
-{
-    if (FTR.GetMeasure != nullptr)
-    {
-        try
-        {
-            return FTR.GetMeasure();
-        }
-        catch(const std::exception& e)
-        {
-            std::cerr << e.what() << '\n';
-            return 0.0;
-        }
-    }
-
-    switch (FTR.ValueType) {
-
-    case HWTYPE_TEMP_VALUE:
-            return GetTemperature(Dev, FTR);
-        break;
-
-    case HWTYPE_USAGE_PERCENT:
-            return GetRamUsagePercent();
-        break;
-
-    case HWTYPE_CPU_RATE:
-            return GetCPURate();
-        break;
-
-    default:
-        break;
-    }
-
-    return 0.0f;
-}
-
-double HardwareMeasure::GetTemperature(Hardware Dev, HardwareFeature FTR)
-{
-    try
-    {
-        return chips[Dev.DeviceIndex].features()[FTR.PrimaryFeatureIndex].subfeatures()[FTR.SubFeatureIndex].read();
-    }
-    catch(const sensors::io_error& ex)
-    {
-        printf("##### sensors::io_error while reading value: %s\n", ex.what());
-        return 0.;
-    }
 }
 
 double HardwareMeasure::GetRamUsagePercent()
@@ -364,9 +322,6 @@ void HardwareMeasure::AddNvidiaGPUMeasurements()
 
     HardwareFeature gpu_temperature_feature;
     gpu_temperature_feature.Name = "GPU temperature";
-    gpu_temperature_feature.ValueType = HWTYPE_TEMP_VALUE;
-    gpu_temperature_feature.PrimaryFeatureIndex = 0;
-    gpu_temperature_feature.SubFeatureIndex = 0;
 
     gpu_temperature_feature.GetMeasure = [gpu_index]()
     {
