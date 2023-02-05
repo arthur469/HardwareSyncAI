@@ -15,7 +15,12 @@ std::vector<ControllerZone*> ControllerZoneManager::GetControllerZones()
     {
         for(unsigned int i = 0; i < controller->zones.size(); i++)
         {
-            controller_zones.push_back(new ControllerZone(controller, i, false, false, 100, false));
+            controller_zones.push_back(new ControllerZone(controller, i, false, false, 100, false, false));
+
+            for(unsigned int s = 0; s < controller->zones[i].segments.size(); s++)
+            {
+                controller_zones.push_back(new ControllerZone(controller, i, false, false, 100, false, true, s));
+            }
         }
     }
 
