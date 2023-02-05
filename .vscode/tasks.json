@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "configure",
+			"type": "shell",
+			"command": "qmake",
+			"problemMatcher": []
+		},
+		{
+			"label": "buid",
+			"type": "shell",
+			"command": "make",
+			"problemMatcher": [
+				"$gcc"
+			]
+		}
+	]
+}
