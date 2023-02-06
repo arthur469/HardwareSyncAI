@@ -6,12 +6,18 @@
 
 This is a plugin for [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB) that allows you sync your ARGB devices with hardware measures (CPU temperature, RAM usage, fans speed, etc...)
 
-## Downloads
+## Experimental (Master)
 
 * [Windows 64](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows%2064)
 * [Linux 64 Buster](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2064%20-%20Buster)
 * [Linux 64 Bullseye](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2064%20-%20Bullseye)
 * [Linux 64 Bookworm](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2064%20-%20Bookworm)
+
+## Stable (0.8)
+
+* [Linux 64 Buster](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/3418212011/artifacts/download)
+* [Linux 64 Bullseye](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/3418212012/artifacts/download)
+* [Windows 64](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/3418212013/artifacts/download)
 
 ## How do I install it?
 

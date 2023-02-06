@@ -287,9 +287,11 @@ void MeasureEntry::UpdateLEDsThread()
             /*---------------------------------------------------------*\
             | Percentage fill mode                                      |
             \*---------------------------------------------------------*/
+            unsigned int startIdx = controller_zone->start_idx();
+            unsigned int ledsCount = controller_zone->leds_count();
+            unsigned int zoneLedCount =  controller_zone->controller->zones[controller_zone->zone_idx].leds_count;
             if(controller_zone->is_percentage_fill)
             {
-                unsigned int ledsCount = controller_zone->leds_count();
                 double ledScale = 1.0 * maxRange / ledsCount;
                 double maxLed = 0.01 * last_idx * ledsCount;
                 bool reverse = controller_zone->reverse;
@@ -311,8 +313,18 @@ void MeasureEntry::UpdateLEDsThread()
                         rgb = ToRGBColor((int)(b*dimm*color.red()), (int)(b*dimm*color.green()), (int)(b*dimm*color.blue()));
                     }
 
-                    controller_zone->controller->zones[controller_zone->zone_idx].colors[led_id] = rgb;
-
+                    if (controller_zone->is_segment)
+                    {
+                        if (startIdx + led_id >= zoneLedCount)
+                        {
+                            break;
+                        }
+                        controller_zone->controller->zones[controller_zone->zone_idx].colors[startIdx + led_id] = rgb;
+                    }
+                    else
+                    {
+                        controller_zone->controller->zones[controller_zone->zone_idx].colors[led_id] = rgb;
+                    }
                 }
 
                 controllers.insert(controller_zone->controller);
@@ -323,7 +335,21 @@ void MeasureEntry::UpdateLEDsThread()
             else
             {
                 RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
-                controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
+                if (controller_zone->is_segment)
+                {
+                    for(unsigned int led_id = 0; led_id < ledsCount; ++led_id)
+                    {
+                        if (startIdx + led_id >= zoneLedCount)
+                        {
+                            break;
+                        }
+                        controller_zone->controller->zones[controller_zone->zone_idx].colors[startIdx + led_id] = rgb;
+                    }
+                }
+                else
+                {
+                    controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
+                }
                 controllers.insert(controller_zone->controller);
             }
         }
@@ -439,7 +465,9 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                         controller_zone->controller->description  == j["description"] &&
                         controller_zone->controller->version      == j["version"] &&
                         controller_zone->controller->vendor       == j["vendor"] &&
-                        controller_zone->zone_idx                 == j["zone_idx"]
+                        controller_zone->zone_idx                 == j["zone_idx"] &&
+                        controller_zone->is_segment               == j["is_segment"] &&
+                        controller_zone->segment_idx              == j["segment_idx"]
                         )
                 {
                     controller_zone->enabled = true;

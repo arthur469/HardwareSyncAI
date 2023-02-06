@@ -14,13 +14,17 @@ public:
                    bool enabled,
                    bool is_percentage_fill,
                    int brightness,
-                   bool reverse):
+                   bool reverse,
+                   bool is_segment,
+                   int segment_idx = -1):
         controller(controller),
         zone_idx(zone_idx),
         enabled(enabled),
         is_percentage_fill(is_percentage_fill),
         brightness(brightness),
-        reverse(reverse)
+        reverse(reverse),
+        is_segment(is_segment),
+        segment_idx(segment_idx)
     {};
 
     RGBController* controller;
@@ -29,20 +33,22 @@ public:
     bool is_percentage_fill;
     int brightness;
     bool reverse;
+    bool is_segment;
+    int segment_idx;
 
     zone_type type()
     {
-        return controller->zones[zone_idx].type;
+        return is_segment ? controller->zones[zone_idx].segments[segment_idx].type : controller->zones[zone_idx].type;
     }
 
     unsigned int start_idx()
     {
-        return controller->zones[zone_idx].start_idx;
+        return is_segment ? controller->zones[zone_idx].segments[segment_idx].start_idx : controller->zones[zone_idx].start_idx;
     }
 
     unsigned int leds_count()
     {
-        return controller->zones[zone_idx].leds_count;
+        return is_segment ? controller->zones[zone_idx].segments[segment_idx].leds_count : controller->zones[zone_idx].leds_count;
     }
 
     unsigned int matrix_map_width()
@@ -62,18 +68,32 @@ public:
 
     bool operator==(ControllerZone const & rhs) const
     {
-        return this->controller == rhs.controller && this->zone_idx == rhs.zone_idx;
+        if (is_segment)
+        {
+            return this->controller == rhs.controller && this->zone_idx == rhs.zone_idx && this->segment_idx == rhs.segment_idx;
+        }
+        else
+        {
+            return this->controller == rhs.controller && this->zone_idx == rhs.zone_idx;
+        }
     }
 
     bool operator<(ControllerZone const & rhs) const
     {
-        // whatever
-        return this->controller != rhs.controller || this->zone_idx != rhs.zone_idx;
+        if (is_segment)
+        {
+            return this->controller != rhs.controller || this->zone_idx != rhs.zone_idx || this->segment_idx != rhs.segment_idx;
+        }
+        else
+        {
+            // whatever
+            return this->controller != rhs.controller || this->zone_idx != rhs.zone_idx;
+        }
     }
 
     std::string display_name()
     {
-        return controller->name + ": " +  controller->zones[zone_idx].name;
+        return controller->name + ": " +  controller->zones[zone_idx].name + (is_segment ? (" - " + controller->zones[zone_idx].segments[segment_idx].name) : "");
     }
 
     json to_json()
@@ -84,6 +104,8 @@ public:
         j["is_percentage_fill"] = is_percentage_fill;
         j["brightness"] = brightness;
         j["reverse"] = reverse;
+        j["is_segment"] = is_segment;
+        j["segment_idx"] = segment_idx;
         j["location"] = controller->location;
         j["serial"] = controller->serial;
         j["description"] = controller->description;
