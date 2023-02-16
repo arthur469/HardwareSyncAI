@@ -71,6 +71,10 @@ private:
 
     // Deteect GPU and add it to the list if present
     void AddNvidiaGPUMeasurements();
+
+    // Add system load averages
+    void AddLoadAverages();
+    double GetLoadAverage(int);
     #endif
 };
 

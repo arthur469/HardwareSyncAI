@@ -185,6 +185,7 @@ HardwareMeasure::HardwareMeasure()
     HardwareList.push_back(CPU);
 
     AddNvidiaGPUMeasurements();
+    AddLoadAverages();
 }
 
 double HardwareMeasure::GetRamUsagePercent()
@@ -320,45 +321,89 @@ void HardwareMeasure::AddNvidiaGPUMeasurements()
     GPU.TrackDeviceName = gpu_name;
     GPU.DeviceIndex = std::stoi(gpu_index);
 
-    HardwareFeature gpu_temperature_feature;
-    gpu_temperature_feature.Name = "GPU temperature";
-
-    gpu_temperature_feature.GetMeasure = [gpu_index]()
+    // create list of features and query tags
+    std::vector<std::string> features = {"temperature.gpu", "utilization.gpu", "utilization.memory", "memory.used", "memory.free"};
+    
+    for (auto feature : features)
     {
-        char line[128];
-        std::string result;
-        std::string cmd = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits -i " + gpu_index;
+        HardwareFeature gpu_feature;
+        gpu_feature.Name = feature;
 
-        FILE *pipe = popen(cmd.c_str(), "r");
-        if (!pipe)
-            return 0.0;
-
-        while (!feof(pipe))
+        gpu_feature.GetMeasure = [gpu_index, feature]()
         {
-            if (fgets(line, 128, pipe) != NULL)
+            char line[128];
+            std::string result;
+            std::string cmd = "nvidia-smi --query-gpu=" + feature + " --format=csv,noheader,nounits -i " + gpu_index;
+
+            FILE *pipe = popen(cmd.c_str(), "r");
+            if (!pipe)
+                return 0.0;
+
+            while (!feof(pipe))
             {
-                result += line;
+                if (fgets(line, 128, pipe) != NULL)
+                {
+                    result += line;
+                }
             }
-        }
 
-        pclose(pipe);
+            pclose(pipe);
 
-        if (result.empty())
-        {
-            // printf("GPU temperature not found\n");
-            return 0.0;
-        }
-        else
-        {
-            // printf("GPU temperature found: %s\n", result.c_str());
-        }
+            if (result.empty())
+            {
+                // printf("GPU temperature not found\n");
+                return 0.0;
+            }
+            else
+            {
+                // printf("GPU temperature found: %s\n", result.c_str());
+            }
 
-        return std::stod(result);
-    };
+            return std::stod(result);
+        };
 
-    GPU.features.push_back(gpu_temperature_feature);
+        GPU.features.push_back(gpu_feature);
+    }
 
     HardwareList.push_back(GPU);
+}
+
+void HardwareMeasure::AddLoadAverages()
+{
+    Hardware LoadAverages;
+    LoadAverages.TrackDeviceName = "Load Averages";
+    LoadAverages.DeviceIndex = 0;
+
+    HardwareFeature load_1min_feature;
+    load_1min_feature.Name = "Load 1min";
+    load_1min_feature.GetMeasure = [this](){return GetLoadAverage(0);};
+
+    HardwareFeature load_5min_feature;
+    load_5min_feature.Name = "Load 5min";
+    load_5min_feature.GetMeasure = [this](){return GetLoadAverage(1);};
+
+    HardwareFeature load_15min_feature;
+    load_15min_feature.Name = "Load 15min";
+    load_15min_feature.GetMeasure = [this](){return GetLoadAverage(2);};
+
+    LoadAverages.features.push_back(load_1min_feature);
+    LoadAverages.features.push_back(load_5min_feature);
+    LoadAverages.features.push_back(load_15min_feature);
+
+    HardwareList.push_back(LoadAverages);
+}
+
+double HardwareMeasure::GetLoadAverage(int index)
+{
+    double loadavg[3];
+    if (getloadavg(loadavg, 3) != -1)
+    {
+        return loadavg[index];
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 #endif
