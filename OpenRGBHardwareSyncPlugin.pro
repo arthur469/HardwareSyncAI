@@ -46,6 +46,8 @@ INCLUDEPATH +=                                                      \
     OpenRGB/RGBController                                           \
     OpenRGB/net_port                                                \
     OpenRGB/dependencies/json                                       \
+    OpenRGB/hidapi_wrapper                                          \
+    OpenRGB/dependencies/hidapi                                     \
 
 HEADERS +=                                                          \
     ControllerZone.h                                                \
