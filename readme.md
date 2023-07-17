@@ -13,11 +13,12 @@ This is a plugin for [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB) that 
 * [Linux 64 Bullseye](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2064%20-%20Bullseye)
 * [Linux 64 Bookworm](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux%2064%20-%20Bookworm)
 
-## Stable (0.8)
+## Stable (0.9)
 
-* [Linux 64 Buster](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/3418212011/artifacts/download)
-* [Linux 64 Bullseye](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/3418212012/artifacts/download)
-* [Windows 64](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/3418212013/artifacts/download)
+* [Linux 64](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/4632318375/artifacts/download)
+* [Windows 64](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/4632318376/artifacts/download)
+
+You can get older releases [here](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/releases/)
 
 ## How do I install it?
 
