@@ -99,7 +99,7 @@ int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
 HardwareMeasure::HardwareMeasure()
 {
     std::vector<chip_name> detected_chips = get_detected_chips();
-    printf("## HardwareMeasure chips: %d\n", (int)detected_chips.size());
+    printf("[OpenRGBHardwareSyncPlugin] detected chips: %d\n", (int)detected_chips.size());
 
     for (unsigned int ChipID = 0; ChipID < detected_chips.size(); ChipID++)
     {
@@ -111,7 +111,7 @@ HardwareMeasure::HardwareMeasure()
         }
         catch(const sensors::io_error& ex)
         {
-            printf("##### sensors::io_error for chip[%d]: %s\n", ChipID, ex.what());
+            printf("[OpenRGBHardwareSyncPlugin] sensors::io_error for chip[%d]: %s\n", ChipID, ex.what());
             continue;
         }
 
@@ -145,7 +145,7 @@ HardwareMeasure::HardwareMeasure()
                         }
                         catch (const sensors::io_error &ex)
                         {
-                            printf("##### sensors::io_error while reading value: %s\n", ex.what());
+                            printf("[OpenRGBHardwareSyncPlugin] sensors::io_error while reading value: %s\n", ex.what());
                             return 0.;
                         }
                     };
@@ -305,21 +305,33 @@ void HardwareMeasure::AddNvidiaGPUMeasurements()
 
     if (result.empty())
     {
-        printf("GPU not found\n");
+        printf("[OpenRGBHardwareSyncPlugin] GPU not found\n");
         return;
     }
     else
     {
-        printf("GPU found: %s\n", result.c_str());
+        printf("[OpenRGBHardwareSyncPlugin] GPU found: %s\n", result.c_str());
     }
 
     // extract GPU name and index
     std::string gpu_name = result.substr(0, result.find(","));
     std::string gpu_index = result.substr(result.find(",") + 1, result.length());
 
+    printf("[OpenRGBHardwareSyncPlugin] gpu_index: %s\n", gpu_index.c_str());
+
     Hardware GPU;
+
     GPU.TrackDeviceName = gpu_name;
-    GPU.DeviceIndex = std::stoi(gpu_index);
+
+    try
+    {
+        GPU.DeviceIndex = std::stoi(gpu_index);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        printf("[OpenRGBHardwareSyncPlugin] ERROR: %s\n", e.what());
+        return;
+    }
 
     // create list of features and query tags
     std::vector<std::string> features = {"temperature.gpu", "utilization.gpu", "utilization.memory", "memory.used", "memory.free"};

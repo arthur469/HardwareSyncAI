@@ -184,14 +184,14 @@ void HardwareSyncMainPage::on_save_clicked()
 {
     std::vector<json> v;
 
-    printf("[HardwareSyncMainPage] preparing json structure...\n");
+    printf("[OpenRGBHardwareSyncPlugin] preparing json structure...\n");
 
     for(MeasureEntry* measure: measures)
     {
         v.push_back(measure->ToJson());
     }
 
-    printf("[HardwareSyncMainPage] json ready to be saved\n");
+    printf("[OpenRGBHardwareSyncPlugin] json ready to be saved\n");
 
     json j = v;
 
