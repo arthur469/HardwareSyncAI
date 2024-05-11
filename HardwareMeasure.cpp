@@ -101,6 +101,13 @@ HardwareMeasure::HardwareMeasure()
     std::vector<chip_name> detected_chips = get_detected_chips();
     printf("[OpenRGBHardwareSyncPlugin] detected chips: %d\n", (int)detected_chips.size());
 
+    // it seems that devices are detected in random order, as a result on each load there is a shift in measures
+    // so sort by name assuming constant hardware names
+    std::sort(detected_chips.begin(), detected_chips.end(), 
+        [](const chip_name &a, const chip_name &b)
+              { return a.name() < b.name(); }
+    );
+
     for (unsigned int ChipID = 0; ChipID < detected_chips.size(); ChipID++)
     {
         Hardware NewDev;
