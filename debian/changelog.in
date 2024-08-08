@@ -1,0 +1,5 @@
+openrgb-plugin-hardware-sync (__VERSION__) UNRELEASED; urgency=medium
+
+  * Builds from git master.  See git history for more information.
+
+ -- Adam Honse <adam@Adam-Laptop.lan>  Thu, 07 Aug 2024 11:30:30 -0500

@@ -184,12 +184,12 @@ unix:!macx {
         dependencies/libsensors-cpp/error.cpp                                                   \
 
     LIBS += -lsensors
-    QMAKE_CXXFLAGS += -std=c++17
+    QMAKE_CXXFLAGS += -std=c++17 -Wno-psabi
 
     CONFIG += link_pkgconfig
     PKGCONFIG += glib-2.0 libgtop-2.0
 
-    target.path=$$PREFIX/lib/
+    target.path=$$PREFIX/lib/openrgb/plugins/
     INSTALLS += target
 }
 
