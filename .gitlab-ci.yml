@@ -113,6 +113,106 @@ before_script:
     expire_in: 30 days
 
 #-----------------------------------------------------------------------#
+# Linux (.deb) Debian Bookworm i386 Build Target                        #
+#-----------------------------------------------------------------------#
+"Linux i386 .deb (Debian Bookworm)":
+  <<: *ccache_init
+  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bookworm-i386
+  tags:
+  - linux
+  - i386
+  stage: build
+  script:
+  - ./scripts/build-package-files.sh debian/changelog
+  - dpkg-architecture -l
+  - dpkg-buildpackage -us -B
+  - rm -v ../openrgb-plugin-hardware-sync-dbgsym*.deb
+  - mv -v ../openrgb-plugin-hardware-sync*.deb ./
+
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Linux_i386_deb_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - openrgb-plugin-hardware-sync*.deb
+    exclude:
+    - openrgb-plugin-hardware-sync-dbgsym*.deb
+    expire_in: 30 days
+  
+#-----------------------------------------------------------------------#
+# Linux (.deb) Debian Bookworm amd64 Build Target                       #
+#-----------------------------------------------------------------------#
+"Linux amd64 .deb (Debian Bookworm)":
+  <<: *ccache_init
+  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bookworm-amd64
+  tags:
+  - linux
+  - amd64
+  stage: build
+  script:
+  - ./scripts/build-package-files.sh debian/changelog
+  - dpkg-architecture -l
+  - dpkg-buildpackage -us -B
+  - rm -v ../openrgb-plugin-hardware-sync-dbgsym*.deb
+  - mv -v ../openrgb-plugin-hardware-sync*.deb ./
+
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Linux_amd64_deb_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - openrgb-plugin-hardware-sync*.deb
+    exclude:
+    - openrgb-plugin-hardware-sync-dbgsym*.deb
+    expire_in: 30 days
+  
+#-----------------------------------------------------------------------#
+# Linux (.deb) Debian Bookworm armhf Build Target                       #
+#-----------------------------------------------------------------------#
+"Linux armhf .deb (Debian Bookworm)":
+  <<: *ccache_init
+  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bookworm-armhf
+  tags:
+  - linux
+  - armhf
+  stage: build
+  script:
+  - ./scripts/build-package-files.sh debian/changelog
+  - dpkg-architecture -l
+  - dpkg-buildpackage -us -B
+  - rm -v ../openrgb-plugin-hardware-sync-dbgsym*.deb
+  - mv -v ../openrgb-plugin-hardware-sync*.deb ./
+
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Linux_armhf_deb_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - openrgb-plugin-hardware-sync*.deb
+    exclude:
+    - openrgb-plugin-hardware-sync-dbgsym*.deb
+    expire_in: 30 days
+
+#-----------------------------------------------------------------------#
+# Linux (.deb) Debian Bookworm arm64 Build Target                       #
+#-----------------------------------------------------------------------#
+"Linux arm64 .deb (Debian Bookworm)":
+  <<: *ccache_init
+  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bookworm-arm64
+  tags:
+  - linux
+  - arm64
+  stage: build
+  script:
+  - ./scripts/build-package-files.sh debian/changelog
+  - dpkg-architecture -l
+  - dpkg-buildpackage -us -B
+  - rm -v ../openrgb-plugin-hardware-sync-dbgsym*.deb
+  - mv -v ../openrgb-plugin-hardware-sync*.deb ./
+
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Linux_arm64_deb_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - openrgb-plugin-hardware-sync*.deb
+    exclude:
+    - openrgb-plugin-hardware-sync-dbgsym*.deb
+    expire_in: 30 days
+
+#-----------------------------------------------------------------------#
 # Windows (64-bit) Build Target                                         #
 #-----------------------------------------------------------------------#
 "Windows 64":
