@@ -1,16 +1,32 @@
-QT +=                  \
-    gui                \
-    widgets            \
-    core               \
+#-----------------------------------------------------------------------------------------------#
+# OpenRGB Hardware Sync Plugin QMake Project                                                    #
+#-----------------------------------------------------------------------------------------------#
 
+#-----------------------------------------------------------------------------------------------#
+# Qt Configuration                                                                              #
+#-----------------------------------------------------------------------------------------------#
+QT +=                                                                                           \
+    core                                                                                        \
+    gui                                                                                         \
+    widgets
 
-TEMPLATE = lib
 DEFINES += ORGBHARDWARESYNCPLUGIN_LIBRARY
+TEMPLATE = lib
+
+#-----------------------------------------------------------------------------------------------#
+# Build Configuration                                                                           #
+#-----------------------------------------------------------------------------------------------#
+CONFIG +=                                                                                       \
+    plugin                                                                                      \
+    silent                                                                                      \
 
 #-----------------------------------------------------------------------------------------------#
 # Application Configuration                                                                     #
 #-----------------------------------------------------------------------------------------------#
-PLUGIN_VERSION     = 0.9
+MAJOR           = 0
+MINOR           = 9
+REVISION        = 1
+PLUGIN_VERSION  = $$MAJOR"."$$MINOR$$REVISION
 
 #-----------------------------------------------------------------------------------------------#
 # Automatically generated build information                                                     #
@@ -21,7 +37,9 @@ GIT_COMMIT_ID   = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PR
 GIT_COMMIT_DATE = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ show -s --format=%ci HEAD)
 GIT_BRANCH      = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ rev-parse --abbrev-ref HEAD)
 
-
+#-----------------------------------------------------------------------------------------------#
+# Download links                                                                                #
+#-----------------------------------------------------------------------------------------------#
 win32:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows 64"
 unix:!macx:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux 64 - Bullseye"
 
@@ -36,69 +54,68 @@ DEFINES +=                                                                      
     GIT_BRANCH=\\"\"\"$$GIT_BRANCH\\"\"\"                                                       \
     LATEST_BUILD_URL=\\"\"\"$$LATEST_BUILD_URL\\"\"\"                                           \
 
+#-----------------------------------------------------------------------------------------------#
+# Includes                                                                                      #
+#-----------------------------------------------------------------------------------------------#
+INCLUDEPATH +=                                                                                  \
+    OpenRGB/                                                                                    \
+    OpenRGB/i2c_smbus                                                                           \
+    OpenRGB/RGBController                                                                       \
+    OpenRGB/net_port                                                                            \
+    OpenRGB/dependencies/json                                                                   \
+    OpenRGB/hidapi_wrapper                                                                      \
+    OpenRGB/dependencies/hidapi                                                                 \
 
-#-------------------------------------------------------------------#
-# Includes                                                          #
-#-------------------------------------------------------------------#
-INCLUDEPATH +=                                                      \
-    OpenRGB/                                                        \
-    OpenRGB/i2c_smbus                                               \
-    OpenRGB/RGBController                                           \
-    OpenRGB/net_port                                                \
-    OpenRGB/dependencies/json                                       \
-    OpenRGB/hidapi_wrapper                                          \
-    OpenRGB/dependencies/hidapi                                     \
+HEADERS +=                                                                                      \
+    ControllerZone.h                                                                            \
+    ControllerZoneListItemWidget.h                                                              \
+    ControllerZoneManager.h                                                                     \
+    MeasureSettings.h                                                                           \
+    HardwareSyncMainPage.h                                                                      \
+    MeasureColor.h                                                                              \
+    MeasureEntry.h                                                                              \
+    OpenRGB/OpenRGBPluginInterface.h                                                            \
+    OpenRGB/ResourceManager.h                                                                   \
+    OpenRGBHardwareSyncPlugin.h                                                                 \
+    HardwareMeasure.h                                                                           \
+    ColorPicker.h                                                                               \
+    ColorStop.h                                                                                 \
+    OpenRGBPluginsFont.h                                                                        \
+    PluginInfo.h                                                                                \
+    QTooltipedSlider.h                                                                          \
+    TabHeader.h                                                                                 \
+    EditableLabel.h                                                                             \
 
-HEADERS +=                                                          \
-    ControllerZone.h                                                \
-    ControllerZoneListItemWidget.h                                  \
-    ControllerZoneManager.h \
-    MeasureSettings.h                                               \
-    HardwareSyncMainPage.h                                          \
-    MeasureColor.h                                                  \
-    MeasureEntry.h                                                  \
-    OpenRGB/OpenRGBPluginInterface.h                                \
-    OpenRGB/ResourceManager.h                                       \
-    OpenRGBHardwareSyncPlugin.h                                     \
-    HardwareMeasure.h                                               \
-    ColorPicker.h                                                   \
-    ColorStop.h                                                     \
-    OpenRGBPluginsFont.h \
-    PluginInfo.h                                                    \
-    QTooltipedSlider.h                                              \
-    TabHeader.h                                                     \
-    EditableLabel.h                                                 \
+SOURCES +=                                                                                      \
+    ControllerZoneListItemWidget.cpp                                                            \
+    ControllerZoneManager.cpp                                                                   \
+    MeasureSettings.cpp                                                                         \
+    HardwareSyncMainPage.cpp                                                                    \
+    MeasureColor.cpp                                                                            \
+    MeasureEntry.cpp                                                                            \
+    OpenRGBHardwareSyncPlugin.cpp                                                               \
+    HardwareMeasure.cpp                                                                         \
+    ColorPicker.cpp                                                                             \
+    ColorStop.cpp                                                                               \
+    OpenRGBPluginsFont.cpp                                                                      \
+    PluginInfo.cpp                                                                              \
+    QTooltipedSlider.cpp                                                                        \
+    TabHeader.cpp                                                                               \
+    EditableLabel.cpp                                                                           \
 
-SOURCES +=                                                          \
-    ControllerZoneListItemWidget.cpp                                \
-    ControllerZoneManager.cpp \
-    MeasureSettings.cpp                                             \
-    HardwareSyncMainPage.cpp                                        \
-    MeasureColor.cpp                                                \
-    MeasureEntry.cpp                                                \
-    OpenRGBHardwareSyncPlugin.cpp                                   \
-    HardwareMeasure.cpp                                             \
-    ColorPicker.cpp                                                 \
-    ColorStop.cpp                                                   \
-    OpenRGBPluginsFont.cpp \
-    PluginInfo.cpp                                                  \
-    QTooltipedSlider.cpp                                            \
-    TabHeader.cpp                                                   \
-    EditableLabel.cpp                                               \
+FORMS +=                                                                                        \
+    ControllerZoneListItemWidget.ui                                                             \
+    HardwareSyncMainPage.ui                                                                     \
+    MeasureColor.ui                                                                             \
+    MeasureEntry.ui                                                                             \
+    ColorPicker.ui                                                                              \
+    ColorStop.ui                                                                                \
+    PluginInfo.ui                                                                               \
+    TabHeader.ui                                                                                \
 
-FORMS +=                                                            \
-    ControllerZoneListItemWidget.ui                                 \
-    HardwareSyncMainPage.ui                                         \
-    MeasureColor.ui                                                 \
-    MeasureEntry.ui                                                 \
-    ColorPicker.ui                                                  \
-    ColorStop.ui                                                    \
-    PluginInfo.ui                                                   \
-    TabHeader.ui                                                    \
-
-#-------------------------------------------------------------------#
-# Windows GitLab CI Configuration                                   #
-#-------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------#
+# Windows-specific Configuration                                                                #
+#-----------------------------------------------------------------------------------------------#
 
 win32:CONFIG += QTPLUGIN
 win32:CONFIG += c++17
@@ -117,23 +134,23 @@ win32:RCC_DIR     = _intermediate_$$DESTDIR/.qrc
 win32:UI_DIR      = _intermediate_$$DESTDIR/.ui
 
 win32:contains(QMAKE_TARGET.arch, x86_64) {
-    LIBS +=                                                             \
-        -lws2_32                                                        \
-        -lole32                                                         \
+    LIBS +=                                                                                     \
+        -lws2_32                                                                                \
+        -lole32                                                                                 \
 }
 
 win32:contains(QMAKE_TARGET.arch, x86) {
-    LIBS +=                                                             \
-        -lws2_32                                                        \
-        -lole32                                                         \
+    LIBS +=                                                                                     \
+        -lws2_32                                                                                \
+        -lole32                                                                                 \
 }
 
-win32:DEFINES +=                                                        \
-    _MBCS                                                               \
-    WIN32                                                               \
-    _CRT_SECURE_NO_WARNINGS                                             \
-    _WINSOCK_DEPRECATED_NO_WARNINGS                                     \
-    WIN32_LEAN_AND_MEAN                                                 \
+win32:DEFINES +=                                                                                \
+    _MBCS                                                                                       \
+    WIN32                                                                                       \
+    _CRT_SECURE_NO_WARNINGS                                                                     \
+    _WINSOCK_DEPRECATED_NO_WARNINGS                                                             \
+    WIN32_LEAN_AND_MEAN                                                                         \
 
 win32:{
     INCLUDEPATH += dependencies/lhwm-cpp-wrapper
@@ -149,22 +166,22 @@ win32:CONFIG(release, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
     LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Release -llhwm-cpp-wrapper
 }
 
-#-----------------------------------------------------------------------#
-# Linux-specific Configuration                                          #
-#-----------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------#
+# Linux-specific Configuration                                                                  #
+#-----------------------------------------------------------------------------------------------#
 unix:!macx {
 
     # lm sensors
-    INCLUDEPATH +=                                                      \
-        dependencies/libsensors-cpp                                     \
+    INCLUDEPATH +=                                                                              \
+        dependencies/libsensors-cpp                                                             \
 
-    HEADERS +=                                                          \
-        dependencies/libsensors-cpp/sensors.h                           \
-        dependencies/libsensors-cpp/error.h                             \
+    HEADERS +=                                                                                  \
+        dependencies/libsensors-cpp/sensors.h                                                   \
+        dependencies/libsensors-cpp/error.h                                                     \
 
-    SOURCES +=                                                          \
-        dependencies/libsensors-cpp/sensors.cpp                         \
-        dependencies/libsensors-cpp/error.cpp                           \
+    SOURCES +=                                                                                  \
+        dependencies/libsensors-cpp/sensors.cpp                                                 \
+        dependencies/libsensors-cpp/error.cpp                                                   \
 
     LIBS += -lsensors
     QMAKE_CXXFLAGS += -std=c++17
@@ -176,6 +193,5 @@ unix:!macx {
     INSTALLS += target
 }
 
-
-RESOURCES +=                                                            \
+RESOURCES +=                                                                                    \
     resources.qrc
