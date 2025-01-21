@@ -9,7 +9,7 @@
 #-----------------------------------------------------------------------#
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  GIT_DEPTH: 1
+  GIT_DEPTH: 0
 
 .shared_windows_runners:
   tags:
