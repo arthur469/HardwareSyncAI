@@ -2,7 +2,7 @@
 #define OPENRGBHARDWARESYNCPLUGIN_H
 
 #include "OpenRGBPluginInterface.h"
-#include "ResourceManager.h"
+#include "ResourceManagerInterface.h"
 #include "HardwareMeasure.h"
 #include "HardwareSyncMainPage.h"
 
@@ -23,14 +23,13 @@ public:
     OpenRGBPluginInfo   GetPluginInfo() override;
     unsigned int        GetPluginAPIVersion() override;
 
-    void                Load(bool dark_theme, ResourceManager* resource_manager_ptr) override;
+    void                Load(ResourceManagerInterface* resource_manager_ptr) override;
     QWidget*            GetWidget() override;
     QMenu*              GetTrayMenu() override;
     void                Unload() override;
 
-    static bool             DarkTheme;
-    static ResourceManager* RMPointer;
     static HardwareMeasure* hm;
+    static ResourceManagerInterface* RMPointer;
 
 private:
 

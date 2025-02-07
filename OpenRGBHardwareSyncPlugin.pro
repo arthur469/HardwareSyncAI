@@ -87,18 +87,36 @@ DEFINES +=                                                                      
     GIT_BRANCH=\\"\"\"$$GIT_BRANCH\\"\"\"                                                       \
     LATEST_BUILD_URL=\\"\"\"$$LATEST_BUILD_URL\\"\"\"                                           \
 
+
 #-----------------------------------------------------------------------------------------------#
-# Includes                                                                                      #
+# OpenRGB Plugin SDK                                                                            #
 #-----------------------------------------------------------------------------------------------#
 INCLUDEPATH +=                                                                                  \
-    OpenRGB/                                                                                    \
-    OpenRGB/i2c_smbus                                                                           \
+    OpenRGB                                                                                     \
     OpenRGB/RGBController                                                                       \
-    OpenRGB/net_port                                                                            \
     OpenRGB/dependencies/json                                                                   \
-    OpenRGB/hidapi_wrapper                                                                      \
-    OpenRGB/dependencies/hidapi                                                                 \
+    OpenRGB/qt                                                                                  \
+    OpenRGB/i2c_smbus                                                                           \
+    OpenRGB/net_port                                                                            \
 
+HEADERS +=                                                                                      \
+    OpenRGB/Colors.h                                                                            \
+    OpenRGB/OpenRGBPluginInterface.h                                                            \
+    OpenRGB/ResourceManagerInterface.h                                                          \
+
+SOURCES +=                                                                                      \
+    OpenRGB/RGBController/RGBController.cpp                                                     \
+    OpenRGB/RGBController/RGBController_Network.cpp                                             \
+    OpenRGB/NetworkServer.cpp                                                                   \
+    OpenRGB/NetworkClient.cpp                                                                   \
+    OpenRGB/NetworkProtocol.cpp                                                                 \
+    OpenRGB/LogManager.cpp                                                                      \
+    OpenRGB/net_port/net_port.cpp                                                               \
+    OpenRGB/qt/hsv.cpp                                                                          \
+
+#-----------------------------------------------------------------------------------------------#
+# Plugin Files                                                                                  #
+#-----------------------------------------------------------------------------------------------#
 HEADERS +=                                                                                      \
     ControllerZone.h                                                                            \
     ControllerZoneListItemWidget.h                                                              \
@@ -107,8 +125,6 @@ HEADERS +=                                                                      
     HardwareSyncMainPage.h                                                                      \
     MeasureColor.h                                                                              \
     MeasureEntry.h                                                                              \
-    OpenRGB/OpenRGBPluginInterface.h                                                            \
-    OpenRGB/ResourceManager.h                                                                   \
     OpenRGBHardwareSyncPlugin.h                                                                 \
     HardwareMeasure.h                                                                           \
     ColorPicker.h                                                                               \
@@ -203,7 +219,6 @@ win32:CONFIG(release, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
 # Linux-specific Configuration                                                                  #
 #-----------------------------------------------------------------------------------------------#
 unix:!macx {
-
     # lm sensors
     INCLUDEPATH +=                                                                              \
         dependencies/libsensors-cpp                                                             \

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <algorithm>
 
 #ifndef _WIN32
 #include "error.h"

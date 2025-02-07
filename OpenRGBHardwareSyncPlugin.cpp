@@ -1,8 +1,7 @@
 #include "OpenRGBHardwareSyncPlugin.h"
 #include <QHBoxLayout>
 
-bool OpenRGBHardwareSyncPlugin::DarkTheme               = false;
-ResourceManager* OpenRGBHardwareSyncPlugin::RMPointer   = nullptr;
+ResourceManagerInterface* OpenRGBHardwareSyncPlugin::RMPointer   = nullptr;
 HardwareMeasure* OpenRGBHardwareSyncPlugin::hm          = nullptr;
 
 OpenRGBPluginInfo OpenRGBHardwareSyncPlugin::GetPluginInfo()
@@ -29,10 +28,9 @@ unsigned int OpenRGBHardwareSyncPlugin::GetPluginAPIVersion()
     return OPENRGB_PLUGIN_API_VERSION;
 }
 
-void OpenRGBHardwareSyncPlugin::Load(bool dark_theme, ResourceManager* resource_manager_ptr)
+void OpenRGBHardwareSyncPlugin::Load(ResourceManagerInterface* resource_manager_ptr)
 {
     RMPointer = resource_manager_ptr;
-    DarkTheme = dark_theme;
 
 #ifdef _WIN32
     can_load = QFile(QCoreApplication::applicationDirPath()+"\\lhwm-wrapper.dll").exists();
