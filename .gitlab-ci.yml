@@ -18,6 +18,7 @@ variables:
 
 stages:
   - build
+  - deploy
 
 before_script:
  - echo "started by ${GITLAB_USER_NAME}"
@@ -285,4 +286,27 @@ before_script:
     name: "${CI_PROJECT_NAME}_Windows_64_${CI_COMMIT_SHORT_SHA}"
     paths:
     - OpenRGBHardwareSyncPlugin.dll
+    expire_in: 30 days
+
+  #-----------------------------------------------------------------------#
+# Windows (64-bit) MSI Target                                           #
+#-----------------------------------------------------------------------#
+"Windows 64 MSI":
+  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:bookworm-i386
+  stage: deploy
+  tags:
+  - linux
+  - i386
+  script:
+  -  ls -la
+  -  ./scripts/build-msi.sh
+  dependencies:
+  - "Windows 64"
+  needs:
+  - "Windows 64"
+
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Windows_64_msi_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - OpenRGB_Hardware_Sync_Plugin_Windows_64.msi
     expire_in: 30 days
