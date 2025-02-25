@@ -11,7 +11,7 @@ APP_ID="${VENDOR_ID}.${PRODUCTNAME,,}"
 
 GITURL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-"
 GITPARAM="?inline=false"
-ICONFILE="OpenRGBEHardwareSyncPlugin.ico"
+ICONFILE="OpenRGBHardwareSyncPlugin.ico"
 LICENSEFILE="scripts/License.rtf"
 BANNERIMAGE="scripts/banner.bmp"
 DIALOGBACKGROUND="scripts/dialog_background.bmp"
