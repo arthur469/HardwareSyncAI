@@ -1,5 +1,7 @@
 #include "OpenRGBPluginsFont.h"
 #include <QFontDatabase>
+#include <QList>
+#include <QString>
 
 OpenRGBPluginsFont* OpenRGBPluginsFont::instance;
 
