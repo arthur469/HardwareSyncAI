@@ -3,9 +3,9 @@
 
 #include <QWidget>
 #include <QImage>
+#include <nlohmann/json.hpp>
 #include "ColorStop.h"
 #include "ui_MeasureColor.h"
-#include "json.hpp"
 
 using json = nlohmann::json;
 

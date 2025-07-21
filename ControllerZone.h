@@ -1,8 +1,8 @@
 ﻿#ifndef CONTROLLERZONE_H
 #define CONTROLLERZONE_H
 
+#include <nlohmann/json.hpp>
 #include "RGBController.h"
-#include "json.hpp"
 
 using json = nlohmann::json;
 

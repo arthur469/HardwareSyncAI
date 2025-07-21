@@ -1,7 +1,7 @@
 #ifndef MEASURESETTINGS_H
 #define MEASURESETTINGS_H
 
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include "filesystem.h"
 
 using json = nlohmann::json;
