@@ -23,7 +23,13 @@ void ColorPicker::on_button_clicked()
 
     QColorDialog *colorDialog = new QColorDialog(this);
     QColor currentColor;
-    currentColor.setNamedColor(ui->button->palette().button().color().name());
+
+    #if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
+        currentColor.fromString(ui->button->palette().button().color().name());
+    #else
+        currentColor.setNamedColor(ui->button->palette().button().color().name());
+    #endif
+    
     colorDialog->setAttribute(Qt::WA_DeleteOnClose);
     colorDialog->setCurrentColor(currentColor);
 
