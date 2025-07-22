@@ -214,6 +214,22 @@ before_script:
     expire_in: 30 days
 
 #-----------------------------------------------------------------------#
+# Windows (64-bit) Qt6 Build Target                                     #
+#-----------------------------------------------------------------------#
+"Windows 64 Qt6":
+  extends:
+  - .shared_windows_runners
+  stage: build
+  script:
+  - scripts\build-windows.bat 6.8.3 2022 64
+  - mv "OpenRGBHardwareSyncPlugin Windows 64-Bit\OpenRGBHardwareSyncPlugin.dll" .
+  artifacts:
+    name: "${CI_PROJECT_NAME}_Windows_64_${CI_COMMIT_SHORT_SHA}"
+    paths:
+    - OpenRGBHardwareSyncPlugin.dll
+    expire_in: 30 days
+
+#-----------------------------------------------------------------------#
 # Windows (64-bit) Build Target                                         #
 #-----------------------------------------------------------------------#
 "Windows 64":
