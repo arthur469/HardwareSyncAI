@@ -456,18 +456,18 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
                 bool ignore_location = (location.find("HID: ") == 0);
 
                 if(
-                        controller_zone->controller->name         == j["name"] &&
+                        controller_zone->controller->GetName()          == j["name"] &&
                         (
                             ignore_location ||
-                            controller_zone->controller->location == j["location"]
+                            controller_zone->controller->GetLocation()  == j["location"]
                             ) &&
-                        controller_zone->controller->serial       == j["serial"] &&
-                        controller_zone->controller->description  == j["description"] &&
-                        controller_zone->controller->version      == j["version"] &&
-                        controller_zone->controller->vendor       == j["vendor"] &&
-                        controller_zone->zone_idx                 == j["zone_idx"] &&
-                        controller_zone->is_segment               == j["is_segment"] &&
-                        controller_zone->segment_idx              == j["segment_idx"]
+                        controller_zone->controller->GetSerial()        == j["serial"] &&
+                        controller_zone->controller->GetDescription()   == j["description"] &&
+                        controller_zone->controller->GetVersion()       == j["version"] &&
+                        controller_zone->controller->GetVendor()        == j["vendor"] &&
+                        controller_zone->zone_idx                       == j["zone_idx"] &&
+                        controller_zone->is_segment                     == j["is_segment"] &&
+                        controller_zone->segment_idx                    == j["segment_idx"]
                         )
                 {
                     controller_zone->enabled = true;
