@@ -28,7 +28,7 @@ You can get older releases [here](https://gitlab.com/OpenRGBDevelopers/OpenRGBHa
 
 ### Windows 
 
-Download and place [lhwm-wrapper.dll](https://gitlab.com/OpenRGBDevelopers/lhwm-wrapper/-/jobs/artifacts/master/download?job=main_build) in the directory of `OpenRGB.exe`.
+Download and place [lhwm-wrapper.dll](https://gitlab.com/api/v4/projects/25437611/jobs/artifacts/master/raw/x64/Release/lhwm-wrapper.dll?job=main_build) in the directory of `OpenRGB.exe`.
 
 Notice: some of the hardware measures may require that you run OpenRGB as admin.
 

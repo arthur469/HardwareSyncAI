@@ -60,7 +60,7 @@ QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
     {
         QLabel* label = new QLabel(
             "<h1>Cannot load the plugin.</h1>"
-            "<p>Make sure you downloaded <a href=\"https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll\">lhwm-wrapper.dll</a></p>"
+            "<p>Make sure you downloaded <a href=\"https://gitlab.com/api/v4/projects/25437611/jobs/artifacts/master/raw/x64/Release/lhwm-wrapper.dll?job=main_build\">lhwm-wrapper.dll</a></p>"
             "<p>Place this DLL inside  <b>" + QCoreApplication::applicationDirPath() +  "</b> and restart OpenRGB.</p>"
         );
 
