@@ -1,15 +1,16 @@
-#include "MeasureEntry.h"
-#include "OpenRGBHardwareSyncPlugin.h"
-#include "ControllerZoneManager.h"
-#include "OpenRGBPluginsFont.h"
+#include <set>
+#include <thread>
+#include <QCheckBox>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QListView>
 #include <QStringList>
 #include <QStringListModel>
-#include <QListView>
-#include <QDialog>
-#include <QCheckBox>
-#include <QFormLayout>
-#include <QDialogButtonBox>
-#include <set>
+#include "ControllerZoneManager.h"
+#include "MeasureEntry.h"
+#include "OpenRGBHardwareSyncPlugin.h"
+#include "OpenRGBPluginsFont.h"
 
 MeasureEntry::MeasureEntry(QWidget *parent) :
     QWidget(parent),
@@ -104,11 +105,11 @@ void MeasureEntry::Start()
     {
         if(controller_zone->enabled)
         {
-            for(unsigned int i = 0 ; i < controller_zone->controller->modes.size(); i++)
+            for(unsigned int i = 0 ; i < controller_zone->controller->GetModeCount(); i++)
             {
-                if(controller_zone->controller->modes[i].name == "Direct")
+                if(controller_zone->controller->GetModeName(i) == "Direct")
                 {
-                    controller_zone->controller->SetMode(i);
+                    controller_zone->controller->SetActiveMode(i);
                     break;
                 }
             }
@@ -270,7 +271,7 @@ void MeasureEntry::UpdateLEDsThread()
 
         emit Color(color);
 
-        std::set<RGBController*> controllers;
+        std::set<RGBControllerInterface*> controllers;
 
         int maxRange = ui->measure_color->max_value - ui->measure_color->min_value;
         float global_brightness = brightness/100.0;
@@ -289,7 +290,7 @@ void MeasureEntry::UpdateLEDsThread()
             \*---------------------------------------------------------*/
             unsigned int startIdx = controller_zone->start_idx();
             unsigned int ledsCount = controller_zone->leds_count();
-            unsigned int zoneLedCount =  controller_zone->controller->zones[controller_zone->zone_idx].leds_count;
+            unsigned int zoneLedCount =  controller_zone->controller->GetZoneLEDsCount(controller_zone->zone_idx);
             if(controller_zone->is_percentage_fill)
             {
                 double ledScale = 1.0 * maxRange / ledsCount;
@@ -313,17 +314,17 @@ void MeasureEntry::UpdateLEDsThread()
                         rgb = ToRGBColor((int)(b*dimm*color.red()), (int)(b*dimm*color.green()), (int)(b*dimm*color.blue()));
                     }
 
-                    if (controller_zone->is_segment)
+                    if(controller_zone->is_segment)
                     {
-                        if (startIdx + led_id >= zoneLedCount)
+                        if(startIdx + led_id >= zoneLedCount)
                         {
                             break;
                         }
-                        controller_zone->controller->zones[controller_zone->zone_idx].colors[startIdx + led_id] = rgb;
+                        controller_zone->controller->SetZoneColor(controller_zone->zone_idx, startIdx + led_id, rgb);
                     }
                     else
                     {
-                        controller_zone->controller->zones[controller_zone->zone_idx].colors[led_id] = rgb;
+                        controller_zone->controller->SetZoneColor(controller_zone->zone_idx, led_id, rgb);
                     }
                 }
 
@@ -335,26 +336,26 @@ void MeasureEntry::UpdateLEDsThread()
             else
             {
                 RGBColor rgb = ToRGBColor((int)(b*color.red()), (int)(b*color.green()), (int)(b*color.blue()));
-                if (controller_zone->is_segment)
+                if(controller_zone->is_segment)
                 {
                     for(unsigned int led_id = 0; led_id < ledsCount; ++led_id)
                     {
-                        if (startIdx + led_id >= zoneLedCount)
+                        if(startIdx + led_id >= zoneLedCount)
                         {
                             break;
                         }
-                        controller_zone->controller->zones[controller_zone->zone_idx].colors[startIdx + led_id] = rgb;
+                        controller_zone->controller->SetZoneColor(controller_zone->zone_idx, startIdx + led_id, rgb);
                     }
                 }
                 else
                 {
-                    controller_zone->controller->SetAllZoneLEDs(controller_zone->zone_idx, rgb);
+                    controller_zone->controller->SetAllZoneColors(controller_zone->zone_idx, rgb);
                 }
                 controllers.insert(controller_zone->controller);
             }
         }
 
-        for(RGBController* controller: controllers)
+        for(RGBControllerInterface* controller: controllers)
         {
             controller->UpdateLEDs();
         }

@@ -1,43 +1,74 @@
-#ifndef OPENRGBHARDWARESYNCPLUGIN_H
-#define OPENRGBHARDWARESYNCPLUGIN_H
+/*---------------------------------------------------------*\
+| OpenRGBHardwareSyncPlugin.h                               |
+|                                                           |
+|   OpenRGB Hardware Sync Plugin                            |
+|                                                           |
+|   This file is part of the OpenRGB Hardware Sync Plugin   |
+|   project                                                 |
+|   SPDX-License-Identifier: GPL-2.0-or-later               |
+\*---------------------------------------------------------*/
 
-#include "OpenRGBPluginInterface.h"
-#include "ResourceManagerInterface.h"
-#include "HardwareMeasure.h"
-#include "HardwareSyncMainPage.h"
+#pragma once
 
+#include <QtPlugin>
 #include <QObject>
 #include <QString>
-#include <QtPlugin>
 #include <QWidget>
+#include "HardwareMeasure.h"
+#include "HardwareSyncMainPage.h"
+#include "OpenRGBPluginInterface.h"
 
 class OpenRGBHardwareSyncPlugin : public QObject, public OpenRGBPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID OpenRGBPluginInterface_IID)
+    Q_PLUGIN_METADATA(IID OpenRGBPluginInterface_IID FILE "OpenRGBHardwareSyncPlugin.json")
     Q_INTERFACES(OpenRGBPluginInterface)
 
 public:
     ~OpenRGBHardwareSyncPlugin();
 
-    OpenRGBPluginInfo   GetPluginInfo() override;
-    unsigned int        GetPluginAPIVersion() override;
+    /*-----------------------------------------------------*\
+    | Plugin Information                                    |
+    \*-----------------------------------------------------*/
+    OpenRGBPluginInfo               GetPluginInfo();
+    unsigned int                    GetPluginAPIVersion();
 
-    void                Load(ResourceManagerInterface* resource_manager_ptr) override;
-    QWidget*            GetWidget() override;
-    QMenu*              GetTrayMenu() override;
-    void                Unload() override;
+    /*-----------------------------------------------------*\
+    | Plugin Functionality                                  |
+    \*-----------------------------------------------------*/
+    void                            Load(OpenRGBPluginAPIInterface* plugin_api_ptr);
+    QWidget*                        GetWidget();
+    QMenu*                          GetTrayMenu();
+    void                            Unload();
+    void                            OnProfileAboutToLoad();
+    void                            OnProfileLoad(nlohmann::json profile_data);
+    nlohmann::json                  OnProfileSave();
+    unsigned char*                  OnSDKCommand(unsigned int pkt_id, unsigned char * pkt_data, unsigned int *pkt_size);
 
-    static HardwareMeasure* hm;
-    static ResourceManagerInterface* RMPointer;
+    /*-----------------------------------------------------*\
+    | Update Signals                                        |
+    \*-----------------------------------------------------*/
+    void                            ProfileManagerUpdated(unsigned int update_reason);
+    void                            ResourceManagerUpdated(unsigned int update_reason);
+    void                            SettingsManagerUpdated(unsigned int update_reason);
 
 private:
-
-    static void DeviceListChangedCallback(void*);
-
+    /*-----------------------------------------------------*\
+    | User interface widget                                 |
+    \*-----------------------------------------------------*/
     HardwareSyncMainPage* ui;
-
     bool can_load = true;
+
+public:
+    /*-----------------------------------------------------*\
+    | Plugin Global Variables                               |
+    \*-----------------------------------------------------*/
+    static OpenRGBPluginAPIInterface *  api;
+    static HardwareMeasure*             hm;
 };
 
-#endif // OPENRGBHARDWARESYNCPLUGIN_H
+/*---------------------------------------------------------*\
+| LogManager logging macros                                 |
+\*---------------------------------------------------------*/
+#undef  LogAppend
+#define LogAppend(level, ...)   OpenRGBHardwareSyncPlugin::api->LogEntry(__FILE__, __LINE__, level, __VA_ARGS__)

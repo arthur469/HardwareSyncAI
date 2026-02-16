@@ -1,21 +1,44 @@
-#include "OpenRGBHardwareSyncPlugin.h"
+/*---------------------------------------------------------*\
+| OpenRGBHardwareSyncPlugin.cpp                             |
+|                                                           |
+|   OpenRGB Hardware Sync Plugin                            |
+|                                                           |
+|   This file is part of the OpenRGB Hardware Sync Plugin   |
+|   project                                                 |
+|   SPDX-License-Identifier: GPL-2.0-or-later               |
+\*---------------------------------------------------------*/
+
 #include <QHBoxLayout>
+#include "LogManager.h"
+#include "OpenRGBHardwareSyncPlugin.h"
+#include "ResourceManagerCallback.h"
 
-ResourceManagerInterface* OpenRGBHardwareSyncPlugin::RMPointer   = nullptr;
-HardwareMeasure* OpenRGBHardwareSyncPlugin::hm          = nullptr;
+OpenRGBPluginAPIInterface*  OpenRGBHardwareSyncPlugin::api  = nullptr;
+HardwareMeasure*            OpenRGBHardwareSyncPlugin::hm   = nullptr;
 
+OpenRGBHardwareSyncPlugin::~OpenRGBHardwareSyncPlugin()
+{
+    if(hm)
+    {
+        delete hm;
+    }
+}
+
+/*---------------------------------------------------------*\
+| Plugin Information                                        |
+\*---------------------------------------------------------*/
 OpenRGBPluginInfo OpenRGBHardwareSyncPlugin::GetPluginInfo()
 {
     OpenRGBPluginInfo info;
 
-    info.Name           = "Hardware Sync";
-    info.Description    = "Sync colors with hardware measures";
+    info.Name           = PROJECT_NAME;
+    info.Description    = PROJECT_DESC;
     info.Version        = VERSION_STRING;
     info.Commit         = GIT_COMMIT_ID;
-    info.URL            = "https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin";
-    info.Location       =  OPENRGB_PLUGIN_LOCATION_TOP;
-    info.Label          =  "Hardware Sync";
-    info.TabIconString  =  "Hardware Sync";
+    info.URL            = PROJECT_URL;
+    info.Location       = OPENRGB_PLUGIN_LOCATION_TOP;
+    info.Label          = "Hardware Sync";
+    info.TabIconString  = "Hardware Sync";
 
     info.TabIcon.load(":/OpenRGBHardwareSyncPlugin.png");
     info.Icon.load(":/OpenRGBHardwareSyncPlugin.png");
@@ -28,9 +51,20 @@ unsigned int OpenRGBHardwareSyncPlugin::GetPluginAPIVersion()
     return OPENRGB_PLUGIN_API_VERSION;
 }
 
-void OpenRGBHardwareSyncPlugin::Load(ResourceManagerInterface* resource_manager_ptr)
+/*---------------------------------------------------------*\
+| Plugin Functionality                                      |
+\*---------------------------------------------------------*/
+void OpenRGBHardwareSyncPlugin::Load(OpenRGBPluginAPIInterface* api_interface_ptr)
 {
-    RMPointer = resource_manager_ptr;
+    /*-----------------------------------------------------*\
+    | Store API interface pointer                           |
+    \*-----------------------------------------------------*/
+    api = api_interface_ptr;
+
+    /*-----------------------------------------------------*\
+    | Log initial messages                                  |
+    \*-----------------------------------------------------*/
+    LOG_INFO("[OpenRGBHardwareSyncPlugin] version %s (%s), build date %s", VERSION_STRING, GIT_COMMIT_ID, GIT_COMMIT_DATE);
 
 #ifdef _WIN32
     can_load = QFile(QCoreApplication::applicationDirPath()+"\\lhwm-wrapper.dll").exists();
@@ -42,17 +76,13 @@ void OpenRGBHardwareSyncPlugin::Load(ResourceManagerInterface* resource_manager_
     }
 }
 
-
 QWidget* OpenRGBHardwareSyncPlugin::GetWidget()
 {
     if(can_load)
     {
-        RMPointer->WaitForDeviceDetection();
+        api->WaitForDetection();
 
         ui = new HardwareSyncMainPage(nullptr);
-
-        RMPointer->RegisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
-        RMPointer->RegisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
 
         return ui;
     }
@@ -80,28 +110,54 @@ QMenu* OpenRGBHardwareSyncPlugin::GetTrayMenu()
 
 void OpenRGBHardwareSyncPlugin::Unload()
 {
-    printf("[OpenRGBHardwareSyncPlugin] Unload.\n");
-
     ui->StopAll();
 
-    RMPointer->UnregisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
-    RMPointer->UnregisterDeviceListChangeCallback(DeviceListChangedCallback, ui);
+    LOG_INFO("[OpenRGBHardwareSyncPlugin] Unloaded.");
 }
 
-void OpenRGBHardwareSyncPlugin::DeviceListChangedCallback(void* o)
+void OpenRGBHardwareSyncPlugin::OnProfileAboutToLoad()
 {
-    printf("[OpenRGBHardwareSyncPlugin] DeviceListChangedCallback\n");
-    ((HardwareSyncMainPage *)o)->StopAll();
-    QMetaObject::invokeMethod((HardwareSyncMainPage *)o, "Clear", Qt::QueuedConnection);
-    QMetaObject::invokeMethod((HardwareSyncMainPage *)o, "InitDevicesList", Qt::QueuedConnection);
+
 }
 
-OpenRGBHardwareSyncPlugin::~OpenRGBHardwareSyncPlugin()
+void OpenRGBHardwareSyncPlugin::OnProfileLoad(nlohmann::json /*profile_data*/)
 {
-    printf("[OpenRGBHardwareSyncPlugin] Destructor\n");
 
-    if(hm)
+}
+
+nlohmann::json OpenRGBHardwareSyncPlugin::OnProfileSave()
+{
+    nlohmann::json profile_data;
+
+    return(profile_data);
+}
+
+unsigned char* OpenRGBHardwareSyncPlugin::OnSDKCommand(unsigned int /*pkt_id*/, unsigned char * /*pkt_data*/, unsigned int * /*pkt_size*/)
+{
+    return(NULL);
+}
+
+/*---------------------------------------------------------*\
+| Update Signals                                            |
+\*---------------------------------------------------------*/
+void OpenRGBHardwareSyncPlugin::ProfileManagerUpdated(unsigned int /*update_reason*/)
+{
+
+}
+
+void OpenRGBHardwareSyncPlugin::ResourceManagerUpdated(unsigned int update_reason)
+{
+    switch(update_reason)
     {
-        delete hm;
+        case RESOURCEMANAGER_UPDATE_REASON_DEVICE_LIST_UPDATED:
+            ui->StopAll();
+            QMetaObject::invokeMethod(ui, "Clear", Qt::BlockingQueuedConnection);
+            QMetaObject::invokeMethod(ui, "InitDevicesList", Qt::BlockingQueuedConnection);
+            break;
     }
+}
+
+void OpenRGBHardwareSyncPlugin::SettingsManagerUpdated(unsigned int /*update_reason*/)
+{
+
 }

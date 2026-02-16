@@ -1,5 +1,5 @@
 #include "MeasureColor.h"
-#include "RGBController.h"
+#include "RGBControllerInterface.h"
 #include <QPainter>
 
 MeasureColor::MeasureColor(QWidget *parent) :

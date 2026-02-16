@@ -91,7 +91,7 @@ bool MeasureSettings::create_dir(filesystem::path directory)
 
 filesystem::path MeasureSettings::SettingsFolder()
 {
-    return OpenRGBHardwareSyncPlugin::RMPointer->GetConfigurationDirectory() / "plugins" / "settings";
+    return OpenRGBHardwareSyncPlugin::api->GetConfigurationDirectory() / "plugins" / "settings";
 }
 
 bool MeasureSettings::CreateSettingsDirectory()

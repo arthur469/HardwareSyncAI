@@ -8,7 +8,7 @@ class ControllerZoneManager
 public:
     ControllerZoneManager();
     static std::vector<ControllerZone*> GetControllerZones();
-    static bool SupportsDirectMode(RGBController*);
+    static bool SupportsDirectMode(RGBControllerInterface*);
 
 };
 

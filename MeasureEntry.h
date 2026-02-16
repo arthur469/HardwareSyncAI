@@ -1,12 +1,13 @@
 #ifndef MEASUREENTRY_H
 #define MEASUREENTRY_H
 
-#include <QWidget>
+#include <thread>
 #include <QTimer>
-#include "ui_MeasureEntry.h"
-#include "HardwareMeasure.h"
+#include <QWidget>
 #include "ControllerZone.h"
 #include "ControllerZoneListItemWidget.h"
+#include "HardwareMeasure.h"
+#include "ui_MeasureEntry.h"
 
 namespace Ui {
 class MeasureEntry;

@@ -2,14 +2,14 @@
 #define CONTROLLERZONE_H
 
 #include <nlohmann/json.hpp>
-#include "RGBController.h"
+#include "RGBControllerInterface.h"
 
 using json = nlohmann::json;
 
 class ControllerZone
 {
 public:
-    ControllerZone(RGBController* controller,
+    ControllerZone(RGBControllerInterface* controller,
                    unsigned int zone_idx,
                    bool enabled,
                    bool is_percentage_fill,
@@ -27,7 +27,7 @@ public:
         segment_idx(segment_idx)
     {};
 
-    RGBController* controller;
+    RGBControllerInterface* controller;
     unsigned int zone_idx;
     bool enabled;
     bool is_percentage_fill;
@@ -38,32 +38,32 @@ public:
 
     zone_type type()
     {
-        return is_segment ? controller->zones[zone_idx].segments[segment_idx].type : controller->zones[zone_idx].type;
+        return is_segment ? controller->GetZoneSegmentType(zone_idx, segment_idx) : controller->GetZoneType(zone_idx);
     }
 
     unsigned int start_idx()
     {
-        return is_segment ? controller->zones[zone_idx].segments[segment_idx].start_idx : controller->zones[zone_idx].start_idx;
+        return is_segment ? controller->GetZoneSegmentStartIndex(zone_idx, segment_idx) : controller->GetZoneStartIndex(zone_idx);
     }
 
     unsigned int leds_count()
     {
-        return is_segment ? controller->zones[zone_idx].segments[segment_idx].leds_count : controller->zones[zone_idx].leds_count;
+        return is_segment ? controller->GetZoneSegmentLEDsCount(zone_idx, segment_idx) : controller->GetZoneLEDsCount(zone_idx);
     }
 
     unsigned int matrix_map_width()
     {
-        return controller->zones[zone_idx].matrix_map->width;
+        return controller->GetZoneMatrixMapWidth(zone_idx);
     }
 
     unsigned int matrix_map_height()
     {
-        return controller->zones[zone_idx].matrix_map->height;
+        return controller->GetZoneMatrixMapHeight(zone_idx);
     }
 
-    unsigned int* map()
+    const unsigned int* map()
     {
-        return controller->zones[zone_idx].matrix_map->map;
+        return controller->GetZoneMatrixMapData(zone_idx);
     }
 
     bool operator==(ControllerZone const & rhs) const
@@ -93,7 +93,7 @@ public:
 
     std::string display_name()
     {
-        return controller->GetName() + ": " +  controller->GetZoneName(zone_idx) + (is_segment ? (" - " + controller->zones[zone_idx].segments[segment_idx].name) : "");
+        return controller->GetName() + ": " +  controller->GetZoneName(zone_idx) + (is_segment ? (" - " + controller->GetZoneSegmentName(zone_idx, segment_idx)) : "");
     }
 
     json to_json()

@@ -11,13 +11,13 @@ std::vector<ControllerZone*> ControllerZoneManager::GetControllerZones()
 {
     std::vector<ControllerZone*> controller_zones;
 
-    for(RGBController* controller: OpenRGBHardwareSyncPlugin::RMPointer->GetRGBControllers())
+    for(RGBControllerInterface* controller: OpenRGBHardwareSyncPlugin::api->GetRGBControllers())
     {
-        for(unsigned int i = 0; i < controller->zones.size(); i++)
+        for(unsigned int i = 0; i < controller->GetZoneCount(); i++)
         {
             controller_zones.push_back(new ControllerZone(controller, i, false, false, 100, false, false));
 
-            for(unsigned int s = 0; s < controller->zones[i].segments.size(); s++)
+            for(unsigned int s = 0; s < controller->GetZoneSegmentCount(i); s++)
             {
                 controller_zones.push_back(new ControllerZone(controller, i, false, false, 100, false, true, s));
             }
@@ -27,11 +27,11 @@ std::vector<ControllerZone*> ControllerZoneManager::GetControllerZones()
     return controller_zones;
 }
 
-bool ControllerZoneManager::SupportsDirectMode(RGBController* controller)
+bool ControllerZoneManager::SupportsDirectMode(RGBControllerInterface* controller)
 {
-    for(unsigned int i = 0; i < controller->modes.size(); i++)
+    for(unsigned int i = 0; i < controller->GetModeCount(); i++)
     {
-        if(controller->modes[i].name == "Direct")
+        if(controller->GetModeName(i) == "Direct")
         {
             return true;
         }

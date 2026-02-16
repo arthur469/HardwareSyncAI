@@ -5,7 +5,7 @@
 
 #include <vector>
 #include <string>
-#include "RGBController.h"
+#include "RGBControllerInterface.h"
 #include <map>
 #include <functional>
 

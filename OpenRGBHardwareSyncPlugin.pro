@@ -71,8 +71,11 @@ GIT_COMMIT_DATE = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PR
 GIT_BRANCH      = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ rev-parse --abbrev-ref HEAD)
 
 #-----------------------------------------------------------------------------------------------#
-# Download links                                                                                #
+# Metadata                                                                                      #
 #-----------------------------------------------------------------------------------------------#
+PROJECT_DESC                = "Sync colors with hardware measures"
+PROJECT_NAME                = "OpenRGB Hardware Sync Plugin"
+PROJECT_URL                 = "https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin"
 win32:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows 64"
 unix:!macx:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux 64 - Bullseye"
 
@@ -85,34 +88,37 @@ DEFINES +=                                                                      
     GIT_COMMIT_ID=\\"\"\"$$GIT_COMMIT_ID\\"\"\"                                                 \
     GIT_COMMIT_DATE=\\"\"\"$$GIT_COMMIT_DATE\\"\"\"                                             \
     GIT_BRANCH=\\"\"\"$$GIT_BRANCH\\"\"\"                                                       \
+    PROJECT_DESC=\\"\"\"$$PROJECT_DESC\\"\"\"                                                   \
+    PROJECT_NAME=\\"\"\"$$PROJECT_NAME\\"\"\"                                                   \
+    PROJECT_URL=\\"\"\"$$PROJECT_URL\\"\"\"                                                     \
     LATEST_BUILD_URL=\\"\"\"$$LATEST_BUILD_URL\\"\"\"                                           \
 
+#-----------------------------------------------------------------------------------------------#
+# Update version in plugin metadata json                                                        #
+#-----------------------------------------------------------------------------------------------#
+JSON_FILE_IN            = $$PWD/OpenRGBHardwareSyncPlugin.json.in
+JSON_FILE_OUT           = $$PWD/OpenRGBHardwareSyncPlugin.json
+
+prebuild_json.target    = prebuild_json_target
+prebuild_json.depends   = FORCE
+prebuild_json.commands  = $$QMAKE_STREAM_EDITOR -e \"s|VERSION_NUM|$$VERSION_NUM|g\"            \
+                                                -e \"s|VERSION_STR|$$VERSION_STR|g\"            \
+                                                -e \"s|GIT_COMMIT_ID|$$GIT_COMMIT_ID|g\"        \
+                                                -e \"s|PROJECT_DESC|$$PROJECT_DESC|g\"          \
+                                                -e \"s|PROJECT_NAME|$$PROJECT_NAME|g\"          \
+                                                -e \"s|PROJECT_URL|$$PROJECT_URL|g\"            \
+                                                $$JSON_FILE_IN > $$JSON_FILE_OUT                \
+
+QMAKE_EXTRA_TARGETS    += prebuild_json
+PRE_TARGETDEPS         += prebuild_json_target
 
 #-----------------------------------------------------------------------------------------------#
 # OpenRGB Plugin SDK                                                                            #
 #-----------------------------------------------------------------------------------------------#
 INCLUDEPATH +=                                                                                  \
     OpenRGB                                                                                     \
-    OpenRGB/RGBController                                                                       \
     OpenRGB/dependencies/json                                                                   \
-    OpenRGB/qt                                                                                  \
-    OpenRGB/i2c_smbus                                                                           \
-    OpenRGB/net_port                                                                            \
-
-HEADERS +=                                                                                      \
-    OpenRGB/Colors.h                                                                            \
-    OpenRGB/OpenRGBPluginInterface.h                                                            \
-    OpenRGB/ResourceManagerInterface.h                                                          \
-
-SOURCES +=                                                                                      \
-    OpenRGB/RGBController/RGBController.cpp                                                     \
-    OpenRGB/RGBController/RGBController_Network.cpp                                             \
-    OpenRGB/NetworkServer.cpp                                                                   \
-    OpenRGB/NetworkClient.cpp                                                                   \
-    OpenRGB/NetworkProtocol.cpp                                                                 \
-    OpenRGB/LogManager.cpp                                                                      \
-    OpenRGB/net_port/net_port.cpp                                                               \
-    OpenRGB/qt/hsv.cpp                                                                          \
+    OpenRGB/RGBController                                                                       \
 
 #-----------------------------------------------------------------------------------------------#
 # Plugin Files                                                                                  #
