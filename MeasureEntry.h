@@ -29,7 +29,6 @@ public:
     void InitDevicesList();
     void Rename(std::string);
     std::string GetName();
-    bool auto_start = false;
 
     static MeasureEntry* FromJson(QWidget *parent, json);
 
@@ -38,7 +37,6 @@ private slots:
     void on_hardware_currentIndexChanged(int);
     void on_hardware_feature_currentIndexChanged(int);
     void on_fps_valueChanged(int);
-    void on_auto_start_stateChanged(int);
     void on_brightness_valueChanged(int);
     void on_percentage_fill_all_toggled(bool);
     void on_enable_all_toggled(bool);

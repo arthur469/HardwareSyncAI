@@ -241,11 +241,6 @@ void MeasureEntry::on_reverse_all_toggled(bool state)
     }
 }
 
-void MeasureEntry::on_auto_start_stateChanged(int state)
-{
-    auto_start = state;
-}
-
 void MeasureEntry::OnMeasure(double measure)
 {
     ui->measure->setText(QString::fromStdString(std::to_string(measure)));
@@ -405,7 +400,6 @@ json MeasureEntry::ToJson()
     j["hardware_feature"]   = ui->hardware_feature->currentIndex();
     j["measure_color"]      = ui->measure_color->ToJson();
     j["running"]            = running;
-    j["auto_start"]         = auto_start;
     j["fps"]                = fps;
     j["name"]               = name;
     j["brightness"]         = brightness;
@@ -515,11 +509,9 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
     if(settings.contains("name"))       measure->name = settings["name"];
     if(settings.contains("brightness")) measure->ui->brightness->setValue(settings["brightness"]);
 
-    if(settings.contains("auto_start"))
+    if(settings.contains("running"))
     {
-        measure->ui->auto_start->setChecked(settings["auto_start"]);
-
-        if(measure->auto_start)
+        if(settings["running"])
         {
             measure->Start();
         }

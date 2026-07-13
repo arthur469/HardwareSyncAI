@@ -1,5 +1,4 @@
 #include "HardwareSyncMainPage.h"
-#include "MeasureSettings.h"
 #include "PluginInfo.h"
 #include "TabHeader.h"
 #include <QToolButton>
@@ -19,7 +18,6 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
 
     // define tab style + settings
     ui->tabs->setTabsClosable(true);
-//    ui->tabs->setStyleSheet("QTabBar::close-button{image:url(:images/close.png);}");
     ui->tabs->tabBar()->setStyleSheet("QTabBar::tab:hover {text-decoration: underline;}");
 
     QMenu* main_menu = new QMenu(this);
@@ -42,16 +40,6 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     QAction* about = new QAction("About", this);
     connect(about, &QAction::triggered, this, &HardwareSyncMainPage::AboutSlot);
     main_menu->addAction(about);
-
-    // Make sure to wait a bit before all other plugins are loaded
-    QTimer::singleShot(2000, [=](){
-        json measure_list = MeasureSettings::Load();
-
-        for(json measure : measure_list)
-        {
-            AddMeasure(MeasureEntry::FromJson(this, measure));
-        }
-    });
 
     for (QWidget *w : QApplication::topLevelWidgets())
     {
@@ -108,6 +96,19 @@ void HardwareSyncMainPage::Clear()
     {
         CloseMeasure(measure);
     }
+}
+
+void HardwareSyncMainPage::LoadMeasures(json measure_list)
+{
+    for(json measure : measure_list)
+    {
+        AddMeasure(MeasureEntry::FromJson(this, measure));
+    }
+}
+
+std::vector<MeasureEntry*> HardwareSyncMainPage::GetMeasures()
+{
+    return measures;
 }
 
 void HardwareSyncMainPage::InitDevicesList()
@@ -184,29 +185,11 @@ void HardwareSyncMainPage::AddMeasure(MeasureEntry* measure_entry_tab)
         }
     });
 
-    tab_header->ToogleRunningIndicator(measure_entry_tab->auto_start);
+    tab_header->ToogleRunningIndicator(measure_entry_tab->IsRunning());
 
     ui->tabs->update();
 
     measures.push_back(measure_entry_tab);
-}
-
-void HardwareSyncMainPage::on_save_clicked()
-{
-    std::vector<json> v;
-
-    printf("[OpenRGBHardwareSyncPlugin] preparing json structure...\n");
-
-    for(MeasureEntry* measure: measures)
-    {
-        v.push_back(measure->ToJson());
-    }
-
-    printf("[OpenRGBHardwareSyncPlugin] json ready to be saved\n");
-
-    json j = v;
-
-    MeasureSettings::Save(j);
 }
 
 void HardwareSyncMainPage::on_start_stop_all_clicked()

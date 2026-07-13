@@ -127,7 +127,6 @@ HEADERS +=                                                                      
     ControllerZone.h                                                                            \
     ControllerZoneListItemWidget.h                                                              \
     ControllerZoneManager.h                                                                     \
-    MeasureSettings.h                                                                           \
     HardwareSyncMainPage.h                                                                      \
     MeasureColor.h                                                                              \
     MeasureEntry.h                                                                              \
@@ -144,7 +143,6 @@ HEADERS +=                                                                      
 SOURCES +=                                                                                      \
     ControllerZoneListItemWidget.cpp                                                            \
     ControllerZoneManager.cpp                                                                   \
-    MeasureSettings.cpp                                                                         \
     HardwareSyncMainPage.cpp                                                                    \
     MeasureColor.cpp                                                                            \
     MeasureEntry.cpp                                                                            \

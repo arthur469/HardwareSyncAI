@@ -9,9 +9,11 @@
 \*---------------------------------------------------------*/
 
 #include <QHBoxLayout>
+#include <QThread>
 #include "LogManager.h"
 #include "OpenRGBHardwareSyncPlugin.h"
 #include "ResourceManagerCallback.h"
+#include "MeasureEntry.h"
 
 OpenRGBPluginAPIInterface*  OpenRGBHardwareSyncPlugin::api  = nullptr;
 HardwareMeasure*            OpenRGBHardwareSyncPlugin::hm   = nullptr;
@@ -117,17 +119,45 @@ void OpenRGBHardwareSyncPlugin::Unload()
 
 void OpenRGBHardwareSyncPlugin::OnProfileAboutToLoad()
 {
-    ui->Clear();
+    if(QThread::currentThread() == this->thread())
+    {
+        ui->Clear();
+    }
+    else
+    {
+        QMetaObject::invokeMethod(ui, [=](){ui->Clear();}, Qt::BlockingQueuedConnection);
+    }
 }
 
-void OpenRGBHardwareSyncPlugin::OnProfileLoad(nlohmann::json /*profile_data*/)
+void OpenRGBHardwareSyncPlugin::OnProfileLoad(nlohmann::json profile_data)
 {
+    if(profile_data.contains("measures"))
+    {
+        json measures_data = profile_data["measures"];
 
+        if(QThread::currentThread() == this->thread())
+        {
+            ui->LoadMeasures(measures_data);
+        }
+        else
+        {
+            QMetaObject::invokeMethod(ui, [=](){ui->LoadMeasures(measures_data);}, Qt::QueuedConnection);
+        }
+    }
 }
 
 nlohmann::json OpenRGBHardwareSyncPlugin::OnProfileSave()
 {
     nlohmann::json profile_data;
+
+    std::vector<nlohmann::json> v;
+
+    for(MeasureEntry* measure: ui->GetMeasures())
+    {
+        v.push_back(measure->ToJson());
+    }
+
+    profile_data["measures"] = v;
 
     return(profile_data);
 }

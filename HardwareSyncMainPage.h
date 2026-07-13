@@ -2,8 +2,11 @@
 #define HARDWARESYNCMAINPAGE_H
 
 #include <QWidget>
+#include <nlohmann/json.hpp>
 #include "ui_HardwareSyncMainPage.h"
 #include "MeasureEntry.h"
+
+using json = nlohmann::json;
 
 namespace Ui {
 class HardwareSyncMainPage;
@@ -17,14 +20,15 @@ public:
     explicit HardwareSyncMainPage(QWidget *parent = nullptr);
     ~HardwareSyncMainPage();
 
+    void Clear();
+    std::vector<MeasureEntry*> GetMeasures();
+    void LoadMeasures(json measure_list);
     void StopAll();
 
 public slots:
-    void Clear();
     void InitDevicesList();
 
 private slots:
-    void on_save_clicked();
     void on_start_stop_all_clicked();
     void AddTabSlot();
     void OnStopMeasures();
