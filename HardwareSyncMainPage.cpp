@@ -106,7 +106,7 @@ void HardwareSyncMainPage::Clear()
 {
     for(MeasureEntry* measure: measures)
     {
-        measure->Clear();
+        CloseMeasure(measure);
     }
 }
 
@@ -116,6 +116,17 @@ void HardwareSyncMainPage::InitDevicesList()
     {
         measure->InitDevicesList();
     }
+}
+
+void HardwareSyncMainPage::CloseMeasure(MeasureEntry* measure_entry_tab)
+{
+    int tab_idx = ui->tabs->indexOf(measure_entry_tab);
+
+    ui->tabs->removeTab(tab_idx);
+
+    measures.erase(std::find(measures.begin(), measures.end(), measure_entry_tab));
+
+    delete measure_entry_tab;
 }
 
 void HardwareSyncMainPage::AddMeasure(MeasureEntry* measure_entry_tab)

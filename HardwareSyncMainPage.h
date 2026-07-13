@@ -34,6 +34,7 @@ private:
     Ui::HardwareSyncMainPage *ui;
     std::vector<MeasureEntry*> measures;
     void AddMeasure(MeasureEntry*);
+    void CloseMeasure(MeasureEntry* measure_entry_tab);
     bool HasStartedMeasures();
 };
 

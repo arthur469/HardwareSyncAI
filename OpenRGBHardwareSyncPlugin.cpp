@@ -117,7 +117,7 @@ void OpenRGBHardwareSyncPlugin::Unload()
 
 void OpenRGBHardwareSyncPlugin::OnProfileAboutToLoad()
 {
-
+    ui->Clear();
 }
 
 void OpenRGBHardwareSyncPlugin::OnProfileLoad(nlohmann::json /*profile_data*/)
