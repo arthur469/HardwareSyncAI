@@ -2,12 +2,85 @@
 #include "RGBControllerInterface.h"
 #include <QPainter>
 
+/*---------------------------------------------------------*\
+| A single color stop within a preset gradient.  The value  |
+| is the measurement (temperature, %, etc) at which the     |
+| color is fully applied.                                   |
+\*---------------------------------------------------------*/
+struct preset_color_stop
+{
+    double          value;
+    unsigned char   red;
+    unsigned char   green;
+    unsigned char   blue;
+};
+
+/*---------------------------------------------------------*\
+| A named gradient preset made up of two or more color      |
+| stops.                                                    |
+\*---------------------------------------------------------*/
+struct gradient_preset
+{
+    std::string                     name;
+    std::vector<preset_color_stop>  stops;
+};
+
+/*---------------------------------------------------------*\
+| Curated gradient presets.  These are offered in the       |
+| preset selector in addition to the "Custom" entry, which  |
+| is always index 0 and leaves the stops untouched.         |
+\*---------------------------------------------------------*/
+static const std::vector<gradient_preset> presets =
+{
+    {
+        "Thermal (Cool to Hot)",
+        {
+            {  30,   0,   0, 255 },     /* Blue                         */
+            {  50,   0, 255,   0 },     /* Green                        */
+            {  70, 255, 255,   0 },     /* Yellow                       */
+            {  80, 255, 165,   0 },     /* Orange                       */
+            {  90, 255,   0,   0 },     /* Red                          */
+        }
+    },
+    {
+        "Classic (Green to Red)",
+        {
+            {   0,   0, 255,   0 },     /* Green                        */
+            {  50, 255, 255,   0 },     /* Yellow                       */
+            { 100, 255,   0,   0 },     /* Red                          */
+        }
+    },
+    {
+        "Cool to Warm (Blue to Red)",
+        {
+            {   0,   0,   0, 255 },     /* Blue                         */
+            { 100, 255,   0,   0 },     /* Red                          */
+        }
+    },
+};
+
 MeasureColor::MeasureColor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MeasureColor)
 {
     ui->setupUi(this);
     ui->color_stops->setLayout(new QHBoxLayout);
+
+    /*-----------------------------------------------------*\
+    | Populate the preset selector.  Index 0 is always      |
+    | "Custom"; the curated presets follow.  Block signals  |
+    | while filling so the default stops below are not      |
+    | overwritten during construction.                      |
+    \*-----------------------------------------------------*/
+    ui->preset_selector->blockSignals(true);
+    ui->preset_selector->addItem("Custom");
+
+    for(unsigned int i = 0; i < presets.size(); i++)
+    {
+        ui->preset_selector->addItem(QString::fromStdString(presets[i].name));
+    }
+
+    ui->preset_selector->blockSignals(false);
 
     ColorStop* green = new ColorStop(this);
     green->SetColor(Qt::green);
@@ -38,6 +111,26 @@ void MeasureColor::on_add_color_clicked()
     stop->SetColor(Qt::white);
     stop->SetStop(0);
     AddColorStop(stop);
+
+    /*-----------------------------------------------------*\
+    | Adding a stop by hand makes this a custom gradient    |
+    \*-----------------------------------------------------*/
+    SetPresetSelectorToCustom();
+}
+
+void MeasureColor::on_preset_selector_currentIndexChanged(int index)
+{
+    /*-----------------------------------------------------*\
+    | Index 0 is "Custom"; leave the existing stops alone.  |
+    | Preset entries follow, so subtract one to index into  |
+    | the presets table.                                    |
+    \*-----------------------------------------------------*/
+    if(index <= 0)
+    {
+        return;
+    }
+
+    ApplyPreset(index - 1);
 }
 
 void MeasureColor::AddColorStop(ColorStop* color_stop)
@@ -49,14 +142,70 @@ void MeasureColor::AddColorStop(ColorStop* color_stop)
 
     connect(color_stop, &ColorStop::GradientStopChanged,this, &MeasureColor::Update);
 
+    /*-----------------------------------------------------*\
+    | Editing a stop's color or value turns the gradient    |
+    | into a custom one.  The stop's initial color/value    |
+    | are set before this connection is made (in the        |
+    | constructor and ApplyPreset), so applying a preset    |
+    | does not trip this and reset the selector.            |
+    \*-----------------------------------------------------*/
+    connect(color_stop, &ColorStop::GradientStopChanged, this, &MeasureColor::SetPresetSelectorToCustom);
+
     connect(color_stop, &ColorStop::RemoveRequest, [=](){
         ui->color_stops->layout()->removeWidget(color_stop);
         color_stops.erase(std::find(color_stops.begin(), color_stops.end(), color_stop));
         delete color_stop;
+        SetPresetSelectorToCustom();
         Update();
     });
 
     Update();
+}
+
+void MeasureColor::ClearColorStops()
+{
+    QLayoutItem* item;
+
+    while((item = ui->color_stops->layout()->takeAt(0)) != NULL)
+    {
+        delete item->widget();
+        delete item;
+    }
+
+    color_stops.clear();
+}
+
+void MeasureColor::ApplyPreset(int preset_index)
+{
+    if(preset_index < 0 || preset_index >= (int)presets.size())
+    {
+        return;
+    }
+
+    ClearColorStops();
+
+    const gradient_preset& preset = presets[preset_index];
+
+    for(unsigned int i = 0; i < preset.stops.size(); i++)
+    {
+        const preset_color_stop& s = preset.stops[i];
+
+        ColorStop* stop = new ColorStop(this);
+        stop->SetColor(QColor(s.red, s.green, s.blue));
+        stop->SetStop(s.value);
+        AddColorStop(stop);
+    }
+}
+
+void MeasureColor::SetPresetSelectorToCustom()
+{
+    /*-----------------------------------------------------*\
+    | Block signals so resetting the selector to "Custom"   |
+    | does not re-trigger ApplyPreset.                      |
+    \*-----------------------------------------------------*/
+    ui->preset_selector->blockSignals(true);
+    ui->preset_selector->setCurrentIndex(0);
+    ui->preset_selector->blockSignals(false);
 }
 
 void MeasureColor::Update()
@@ -157,15 +306,7 @@ json MeasureColor::ToJson()
 
 void MeasureColor::LoadJson(json j)
 {
-    QLayoutItem* item;
-
-    while ((item = ui->color_stops->layout()->takeAt(0)) != NULL)
-    {
-        delete item->widget();
-        delete item;
-    }
-
-    color_stops.clear();
+    ClearColorStops();
 
     for(const std::tuple<double, RGBColor> entry : j["color_stops"])
     {
@@ -176,6 +317,12 @@ void MeasureColor::LoadJson(json j)
         stop->SetStop(std::get<0>(entry));
         AddColorStop(stop);
     }
+
+    /*-----------------------------------------------------*\
+    | A loaded gradient is an arbitrary set of stops, so    |
+    | show it as "Custom" rather than any named preset.     |
+    \*-----------------------------------------------------*/
+    SetPresetSelectorToCustom();
 }
 
 

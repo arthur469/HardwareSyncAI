@@ -30,12 +30,16 @@ public:
 
 private slots:
     void on_add_color_clicked();
+    void on_preset_selector_currentIndexChanged(int index);
 
 private:
     Ui::MeasureColor *ui;
     QImage image;
     std::vector<ColorStop*> color_stops;
     void AddColorStop(ColorStop* color);
+    void ClearColorStops();
+    void ApplyPreset(int preset_index);
+    void SetPresetSelectorToCustom();
     void Update();
 };
 
