@@ -76,8 +76,6 @@ GIT_BRANCH      = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PR
 PROJECT_DESC                = "Sync colors with hardware measures"
 PROJECT_NAME                = "OpenRGB Hardware Sync Plugin"
 PROJECT_URL                 = "https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin"
-win32:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Windows 64"
-unix:!macx:LATEST_BUILD_URL="https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/jobs/artifacts/master/download?job=Linux 64 - Bullseye"
 
 #-----------------------------------------------------------------------------------------------#
 # Inject vars in defines                                                                        #
@@ -91,7 +89,6 @@ DEFINES +=                                                                      
     PROJECT_DESC=\\"\"\"$$PROJECT_DESC\\"\"\"                                                   \
     PROJECT_NAME=\\"\"\"$$PROJECT_NAME\\"\"\"                                                   \
     PROJECT_URL=\\"\"\"$$PROJECT_URL\\"\"\"                                                     \
-    LATEST_BUILD_URL=\\"\"\"$$LATEST_BUILD_URL\\"\"\"                                           \
 
 #-----------------------------------------------------------------------------------------------#
 # Update version in plugin metadata json                                                        #
@@ -135,7 +132,6 @@ HEADERS +=                                                                      
     ColorPicker.h                                                                               \
     ColorStop.h                                                                                 \
     OpenRGBPluginsFont.h                                                                        \
-    PluginInfo.h                                                                                \
     QTooltipedSlider.h                                                                          \
     TabHeader.h                                                                                 \
     EditableLabel.h                                                                             \
@@ -151,7 +147,6 @@ SOURCES +=                                                                      
     ColorPicker.cpp                                                                             \
     ColorStop.cpp                                                                               \
     OpenRGBPluginsFont.cpp                                                                      \
-    PluginInfo.cpp                                                                              \
     QTooltipedSlider.cpp                                                                        \
     TabHeader.cpp                                                                               \
     EditableLabel.cpp                                                                           \
@@ -163,7 +158,6 @@ FORMS +=                                                                        
     MeasureEntry.ui                                                                             \
     ColorPicker.ui                                                                              \
     ColorStop.ui                                                                                \
-    PluginInfo.ui                                                                               \
     TabHeader.ui                                                                                \
 
 #-----------------------------------------------------------------------------------------------#

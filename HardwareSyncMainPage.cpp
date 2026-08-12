@@ -1,5 +1,4 @@
 #include "HardwareSyncMainPage.h"
-#include "PluginInfo.h"
 #include "TabHeader.h"
 #include <QToolButton>
 #include <QMainWindow>
@@ -37,10 +36,6 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     connect(new_measure, &QAction::triggered, this, &HardwareSyncMainPage::AddTabSlot);
     main_menu->addAction(new_measure);
 
-    QAction* about = new QAction("About", this);
-    connect(about, &QAction::triggered, this, &HardwareSyncMainPage::AboutSlot);
-    main_menu->addAction(about);
-
     for (QWidget *w : QApplication::topLevelWidgets())
     {
         if (QMainWindow* mainWin = qobject_cast<QMainWindow*>(w))
@@ -64,22 +59,6 @@ HardwareSyncMainPage::~HardwareSyncMainPage()
 void HardwareSyncMainPage::AddTabSlot()
 {
     AddMeasure(new MeasureEntry(this));
-}
-
-void HardwareSyncMainPage::AboutSlot()
-{
-    QDialog* dialog = new QDialog();
-    dialog->setWindowTitle("Hardware Sync");
-    dialog->setMinimumSize(300,320);
-    dialog->setModal(true);
-
-    QVBoxLayout* dialog_layout = new QVBoxLayout(dialog);
-
-    PluginInfo* plugin_info = new PluginInfo(dialog);
-
-    dialog_layout->addWidget(plugin_info);
-
-    dialog->exec();
 }
 
 void HardwareSyncMainPage::StopAll()
