@@ -27,6 +27,7 @@ public:
 
 public slots:
     void InitDevicesList();
+    void RefreshDevicesLists();
 
 private slots:
     void on_start_stop_all_clicked();

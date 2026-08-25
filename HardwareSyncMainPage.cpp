@@ -98,6 +98,17 @@ void HardwareSyncMainPage::InitDevicesList()
     }
 }
 
+void HardwareSyncMainPage::RefreshDevicesLists()
+{
+    StopAll();
+    
+    for(MeasureEntry* measure: measures)
+    {
+        measure->Clear();
+        measure->InitDevicesList();
+    }
+}
+
 void HardwareSyncMainPage::CloseMeasure(MeasureEntry* measure_entry_tab)
 {
     int tab_idx = ui->tabs->indexOf(measure_entry_tab);

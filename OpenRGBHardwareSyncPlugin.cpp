@@ -180,9 +180,7 @@ void OpenRGBHardwareSyncPlugin::ResourceManagerUpdated(unsigned int update_reaso
     switch(update_reason)
     {
         case RESOURCEMANAGER_UPDATE_REASON_DEVICE_LIST_UPDATED:
-            ui->StopAll();
-            QMetaObject::invokeMethod(ui, "Clear", Qt::BlockingQueuedConnection);
-            QMetaObject::invokeMethod(ui, "InitDevicesList", Qt::BlockingQueuedConnection);
+            QMetaObject::invokeMethod(ui, "RefreshDevicesLists", Qt::BlockingQueuedConnection);
             break;
     }
 }
