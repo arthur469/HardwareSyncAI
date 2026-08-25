@@ -12,10 +12,14 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // remove intial dummy tabs
+    /*-----------------------------------------------------*\
+    | Remove intial dummy tabs                              |
+    \*-----------------------------------------------------*/
     ui->tabs->clear();
 
-    // define tab style + settings
+    /*-----------------------------------------------------*\
+    | Define tab style + settings                           |
+    \*-----------------------------------------------------*/
     ui->tabs->setTabsClosable(true);
     ui->tabs->tabBar()->setStyleSheet("QTabBar::tab:hover {text-decoration: underline;}");
 
@@ -24,7 +28,9 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     QLabel* no_measure = new QLabel("You have no measure.\n You can add one by clicking the HWSync button.");
     no_measure->setAlignment(Qt::AlignCenter);
 
-    // First tab: add button
+    /*-----------------------------------------------------*\
+    | First tab: add button                                 |
+    \*-----------------------------------------------------*/
     QPushButton* main_menu_button = new QPushButton();
     main_menu_button->setText("HWSync");
     ui->tabs->addTab(no_measure, QString(""));
@@ -36,9 +42,9 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     connect(new_measure, &QAction::triggered, this, &HardwareSyncMainPage::AddTabSlot);
     main_menu->addAction(new_measure);
 
-    for (QWidget *w : QApplication::topLevelWidgets())
+    for(QWidget *w : QApplication::topLevelWidgets())
     {
-        if (QMainWindow* mainWin = qobject_cast<QMainWindow*>(w))
+        if(QMainWindow* mainWin = qobject_cast<QMainWindow*>(w))
         {
             QAction* actionLightsOff = mainWin->findChild<QAction *>("ActionLightsOff");
 
@@ -100,12 +106,38 @@ void HardwareSyncMainPage::InitDevicesList()
 
 void HardwareSyncMainPage::RefreshDevicesLists()
 {
+    /*-----------------------------------------------------*\
+    | Save the running state of each measure before         |
+    | refreshing                                            |
+    \*-----------------------------------------------------*/
+    std::vector<bool> was_running;
+    for(MeasureEntry* measure: measures)
+    {
+        was_running.push_back(measure->IsRunning());
+    }
+    
+    /*-----------------------------------------------------*\
+    | Stop all measures temporarily to safely clear and     |
+    | reinitialize device lists                             |
+    \*-----------------------------------------------------*/
     StopAll();
     
     for(MeasureEntry* measure: measures)
     {
         measure->Clear();
         measure->InitDevicesList();
+    }
+    
+    /*-----------------------------------------------------*\
+    | Restore the running state after the list update is    |
+    | complete                                              |
+    \*-----------------------------------------------------*/
+    for(size_t i = 0; i < measures.size(); ++i)
+    {
+        if(was_running[i])
+        {
+            measures[i]->Start();
+        }
     }
 }
 
@@ -124,12 +156,13 @@ void HardwareSyncMainPage::AddMeasure(MeasureEntry* measure_entry_tab)
 {    
     int tab_size = ui->tabs->count();
 
-    // insert at the end
+    /*-----------------------------------------------------*\
+    | Insert at the end                                     |
+    \*-----------------------------------------------------*/
     int tab_position = tab_size;
 
     std::string tab_name = measure_entry_tab->GetName();
 
-    //VirtualControllerTab* tab = new VirtualControllerTab();
     TabHeader* tab_header = new TabHeader();
     tab_header->Rename(QString::fromUtf8(tab_name.c_str()));
 
