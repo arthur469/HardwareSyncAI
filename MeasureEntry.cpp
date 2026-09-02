@@ -85,6 +85,93 @@ void MeasureEntry::Clear()
     }
 }
 
+json MeasureEntry::SaveDevices()
+{
+    /*---------------------------------------------------------*\
+    | Save the state of the currently enabled devices so it     |
+    | can be restored after the device list has been refreshed  |
+    \*---------------------------------------------------------*/
+    json saved_devices = json::array();
+
+    for(ControllerZone* controller_zone: controller_zones)
+    {
+        if(controller_zone->enabled)
+        {
+            saved_devices.push_back(controller_zone->to_json());
+        }
+    }
+
+    return saved_devices;
+}
+
+void MeasureEntry::LoadDevices(json zones)
+{
+    /*---------------------------------------------------------*\
+    | Match the saved devices against the current controller    |
+    | zones and restore their state                             |
+    \*---------------------------------------------------------*/
+    for(json j : zones)
+    {
+        for(ControllerZone* controller_zone: controller_zones)
+        {
+            std::string location = j["location"].get<std::string>();
+            bool ignore_location = (location.find("HID: ") == 0);
+
+            if(
+                    controller_zone->controller->GetName()          == j["name"] &&
+                    (
+                        ignore_location ||
+                        controller_zone->controller->GetLocation()  == j["location"]
+                        ) &&
+                    controller_zone->controller->GetSerial()        == j["serial"] &&
+                    controller_zone->controller->GetDescription()   == j["description"] &&
+                    controller_zone->controller->GetVersion()       == j["version"] &&
+                    controller_zone->controller->GetVendor()        == j["vendor"] &&
+                    controller_zone->zone_idx                       == j["zone_idx"] &&
+                    controller_zone->is_segment                     == j["is_segment"] &&
+                    controller_zone->segment_idx                    == j["segment_idx"]
+                    )
+            {
+                controller_zone->enabled = true;
+
+                if(j.contains("is_percentage_fill"))
+                {
+                    controller_zone->is_percentage_fill = j["is_percentage_fill"];
+                }
+                else
+                {
+                    controller_zone->is_percentage_fill = false;
+                }
+
+                if(j.contains("brightness"))
+                {
+                    controller_zone->brightness = j["brightness"];
+                }
+                else
+                {
+                    controller_zone->brightness = 100;
+                }
+
+                if(j.contains("reverse"))
+                {
+                    controller_zone->reverse = j["reverse"];
+                }
+                else
+                {
+                    controller_zone->reverse = false;
+                }
+
+                controller_zones_widgets[controller_zone]->setPercentageFill(controller_zone->is_percentage_fill);
+                controller_zones_widgets[controller_zone]->setEnabled(controller_zone->enabled);
+                controller_zones_widgets[controller_zone]->setBrightness(controller_zone->brightness);
+                controller_zones_widgets[controller_zone]->setReverse(controller_zone->reverse);
+
+                break;
+            }
+        }
+    }
+}
+
 void MeasureEntry::Rename(std::string value)
 {
     name = value;
@@ -384,17 +471,7 @@ json MeasureEntry::ToJson()
 {
     json j;
 
-    std::vector<json> devices;
-
-    for(ControllerZone* controller_zone: controller_zones)
-    {
-        if(controller_zone->enabled)
-        {
-            devices.push_back(controller_zone->to_json());
-        }
-    }
-
-    j["devices"]            = devices;
+    j["devices"]            = SaveDevices();
     j["refresh_interval"]   = refresh_interval;
     j["hardware"]           = ui->hardware->currentIndex();
     j["hardware_feature"]   = ui->hardware_feature->currentIndex();
@@ -441,68 +518,7 @@ MeasureEntry* MeasureEntry::FromJson(QWidget *parent, json settings)
 
     if(settings.contains("devices"))
     {
-        json zones = settings["devices"];
-
-        for(auto j : zones)
-        {
-            for(ControllerZone* controller_zone: measure->controller_zones)
-            {
-                auto location = j["location"].get<std::string>();
-                bool ignore_location = (location.find("HID: ") == 0);
-
-                if(
-                        controller_zone->controller->GetName()          == j["name"] &&
-                        (
-                            ignore_location ||
-                            controller_zone->controller->GetLocation()  == j["location"]
-                            ) &&
-                        controller_zone->controller->GetSerial()        == j["serial"] &&
-                        controller_zone->controller->GetDescription()   == j["description"] &&
-                        controller_zone->controller->GetVersion()       == j["version"] &&
-                        controller_zone->controller->GetVendor()        == j["vendor"] &&
-                        controller_zone->zone_idx                       == j["zone_idx"] &&
-                        controller_zone->is_segment                     == j["is_segment"] &&
-                        controller_zone->segment_idx                    == j["segment_idx"]
-                        )
-                {
-                    controller_zone->enabled = true;
-
-                    if(j.contains("is_percentage_fill"))
-                    {
-                        controller_zone->is_percentage_fill = j["is_percentage_fill"];
-                    }
-                    else
-                    {
-                        controller_zone->is_percentage_fill = false;
-                    }
-
-                    if(j.contains("brightness"))
-                    {
-                        controller_zone->brightness = j["brightness"];
-                    }
-                    else
-                    {
-                        controller_zone->brightness = 100;
-                    }
-
-                    if(j.contains("reverse"))
-                    {
-                        controller_zone->reverse = j["reverse"];
-                    }
-                    else
-                    {
-                        controller_zone->reverse = false;
-                    }
-
-                    measure->controller_zones_widgets[controller_zone]->setPercentageFill(controller_zone->is_percentage_fill);
-                    measure->controller_zones_widgets[controller_zone]->setEnabled(controller_zone->enabled);
-                    measure->controller_zones_widgets[controller_zone]->setBrightness(controller_zone->brightness);
-                    measure->controller_zones_widgets[controller_zone]->setReverse(controller_zone->reverse);
-
-                    break;
-                }
-            }
-        }
+        measure->LoadDevices(settings["devices"]);
     }
 
     if(settings.contains("fps"))        measure->ui->fps->setValue(settings["fps"]);

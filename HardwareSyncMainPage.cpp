@@ -107,13 +107,16 @@ void HardwareSyncMainPage::InitDevicesList()
 void HardwareSyncMainPage::RefreshDevicesLists()
 {
     /*-----------------------------------------------------*\
-    | Save the running state of each measure before         |
-    | refreshing                                            |
+    | Save the running state and the enabled devices of     |
+    | each measure before refreshing                        |
     \*-----------------------------------------------------*/
     std::vector<bool> was_running;
+    std::vector<json> saved_devices;
+
     for(MeasureEntry* measure: measures)
     {
         was_running.push_back(measure->IsRunning());
+        saved_devices.push_back(measure->SaveDevices());
     }
     
     /*-----------------------------------------------------*\
@@ -129,11 +132,13 @@ void HardwareSyncMainPage::RefreshDevicesLists()
     }
     
     /*-----------------------------------------------------*\
-    | Restore the running state after the list update is    |
-    | complete                                              |
+    | Restore the enabled devices and the running state     |
+    | after the list update is complete                     |
     \*-----------------------------------------------------*/
     for(size_t i = 0; i < measures.size(); ++i)
     {
+        measures[i]->LoadDevices(saved_devices[i]);
+
         if(was_running[i])
         {
             measures[i]->Start();

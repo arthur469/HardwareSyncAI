@@ -27,6 +27,8 @@ public:
     json ToJson();
     void Clear();
     void InitDevicesList();
+    json SaveDevices();
+    void LoadDevices(json zones);
     void Rename(std::string);
     std::string GetName();
 
