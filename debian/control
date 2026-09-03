@@ -13,7 +13,7 @@ Build-Depends:
  libusb-1.0-0-dev,
  libhidapi-dev,
  libmbedtls-dev,
- libsensors4-dev,
+ libsensors-dev | libsensors4-dev,
  libgtop2-dev,
  libglib2.0-dev
 Homepage: https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin
