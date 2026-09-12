@@ -100,7 +100,25 @@ int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
 
 HardwareMeasure::HardwareMeasure()
 {
-    std::vector<chip_name> detected_chips = get_detected_chips();
+    std::vector<chip_name> detected_chips;
+
+    try
+    {
+        detected_chips = get_detected_chips();
+    }
+    catch(const sensors::error& ex)
+    {
+        printf("[OpenRGBHardwareSyncPlugin] sensors::error during initialization: %s\n", ex.what());
+        printf("[OpenRGBHardwareSyncPlugin] Hardware monitoring via sensors will be disabled.\n");
+        return;
+    }
+    catch(const std::exception& ex)
+    {
+        printf("[OpenRGBHardwareSyncPlugin] std::exception during sensors initialization: %s\n", ex.what());
+        printf("[OpenRGBHardwareSyncPlugin] Hardware monitoring via sensors will be disabled.\n");
+        return;
+    }
+
     printf("[OpenRGBHardwareSyncPlugin] detected chips: %d\n", (int)detected_chips.size());
 
     // it seems that devices are detected in random order, as a result on each load there is a shift in measures
@@ -128,40 +146,55 @@ HardwareMeasure::HardwareMeasure()
 
         const chip_name& chip = detected_chips[ChipID];
 
-        for (unsigned int ChipFeatureID = 0; ChipFeatureID < chip.features().size(); ChipFeatureID++)
+        try
         {
-            feature FTR = chip.features()[ChipFeatureID];
-            std::string BaseFeatureName = (std::string)FTR.label();
-
-            for(int SubFeatureID = 0; SubFeatureID < (int)FTR.subfeatures().size(); SubFeatureID++)
+            const auto& features = chip.features();
+            for (unsigned int ChipFeatureID = 0; ChipFeatureID < features.size(); ChipFeatureID++)
             {
-                subfeature SubFTR = FTR.subfeatures()[SubFeatureID];
+                feature FTR = features[ChipFeatureID];
+                std::string BaseFeatureName = (std::string)FTR.label();
 
-                if(SubFTR.type() == subfeature_type::input)
+                const auto& subfeatures = FTR.subfeatures();
+                for(int SubFeatureID = 0; SubFeatureID < (int)subfeatures.size(); SubFeatureID++)
                 {
-                    std::string FTRName;
-                    if (SubFeatureID == 0)
-                        FTRName = (BaseFeatureName);
-                    else
-                        FTRName = (BaseFeatureName + " "+ std::string(SubFTR.name().c_str()));
-                    HardwareFeature feature;
-                    feature.Name = FTRName;
-                    feature.GetMeasure = [this, chip, ChipFeatureID, SubFeatureID]()
-                    {
-                        try
-                        {
-                            return chip.features()[ChipFeatureID].subfeatures()[SubFeatureID].read();
-                        }
-                        catch (const sensors::io_error &ex)
-                        {
-                            printf("[OpenRGBHardwareSyncPlugin] sensors::io_error while reading value: %s\n", ex.what());
-                            return 0.;
-                        }
-                    };
+                    subfeature SubFTR = subfeatures[SubFeatureID];
 
-                    NewDev.features.push_back(feature);
+                    if(SubFTR.type() == subfeature_type::input)
+                    {
+                        std::string FTRName;
+                        if (SubFeatureID == 0)
+                            FTRName = (BaseFeatureName);
+                        else
+                            FTRName = (BaseFeatureName + " "+ std::string(SubFTR.name().c_str()));
+                        HardwareFeature feature;
+                        feature.Name = FTRName;
+                        feature.GetMeasure = [this, chip, ChipFeatureID, SubFeatureID]()
+                        {
+                            try
+                            {
+                                return chip.features()[ChipFeatureID].subfeatures()[SubFeatureID].read();
+                            }
+                            catch (const sensors::io_error &ex)
+                            {
+                                printf("[OpenRGBHardwareSyncPlugin] sensors::io_error while reading value: %s\n", ex.what());
+                                return 0.;
+                            }
+                        };
+
+                        NewDev.features.push_back(feature);
+                    }
                 }
             }
+        }
+        catch(const sensors::error& ex)
+        {
+            printf("[OpenRGBHardwareSyncPlugin] sensors::error while processing chip[%d]: %s\n", ChipID, ex.what());
+            continue;
+        }
+        catch(const std::exception& ex)
+        {
+            printf("[OpenRGBHardwareSyncPlugin] std::exception while processing chip[%d]: %s\n", ChipID, ex.what());
+            continue;
         }
 
         if (NewDev.features.size() > 0)

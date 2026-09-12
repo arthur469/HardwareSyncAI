@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 Adam Honse, OpenRGB Team -->
+<component type="addon">
+  <id>org.openrgb.OpenRGB.Plugin.HardwareSync</id>
+  <extends>org.openrgb.OpenRGB</extends>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0-or-later</project_license>
+  <developer id="org.openrgb">
+    <name>Adam Honse, OpenRGB Team</name>
+  </developer>
+
+  <name>OpenRGB Hardware Sync Plugin</name>
+  <icon type="stock">openrgb-hardware-sync-plugin</icon>
+
+  <content_rating type="oars-1.0" />
+
+  <summary>Hardware Sync plugin for OpenRGB to display hardware measurements on RGB devices</summary>
+
+  <description>
+    <p>
+      The OpenRGB Hardware Sync plugin is an addon for OpenRGB that allows you to display hardware
+      measurements such as component temperatures, CPU/GPU usage, RAM/VRAM usage, and more on your
+      OpenRGB-supported RGB devices.  Create a gradient to map to a measurement range and then
+      assign it to one or more device zones.  Supports varying color based on measurement or
+      producing a line graph on a linear or matrix device.
+    </p><p>
+      Features
+    </p>
+    <ul>
+      <li>View your hardware statistics on your RGB devices</li>
+      <li>Supports multiple measurements at once</li>
+      <li>View as either a single color or as a line graph</li>
+      <li>Save measurements to OpenRGB profiles</li>
+    </ul>
+  </description>
+
+  <releases>
+    <release version="1.0~rc2" date="2025-09-14" type="development"></release>
+    <release version="0.9" date="2023-07-11"></release>
+    <release version="0.8" date="2022-12-03"></release>
+  </releases>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/raw/master/Documentation/Images/Screenshot_Hardware_Sync.png</image>
+      <caption>OpenRGB Hardware Sync Plugin</caption>
+    </screenshot>
+  </screenshots>
+
+  <keywords>
+    <keyword>rgb</keyword>
+    <keyword>lighting</keyword>
+    <keyword>plugin</keyword>
+  </keywords>
+
+  <url type="bugtracker">https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/issues</url>
+  <url type="donation">https://gitlab.com/CalcProgrammer1/OpenRGB/-/blob/master/README.md#support-openrgb</url>
+  <url type="help">https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin/-/blob/master/README.md</url>
+  <url type="homepage">https://openrgb.org/plugin_hardware_sync.html</url>
+</component>

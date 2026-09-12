@@ -235,8 +235,13 @@ unix:!macx {
     CONFIG += link_pkgconfig
     PKGCONFIG += glib-2.0 libgtop-2.0
 
+    #-------------------------------------------------------------------------------------------#
+    # Add static files to installation                                                          #
+    #-------------------------------------------------------------------------------------------#
     target.path=$$PREFIX/lib/openrgb/plugins/
-    INSTALLS += target
+    metainfo.path=$$PREFIX/share/metainfo/
+    metainfo.files+=org.openrgb.OpenRGB.Plugin.HardwareSync.metainfo.xml
+    INSTALLS += target metainfo
 }
 
 RESOURCES +=                                                                                    \

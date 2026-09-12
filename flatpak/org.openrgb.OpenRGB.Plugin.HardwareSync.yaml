@@ -1,0 +1,58 @@
+id: org.openrgb.OpenRGB.Plugin.HardwareSync
+branch: '5'
+extension-tag: org.openrgb.OpenRGB.Plugin
+build-extension: true
+separate-locales: false
+
+runtime: org.openrgb.OpenRGB
+runtime-version: 'master'
+sdk: org.kde.Sdk//6.10
+
+build-options:
+  prefix: /app/lib/openrgb/plugins/HardwareSync
+  env:
+    PKG_CONFIG_PATH: /usr/lib/pkgconfig:/usr/share/pkgconfig:/app/lib/pkgconfig
+
+modules:
+  - name: libgtop
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/libgtop/2.41/libgtop-2.41.3.tar.xz
+        sha256: 775676df958e2ea2452f7568f28b2ea581063d312773dd5c0b7624c1b9b2da8c
+
+  - name: lm-sensors
+    buildsystem: simple
+    build-commands:
+      # Reverted to standard compilation to naturally produce libsensors.so.5
+      - make user PREFIX=${FLATPAK_DEST} CFLAGS="-O2 -fPIC"
+      - make user_install PREFIX=${FLATPAK_DEST}
+    sources:
+      - type: archive
+        url: https://github.com/lm-sensors/lm-sensors/archive/refs/tags/V3-6-0.tar.gz
+        sha256: 0591f9fa0339f0d15e75326d0365871c2d4e2ed8aa1ff759b3a55d3734b7d197
+
+  - name: openrgb-plugin-hardware-sync
+    buildsystem: qmake
+    build-options:
+      env:
+        PKG_CONFIG_PATH: /app/lib/openrgb/plugins/HardwareSync/lib/pkgconfig:/usr/lib/pkgconfig:/app/lib/pkgconfig
+        C_INCLUDE_PATH: /app/lib/openrgb/plugins/HardwareSync/include
+        CPLUS_INCLUDE_PATH: /app/lib/openrgb/plugins/HardwareSync/include
+        LIBRARY_PATH: /app/lib/openrgb/plugins/HardwareSync/lib
+        # Crucial runtime fix: Instructs OpenRGB to look inside the plugin folder itself for libsensors.so
+        LD_LIBRARY_PATH: /app/lib/openrgb/plugins/HardwareSync/lib
+    config-options:
+      - QMAKE=qmake6
+      - "INCLUDEPATH+=/app/lib/openrgb/plugins/HardwareSync/include"
+      - "LIBS+=-L/app/lib/openrgb/plugins/HardwareSync/lib -lsensors"
+    post-install:
+      # Relocate the main plugin file out of its build subfolder into the extension root
+      - mv ${FLATPAK_DEST}/lib/openrgb/plugins/libOpenRGBHardwareSyncPlugin.so ${FLATPAK_DEST}/libOpenRGBHardwareSyncPlugin.so
+      # Instead of deleting ${FLATPAK_DEST}/lib entirely, clean up only the unwanted nested plugin subdirectory
+      - rm -rf ${FLATPAK_DEST}/lib/openrgb
+      # Install the plugin icon
+      - install -Dm644 OpenRGBHardwareSyncPlugin.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/openrgb-hardware-sync-plugin.png
+    sources:
+      - type: dir
+        path: ../
