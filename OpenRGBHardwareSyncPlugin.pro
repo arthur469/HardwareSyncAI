@@ -104,7 +104,7 @@ prebuild_json.commands  = $$QMAKE_STREAM_EDITOR -e \"s|VERSION_NUM|$$VERSION_NUM
                                                 -e \"s|PROJECT_DESC|$$PROJECT_DESC|g\"          \
                                                 -e \"s|PROJECT_NAME|$$PROJECT_NAME|g\"          \
                                                 -e \"s|PROJECT_URL|$$PROJECT_URL|g\"            \
-                                                $$JSON_FILE_IN > $$JSON_FILE_OUT                \
+                                                \"$$JSON_FILE_IN\" > \"$$JSON_FILE_OUT\"        \
 
 QMAKE_EXTRA_TARGETS    += prebuild_json
 PRE_TARGETDEPS         += prebuild_json_target

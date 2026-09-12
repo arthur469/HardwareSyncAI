@@ -330,7 +330,12 @@ void MeasureEntry::on_reverse_all_toggled(bool state)
 
 void MeasureEntry::OnMeasure(double measure)
 {
-    ui->measure->setText(QString::fromStdString(std::to_string(measure)));
+    if(std::isnan(measure) || std::isinf(measure))
+    {
+        ui->measure->setText("0.0");
+        return;
+    }
+    ui->measure->setText(QString::asprintf("%.1f", measure));
 }
 
 void MeasureEntry::OnColor(QColor color)

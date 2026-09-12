@@ -259,6 +259,11 @@ void MeasureColor::Update()
 
 std::tuple<float, QColor> MeasureColor::GetColor(double val, float last_idx, int fps)
 {
+    if(std::isnan(val) || std::isinf(val))
+    {
+        val = min_value;
+    }
+
     if(max_value == 0 || max_value == min_value)
     {
         return std::tuple<float, QColor>(0, Qt::black);

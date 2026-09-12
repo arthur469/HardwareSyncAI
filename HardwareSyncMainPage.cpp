@@ -77,9 +77,18 @@ void HardwareSyncMainPage::StopAll()
 
 void HardwareSyncMainPage::Clear()
 {
-    for(MeasureEntry* measure: measures)
+    StopAll();
+
+    while(!measures.empty())
     {
-        CloseMeasure(measure);
+        MeasureEntry* measure = measures.back();
+        int tab_idx = ui->tabs->indexOf(measure);
+        if(tab_idx >= 0)
+        {
+            ui->tabs->removeTab(tab_idx);
+        }
+        measures.pop_back();
+        delete measure;
     }
 }
 
