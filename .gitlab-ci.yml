@@ -18,6 +18,7 @@
 #   OpenRGBHardwareSyncPlugin repository, automatically run #
 #   all jobs on the default branch, otherwise run them if   #
 #   the source is part of a merge request                   #
+# * Qt5 builds are always manually triggered, not automatic #
 #-----------------------------------------------------------#
 .downstream_rules:
   rules:
@@ -29,6 +30,13 @@
   rules:
   - if: '$CI_PROJECT_PATH == "OpenRGBDevelopers/OpenRGBHardwareSyncPlugin" && ($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event")'
     when: on_success
+  - !reference [.downstream_rules, rules]
+
+.qt5_rules:
+  rules:
+  - if: '$CI_PROJECT_PATH == "OpenRGBDevelopers/OpenRGBHardwareSyncPlugin" && ($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event")'
+    when: manual
+    allow_failure: true
   - !reference [.downstream_rules, rules]
 
 .shared_windows_runners:
@@ -86,6 +94,9 @@ before_script:
     TGT_PATH: "${TGT_ARCH}"
   <<: *linux_script_steps
 
+  rules:
+    - !reference [.qt5_rules, rules]
+
 #-----------------------------------------------------------#
 # Linux i386 Build Target                                   #
 #-----------------------------------------------------------#
@@ -107,6 +118,9 @@ before_script:
     TGT_NAME: "${TGT_ARCH}_qt5"
     TGT_PATH: "${TGT_ARCH}"
   <<: *linux_script_steps
+
+  rules:
+    - !reference [.qt5_rules, rules]
 
 #-----------------------------------------------------------#
 # Linux amd64 Build Target                                  #
@@ -130,6 +144,9 @@ before_script:
     TGT_PATH: "${TGT_ARCH}"
   <<: *linux_script_steps
 
+  rules:
+    - !reference [.qt5_rules, rules]
+
 #-----------------------------------------------------------#
 # Linux armhf Build Target                                  #
 #-----------------------------------------------------------#
@@ -151,6 +168,9 @@ before_script:
     TGT_NAME: "${TGT_ARCH}_qt5"
     TGT_PATH: "${TGT_ARCH}"
   <<: *linux_script_steps
+
+  rules:
+    - !reference [.qt5_rules, rules]
 
 #-----------------------------------------------------------#
 # Linux arm64 Build Target                                  #
@@ -352,7 +372,7 @@ before_script:
     expire_in: 30 days
 
   rules:
-    - !reference [.upstream_rules, rules]
+    - !reference [.qt5_rules, rules]
 
 #-----------------------------------------------------------#
 # Windows (64-bit) Build Target                             #
