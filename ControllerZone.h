@@ -93,19 +93,24 @@ public:
 
     std::string display_name()
     {
-        return controller->GetName() + ": " +  controller->GetZoneName(zone_idx) + (is_segment ? (" - " + controller->GetZoneSegmentName(zone_idx, segment_idx)) : "");
+        std::string name=controller->GetZoneDisplayName(zone_idx);
+        if(name.empty())name=controller->GetZoneName(zone_idx);
+        return name + (is_segment ? (" - " + controller->GetZoneSegmentName(zone_idx, segment_idx)) : "") + " (" + std::to_string(leds_count()) + " LEDs)";
     }
 
     json to_json()
     {
         json j;
         j["zone_idx"]           = zone_idx;
+        j["zone_name"]          = controller->GetZoneName(zone_idx);
+        j["leds_count"]         = leds_count();
         j["name"]               = controller->GetName();
         j["is_percentage_fill"] = is_percentage_fill;
         j["brightness"]         = brightness;
         j["reverse"]            = reverse;
         j["is_segment"]         = is_segment;
         j["segment_idx"]        = segment_idx;
+        if(is_segment)j["segment_name"] = controller->GetZoneSegmentName(zone_idx, segment_idx);
         j["location"]           = controller->GetLocation();
         j["serial"]             = controller->GetSerial();
         j["description"]        = controller->GetDescription();

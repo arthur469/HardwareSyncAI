@@ -19,6 +19,7 @@ public:
     void SetStop(double);
 
     QColor GetColor();
+    void SetRemoveEnabled(bool enabled);
     double GetValue();
 
 private slots:

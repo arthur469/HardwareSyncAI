@@ -25,7 +25,7 @@ void ColorPicker::on_button_clicked()
     QColor currentColor;
 
     #if QT_VERSION >= QT_VERSION_CHECK(6, 4, 0)
-        currentColor.fromString(ui->button->palette().button().color().name());
+        currentColor=QColor::fromString(ui->button->palette().button().color().name());
     #else
         currentColor.setNamedColor(ui->button->palette().button().color().name());
     #endif

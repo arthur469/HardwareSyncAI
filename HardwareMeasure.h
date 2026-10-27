@@ -9,8 +9,8 @@
 #include <map>
 #include <functional>
 
-#ifdef _WIN32
-#include <lhwm-cpp-wrapper.h>
+#if defined(_WIN32) || defined(HARDWARE_SYNC_AI_COLLECTOR)
+// Windows sensor collection reuses the read-only telemetry bridge.
 #include <QString>
 #include <QFile>
 #include <QCoreApplication>
@@ -50,18 +50,21 @@ public:
     std::vector<Hardware> GetAvailableDevices();
     double GetMeasure(const Hardware&, const HardwareFeature&);
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(HARDWARE_SYNC_AI_COLLECTOR)
     int GetHardwareIndex(std::string identifier);
     int GetHardwareFeatureIndex(std::string identifier);
 #endif
 
 private:
     std::vector<Hardware> HardwareList;
+#ifdef __linux__
+    void AppendNativeSensors();
+#endif
 
     double GetRamUsagePercent();
     double GetCPURate();
 
-    #ifdef _WIN32
+    #if defined(_WIN32) || defined(HARDWARE_SYNC_AI_COLLECTOR)
     std::map<std::string, int> IdentifierToHardwareDropdownIdx;
     std::map<std::string, int> IdentifierToFeatureDropdownIdx;
 

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <limits>
 #include <algorithm>
 
 #ifndef _WIN32
@@ -30,72 +31,42 @@ double HardwareMeasure::GetMeasure(const Hardware& /*Dev*/, const HardwareFeatur
         catch(const std::exception& e)
         {
             std::cerr << e.what() << '\n';
-            return 0.0;
+            return std::numeric_limits<double>::quiet_NaN();
         }
     }
 
-    return 0.0f;
+    return std::numeric_limits<double>::quiet_NaN();
 }
 
-#ifdef _WIN32
-
-HardwareMeasure::HardwareMeasure()
-{    
-    std::map<std::string, std::vector<std::tuple<std::string, std::string, std::string>>>
-            hs_map = LHWM::GetHardwareSensorMap();
-
-    int hardwareIdx = 0;
-    for (auto const& [key, val] : hs_map)
-    {
-        Hardware hw;
-        hw.TrackDeviceName = key;
-
-        int featureIdx = 0;
-
-        for(auto const& tup : val)
-        {
-            HardwareFeature feature;
-            feature.Name = std::get<0>(tup) + " (" + std::get<1>(tup) + ")";
-            const auto identifier = std::get<2>(tup);
-            feature.Identifier = identifier;
-            feature.GetMeasure = [identifier](){return LHWM::GetSensorValue(identifier);};
-
-            hw.features.push_back(feature);
-
-            IdentifierToHardwareDropdownIdx[feature.Identifier] = hardwareIdx;
-            IdentifierToFeatureDropdownIdx[feature.Identifier] = featureIdx;
-            featureIdx++;
-        }
-
-        if (hw.features.size() > 0)
-        {
-            HardwareList.push_back(hw);
-            hardwareIdx++;
-        }
+#if defined(_WIN32) || defined(HARDWARE_SYNC_AI_COLLECTOR)
+#include "TelemetryRuntime.h"
+#include <limits>
+HardwareMeasure::HardwareMeasure(){
+    const std::vector<std::tuple<std::string,std::string,std::string>> features={
+      {"CPU","Demand (%), package power or load fallback","cpu_demand_percent"},{"CPU","Usage (%)","cpu_usage_percent"},{"CPU","Package power (W), if available","cpu_power_w"},{"CPU","Temperature (C)","cpu_temp_c"},
+      {"GPU","Power (W)","gpu_power_w"},{"GPU","Temperature (C)","gpu_temp_c"},{"GPU","Usage (%)","gpu_usage_percent"},
+      {"RAM","Usage (%)","ram_usage_percent"},{"Fans","Case speed (rpm)","case_rpm"},{"Fans","Auxiliary fan speed (rpm), if configured","sl_rpm"},
+      {"Thermal","Case thermal demand (%)","case_thermal_percent"},{"GPU","Power relative to limit (%)","gpu_power_percent"},
+      {"Local AI (Ollama)","Model in GPU memory (0/1)","gpu_model"},{"Local AI (Ollama)","Model host allocation estimate (0/1)","ram_model"},
+      {"Local AI (Ollama)","Model CPU/partial allocation estimate (0/1)","cpu_model"},{"Local AI (Ollama)","Loaded model count","model_count"},
+      {"GPU","Memory used (MiB)","gpu_memory_mib"},{"GPU","Memory total (MiB)","gpu_memory_total_mib"},{"GPU","Fan speed (%)","gpu_fan_percent"}
+    };
+    for(const auto& row:features){
+      auto name=std::get<0>(row);int h=-1;
+      for(unsigned i=0;i<HardwareList.size();i++)if(HardwareList[i].TrackDeviceName==name)h=i;
+      if(h<0){Hardware hw;hw.TrackDeviceName=name;hw.DeviceIndex=HardwareList.size();HardwareList.push_back(hw);h=HardwareList.size()-1;}
+      const auto key=std::get<2>(row);HardwareFeature feature;feature.Name=std::get<1>(row);feature.Identifier=key;
+      feature.GetMeasure=[key](){return telemetryRuntime().value(key);};
+      IdentifierToHardwareDropdownIdx[key]=h;IdentifierToFeatureDropdownIdx[key]=HardwareList[h].features.size();HardwareList[h].features.push_back(feature);
     }
-
+#ifdef __linux__
+    AppendNativeSensors();
+#endif
 }
-
-double HardwareMeasure::GetRamUsagePercent()
-{
-    return 0.0f;
-}
-
-double HardwareMeasure::GetCPURate()
-{
-    return 0.0f;
-}
-
-int HardwareMeasure::GetHardwareIndex(std::string identifier)
-{
-    return IdentifierToHardwareDropdownIdx[identifier];
-}
-
-int HardwareMeasure::GetHardwareFeatureIndex(std::string identifier)
-{
-    return IdentifierToFeatureDropdownIdx[identifier];
-}
-
+double HardwareMeasure::GetRamUsagePercent(){return telemetryRuntime().value("ram_usage_percent");}
+double HardwareMeasure::GetCPURate(){return telemetryRuntime().value("cpu_usage_percent");}
+int HardwareMeasure::GetHardwareIndex(std::string key){auto i=IdentifierToHardwareDropdownIdx.find(key);return i==IdentifierToHardwareDropdownIdx.end()?-1:i->second;}
+int HardwareMeasure::GetHardwareFeatureIndex(std::string key){auto i=IdentifierToFeatureDropdownIdx.find(key);return i==IdentifierToFeatureDropdownIdx.end()?-1:i->second;}
 #elif __linux__
 
 HardwareMeasure::HardwareMeasure()
@@ -460,4 +431,37 @@ double HardwareMeasure::GetLoadAverage(int index)
     }
 }
 
+#endif
+
+#if defined(__linux__) && defined(HARDWARE_SYNC_AI_COLLECTOR)
+#include "sensors.h"
+#include <cstdlib>
+void HardwareMeasure::AppendNativeSensors()
+{
+    // Preserve upstream's generic libsensors discovery alongside the AI extension.
+    try {
+        auto chips=sensors::get_detected_chips();
+        std::sort(chips.begin(),chips.end(),[](const sensors::chip_name& a,const sensors::chip_name& b){return a.name()<b.name();});
+        for(const auto& chip:chips) {
+            Hardware hardware;hardware.TrackDeviceName=chip.name();hardware.DeviceIndex=HardwareList.size();
+            for(const auto& feature:chip.features())for(const auto& input:feature.subfeatures()) {
+                if(input.type()!=sensors::subfeature_type::input)continue;
+                HardwareFeature metric;metric.Name=feature.label()+" ("+input.name()+")";
+                metric.Identifier="sensor:"+chip.name()+"/"+input.name();
+                metric.GetMeasure=[input](){try{return input.read();}catch(...){return std::numeric_limits<double>::quiet_NaN();}};
+                IdentifierToHardwareDropdownIdx[metric.Identifier]=HardwareList.size();
+                IdentifierToFeatureDropdownIdx[metric.Identifier]=hardware.features.size();hardware.features.push_back(metric);
+            }
+            if(!hardware.features.empty())HardwareList.push_back(hardware);
+        }
+    } catch(const std::exception&) { /* Other system/AI metrics remain available. */ }
+    Hardware load;load.TrackDeviceName="Load Averages";load.DeviceIndex=HardwareList.size();
+    for(int i=0;i<3;++i) {
+        HardwareFeature feature;feature.Name=std::string("Load ")+(i==0?"1":i==1?"5":"15")+" min";
+        feature.Identifier="load_average_"+std::to_string(i);
+        feature.GetMeasure=[i](){double values[3];return getloadavg(values,3)==3?values[i]:std::numeric_limits<double>::quiet_NaN();};
+        IdentifierToHardwareDropdownIdx[feature.Identifier]=HardwareList.size();IdentifierToFeatureDropdownIdx[feature.Identifier]=load.features.size();load.features.push_back(feature);
+    }
+    HardwareList.push_back(load);
+}
 #endif

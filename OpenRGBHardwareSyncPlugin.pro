@@ -24,13 +24,13 @@ CONFIG +=                                                                       
 # Application Configuration                                                                     #
 #-----------------------------------------------------------------------------------------------#
 MAJOR       = 1
-MINOR       = 0
-SUFFIX      = git
+MINOR       = 1
+SUFFIX      = beta1
 
 SHORTHASH   = $$system("git rev-parse --short=7 HEAD")
 LASTTAG     = "release_"$$MAJOR"."$$MINOR
 COMMAND     = "git rev-list --count "$$LASTTAG"..HEAD"
-COMMITS     = $$system($$COMMAND)
+COMMITS     = 0
 
 VERSION_NUM = $$MAJOR"."$$MINOR"."$$COMMITS
 VERSION_STR = $$MAJOR"."$$MINOR
@@ -66,16 +66,16 @@ message("VERSION_RPM: "$$VERSION_RPM)
 #-----------------------------------------------------------------------------------------------#
 win32:BUILDDATE = $$system(date /t)
 unix:BUILDDATE  = $$system(date -R -d "@${SOURCE_DATE_EPOCH:-$(date +%s)}")
-GIT_COMMIT_ID   = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ rev-parse HEAD)
-GIT_COMMIT_DATE = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ show -s --format=%ci HEAD)
-GIT_BRANCH      = $$system(git --git-dir $$_PRO_FILE_PWD_/.git --work-tree $$_PRO_FILE_PWD_ rev-parse --abbrev-ref HEAD)
+GIT_COMMIT_ID   = $$system(git -C $$_PRO_FILE_PWD_ rev-parse HEAD)
+GIT_COMMIT_DATE = $$system(git -C $$_PRO_FILE_PWD_ show -s --format=%ci HEAD)
+GIT_BRANCH      = $$system(git -C $$_PRO_FILE_PWD_ rev-parse --abbrev-ref HEAD)
 
 #-----------------------------------------------------------------------------------------------#
 # Metadata                                                                                      #
 #-----------------------------------------------------------------------------------------------#
-PROJECT_DESC                = "Sync colors with hardware measures"
-PROJECT_NAME                = "OpenRGB Hardware Sync Plugin"
-PROJECT_URL                 = "https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin"
+PROJECT_DESC                = "Hardware Sync with local model detection and effect overlays"
+PROJECT_NAME                = "Hardware Sync AI"
+PROJECT_URL                 = "https://github.com/arthur469/HardwareSyncAI"
 
 #-----------------------------------------------------------------------------------------------#
 # Inject vars in defines                                                                        #
@@ -199,20 +199,6 @@ win32:DEFINES +=                                                                
     _WINSOCK_DEPRECATED_NO_WARNINGS                                                             \
     WIN32_LEAN_AND_MEAN                                                                         \
 
-win32:{
-    INCLUDEPATH += dependencies/lhwm-cpp-wrapper
-    DEPENDPATH += dependencies/lhwm-cpp-wrapper
-    HEADERS += dependencies/lhwm-cpp-wrapper/lhwm-cpp-wrapper.h
-}
-
-win32:CONFIG(debug, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
-    LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Debug -llhwm-cpp-wrapper
-}
-
-win32:CONFIG(release, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
-    LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Release -llhwm-cpp-wrapper
-}
-
 #-----------------------------------------------------------------------------------------------#
 # Linux-specific Configuration                                                                  #
 #-----------------------------------------------------------------------------------------------#
@@ -246,3 +232,13 @@ unix:!macx {
 
 RESOURCES +=                                                                                    \
     resources.qrc
+
+HEADERS += TelemetryRuntime.h TelemetryMath.h TargetIdentity.h
+SOURCES += TelemetryRuntime.cpp
+
+TARGET = HardwareSyncAI
+
+unix:DEFINES += HARDWARE_SYNC_AI_COLLECTOR
+
+# Keep local build paths out of distributable objects and diagnostics.
+unix:QMAKE_CXXFLAGS += -ffile-prefix-map=$$_PRO_FILE_PWD_=.

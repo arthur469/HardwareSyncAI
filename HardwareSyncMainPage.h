@@ -23,6 +23,7 @@ public:
     void Clear();
     std::vector<MeasureEntry*> GetMeasures();
     void LoadMeasures(json measure_list);
+    json Diagnostics();
     void StopAll();
 
 public slots:
@@ -40,6 +41,12 @@ private:
     void AddMeasure(MeasureEntry*);
     void CloseMeasure(MeasureEntry* measure_entry_tab);
     bool HasStartedMeasures();
+    json CurrentConfiguration();
+    void SaveConfiguration();
+    json savedConfiguration;
+    json pendingConfiguration;
+    bool configurationLoaded=false;
+
 };
 
 #endif // HARDWARESYNCMAINPAGE_H

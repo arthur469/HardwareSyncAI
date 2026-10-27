@@ -56,8 +56,10 @@ private:
     /*-----------------------------------------------------*\
     | User interface widget                                 |
     \*-----------------------------------------------------*/
-    HardwareSyncMainPage* ui;
+    HardwareSyncMainPage* ui=nullptr;
     bool can_load = true;
+    bool initialProfile=true;
+    bool resumeInitialProfile=false;
 
 public:
     /*-----------------------------------------------------*\

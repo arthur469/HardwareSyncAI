@@ -1,7 +1,7 @@
 {
-    "Id" : "org.openrgb.openrgbhardwaresyncplugin",
+    "Id" : "io.github.arthur469.HardwareSyncAI",
     "Name" : "PROJECT_NAME",
-    "VendorId" : "openrgb",
+    "VendorId" : "arthur469",
     "Version" : "VERSION_NUM",
     "VersionStr" : "VERSION_STR",
     "Url" : "PROJECT_URL",

@@ -8,6 +8,12 @@ ColorStop::ColorStop(QWidget *parent) :
     ui(new Ui::ColorStop)
 {
     ui->setupUi(this);
+    ui->remove_button->setText("Remove");
+    ui->remove_button->setFlat(false);
+    ui->remove_button->setMinimumSize(72,28);
+    ui->remove_button->setMaximumSize(16777215,32);
+    ui->remove_button->setAccessibleName("Remove color stop");
+    ui->remove_button->setToolTip("Remove this color stop");
 
     //default values
     stop.second = Qt::white;
@@ -47,6 +53,12 @@ void ColorStop::on_stop_valueChanged(double)
 void ColorStop::on_remove_button_clicked()
 {
     emit RemoveRequest();
+}
+
+void ColorStop::SetRemoveEnabled(bool enabled)
+{
+    ui->remove_button->setEnabled(enabled);
+    ui->remove_button->setToolTip(enabled?"Remove this color stop":"Keep at least one color; one color gives a constant output");
 }
 
 ColorStop::~ColorStop()

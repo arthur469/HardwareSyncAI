@@ -152,6 +152,7 @@ void MeasureColor::AddColorStop(ColorStop* color_stop)
     connect(color_stop, &ColorStop::GradientStopChanged, this, &MeasureColor::SetPresetSelectorToCustom);
 
     connect(color_stop, &ColorStop::RemoveRequest, [=](){
+        if(color_stops.size()<=1)return;
         ui->color_stops->layout()->removeWidget(color_stop);
         color_stops.erase(std::find(color_stops.begin(), color_stops.end(), color_stop));
         delete color_stop;
@@ -211,6 +212,7 @@ void MeasureColor::SetPresetSelectorToCustom()
 void MeasureColor::Update()
 {
     image = QImage(100, 1, QImage::Format_RGB32);
+    for(auto stop:color_stops)stop->SetRemoveEnabled(color_stops.size()>1);
 
     QGradientStops stops;
 
@@ -224,8 +226,15 @@ void MeasureColor::Update()
         min_value = value < min_value ? value : min_value;
     }
 
-    if(max_value == 0 || max_value == min_value)
+    if(color_stops.empty())
     {
+        image.fill(Qt::black);
+        return;
+    }
+    if(max_value == min_value)
+    {
+        image.fill(color_stops.back()->GetColor());
+        ui->preview->setPixmap(QPixmap::fromImage(image));
         return;
     }
 
@@ -239,8 +248,8 @@ void MeasureColor::Update()
 
     QGradient::Spread spread = QGradient::PadSpread;
 
-    QPointF start_point(0,0);
-    QPointF end_point(100,0);
+    QPointF start_point(.5,0);
+    QPointF end_point(99.5,0);
 
     QLinearGradient grad(start_point , end_point);
 
@@ -264,14 +273,15 @@ std::tuple<float, QColor> MeasureColor::GetColor(double val, float last_idx, int
         val = min_value;
     }
 
-    if(max_value == 0 || max_value == min_value)
+    if(color_stops.empty())
     {
         return std::tuple<float, QColor>(0, Qt::black);
     }
+    if(max_value == min_value)return std::tuple<float,QColor>(0,image.pixelColor(0,0));
 
     float idx = std::max<float>(0, std::min<float>(99, 100 * ((val - min_value) / (max_value - min_value))));
 
-    float delta = 1./fps;
+    float delta = 1./std::max(1,fps);
 
     float gap = fabs(last_idx - idx);
 

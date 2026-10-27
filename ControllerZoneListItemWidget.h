@@ -25,6 +25,9 @@ public:
     void setBrightness(int);
     void showBrightnessSlider(bool);
 
+signals:
+    void SelectionChanged();
+
 private slots:
     void on_enabled_toggled(bool);
     void on_percentage_fill_toggled(bool);

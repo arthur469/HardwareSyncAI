@@ -10,11 +10,13 @@ ControllerZoneListItemWidget::ControllerZoneListItemWidget(QWidget *parent, Cont
 {
     ui->setupUi(this);
 
-    ui->enabled->setFont(OpenRGBPluginsFont::GetFont());
     ui->reverse->setFont(OpenRGBPluginsFont::GetFont());
     ui->no_direct_mode_warning->setFont(OpenRGBPluginsFont::GetFont());
 
-    ui->enabled->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::check));
+    ui->enabled->setText("Use");
+    ui->enabled->setMinimumWidth(52);
+    ui->enabled->setMaximumWidth(64);
+    ui->enabled->setToolTip("Include this zone in the current rule");
     ui->reverse->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::arrows_exchange));
     ui->no_direct_mode_warning->setText(OpenRGBPluginsFont::icon(OpenRGBPluginsFont::danger));
 
@@ -23,6 +25,7 @@ ControllerZoneListItemWidget::ControllerZoneListItemWidget(QWidget *parent, Cont
     ui->enabled->setChecked(controller_zone->enabled);
     ui->no_direct_mode_warning->setVisible(!ControllerZoneManager::SupportsDirectMode(controller_zone->controller));
     ui->brightness->setVisible(false);
+    if(controller_zone->leds_count()==0){ui->enabled->setEnabled(false);setToolTip("Empty zone; no LEDs configured in OpenRGB");}
 }
 
 ControllerZoneListItemWidget::~ControllerZoneListItemWidget()
@@ -47,7 +50,8 @@ bool ControllerZoneListItemWidget::isEnabled()
 
 void ControllerZoneListItemWidget::setEnabled(bool state)
 {
-    ui->enabled->setChecked(state);
+    controller_zone->enabled=state&&controller_zone->leds_count()>0;
+    ui->enabled->setChecked(state&&controller_zone->leds_count()>0);
 }
 
 bool ControllerZoneListItemWidget::isReverse()
@@ -74,28 +78,28 @@ void ControllerZoneListItemWidget::on_enabled_toggled(bool state)
 {
     controller_zone->enabled = state;
     UpdateCheckState();
+    emit SelectionChanged();
 }
 
 void ControllerZoneListItemWidget::on_percentage_fill_toggled(bool state)
 {
     controller_zone->is_percentage_fill = state;
+    emit SelectionChanged();
 }
 
 void ControllerZoneListItemWidget::on_brightness_valueChanged(int value)
 {
     controller_zone->brightness = value;
+    emit SelectionChanged();
 }
 
 void ControllerZoneListItemWidget::on_reverse_toggled(bool state)
 {
     controller_zone->reverse = state;
+    emit SelectionChanged();
 }
 
 void ControllerZoneListItemWidget::UpdateCheckState()
 {
-    ui->enabled->setText(
-                ui->enabled->isChecked()?
-                    OpenRGBPluginsFont::icon(OpenRGBPluginsFont::check_o):
-                    OpenRGBPluginsFont::icon(OpenRGBPluginsFont::check)
-                    );
+    ui->enabled->setText("Use");
 }

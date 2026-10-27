@@ -1,6 +1,7 @@
 #include "OpenRGBHardwareSyncPlugin.h"
 #include "ControllerZoneManager.h"
 #include "ControllerZone.h"
+#include "TelemetryMath.h"
 
 ControllerZoneManager::ControllerZoneManager()
 {
@@ -13,6 +14,7 @@ std::vector<ControllerZone*> ControllerZoneManager::GetControllerZones()
 
     for(RGBControllerInterface* controller: OpenRGBHardwareSyncPlugin::api->GetRGBControllers())
     {
+        if(controller->GetHidden())continue;
         for(unsigned int i = 0; i < controller->GetZoneCount(); i++)
         {
             controller_zones.push_back(new ControllerZone(controller, i, false, false, 100, false, false));
@@ -31,7 +33,7 @@ bool ControllerZoneManager::SupportsDirectMode(RGBControllerInterface* controlle
 {
     for(unsigned int i = 0; i < controller->GetModeCount(); i++)
     {
-        if(controller->GetModeName(i) == "Direct")
+        if(TelemetryMath::supportedMode(controller->GetModeName(i),controller->GetModeFlags(i)))
         {
             return true;
         }

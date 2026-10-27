@@ -1,4 +1,9 @@
+#include "OpenRGBHardwareSyncPlugin.h"
 #include "HardwareSyncMainPage.h"
+#include "TelemetryRuntime.h"
+#include <QLabel>
+#include <QTimer>
+#include <QMessageBox>
 #include "TabHeader.h"
 #include <QToolButton>
 #include <QMainWindow>
@@ -11,6 +16,25 @@ HardwareSyncMainPage::HardwareSyncMainPage(QWidget *parent) :
     ui(new Ui::HardwareSyncMainPage)
 {
     ui->setupUi(this);
+    auto status=new QLabel(this);status->setWordWrap(true);status->setObjectName("telemetryStatus");ui->gridLayout->addWidget(status,2,0,1,2);
+    auto pause=new QPushButton("Pause plugin writes",this);auto resume=new QPushButton("Resume eligible targets",this);auto save=new QPushButton("Save plugin settings",this);
+    ui->gridLayout->addWidget(pause,3,0);ui->gridLayout->addWidget(resume,3,1);ui->gridLayout->addWidget(save,4,0,1,2);
+    connect(pause,&QPushButton::clicked,this,[](){telemetryRuntime().setPause(true,"Pause requested in Hardware Sync AI");});
+    connect(resume,&QPushButton::clicked,this,[](){telemetryRuntime().setPause(false,"Resume requested in Hardware Sync AI; black/OFF remains protected");});
+    connect(save,&QPushButton::clicked,this,[this](){
+      try{SaveConfiguration();QMessageBox::information(this,"Hardware Sync AI","Plugin settings saved. Existing pause is preserved.");}catch(...){QMessageBox::warning(this,"Hardware Sync AI","Settings could not be saved.");}
+    });
+    auto autosave=new QTimer(this);autosave->setInterval(800);
+    connect(autosave,&QTimer::timeout,this,[this](){
+        if(!configurationLoaded)return;
+        auto current=CurrentConfiguration();
+        if(current==savedConfiguration)return;
+        if(current!=pendingConfiguration){pendingConfiguration=current;return;}
+        // One save after edits settle, never on every telemetry frame.
+        try{SaveConfiguration();}catch(...){/* Retain pending edits; retry next tick. */}
+    });autosave->start();
+    auto timer=new QTimer(this);timer->setInterval(1000);connect(timer,&QTimer::timeout,this,[status](){auto state=telemetryRuntime().status();auto collector=state["collector_error"].get<std::string>();status->setText(QString::fromStdString(std::string(state["paused"].get<bool>()?"PAUSED - ":"OUTPUT ENABLED - ")+state["reason"].get<std::string>()+" | Collector: "+(collector.empty()?"Ready":collector)+" | Local AI: Ollama model residency"));});timer->start();
+
 
     /*-----------------------------------------------------*\
     | Remove intial dummy tabs                              |
@@ -62,6 +86,17 @@ HardwareSyncMainPage::~HardwareSyncMainPage()
     delete ui;
 }
 
+json HardwareSyncMainPage::CurrentConfiguration(){json result=json::array();for(auto m:measures)result.push_back(m->ToJson());return result;}
+void HardwareSyncMainPage::SaveConfiguration(){
+    auto current=CurrentConfiguration();
+    auto settings=OpenRGBHardwareSyncPlugin::api->GetSettings("RGBTelemetryPlugin");
+    settings["measures"]=current;
+    OpenRGBHardwareSyncPlugin::api->SetSettings("RGBTelemetryPlugin",settings);
+    OpenRGBHardwareSyncPlugin::api->SaveSettings();
+    savedConfiguration=current;pendingConfiguration=current;
+}
+json HardwareSyncMainPage::Diagnostics(){json result=json::array();for(auto measure:measures)result.push_back(measure->Diagnostic());return result;}
+
 void HardwareSyncMainPage::AddTabSlot()
 {
     AddMeasure(new MeasureEntry(this));
@@ -98,6 +133,7 @@ void HardwareSyncMainPage::LoadMeasures(json measure_list)
     {
         AddMeasure(MeasureEntry::FromJson(this, measure));
     }
+    savedConfiguration=CurrentConfiguration();pendingConfiguration=savedConfiguration;configurationLoaded=true;
 }
 
 std::vector<MeasureEntry*> HardwareSyncMainPage::GetMeasures()
@@ -262,8 +298,10 @@ bool HardwareSyncMainPage::HasStartedMeasures()
 
 void HardwareSyncMainPage::OnStopMeasures()
 {
+    telemetryRuntime().setPause(true,"OpenRGB Lights Off requested");
     for(MeasureEntry* measure: measures)
     {
         measure->Stop();
     }
 }
+
