@@ -25,7 +25,7 @@ CONFIG +=                                                                       
 #-----------------------------------------------------------------------------------------------#
 MAJOR       = 1
 MINOR       = 1
-SUFFIX      = beta1
+SUFFIX      = beta2
 
 SHORTHASH   = $$system("git rev-parse --short=7 HEAD")
 LASTTAG     = "release_"$$MAJOR"."$$MINOR

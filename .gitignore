@@ -22,32 +22,6 @@ tests-linux/feature_tests
 tests-linux/standalone_tests
 OpenRGBHardwareSyncPlugin.json
 
-*.so
-*.so.*
-*.log
-__pycache__/
-*tests-linux/Makefile
-tests-linux/plugin_tests
-tests-linux/feature_tests
-tests-linux/standalone_tests
-OpenRGBHardwareSyncPlugin.json
 
-*.so
-*.so.*
-*.log
-__pycache__/
-*tests-linux/Makefile
-tests-linux/plugin_tests
-tests-linux/feature_tests
-tests-linux/standalone_tests
-OpenRGBHardwareSyncPlugin.json
 
-*.so
-*.so.*
-*.log
-__pycache__/
-*tests-linux/Makefile
-tests-linux/plugin_tests
-tests-linux/feature_tests
-tests-linux/standalone_tests
-OpenRGBHardwareSyncPlugin.json
+

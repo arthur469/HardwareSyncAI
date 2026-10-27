@@ -23,7 +23,7 @@ public:
     bool beginFrame();
     void endFrame();
     bool eligible(RGBControllerInterface* controller,bool native=false);
-    void remember(RGBControllerInterface* controller);
+    void remember(RGBControllerInterface* controller,bool wrote=true);
     void clearControllerState();
     bool claim(RGBControllerInterface* controller,unsigned zone,const void* owner);
     void assign(const void* owner,const std::string& name,const std::vector<std::pair<RGBControllerInterface*,unsigned>>& zones);

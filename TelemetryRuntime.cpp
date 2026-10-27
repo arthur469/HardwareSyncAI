@@ -155,7 +155,7 @@ bool TelemetryRuntime::eligible(RGBControllerInterface* c,bool native){
  auto it=expected.find(c);if(it!=expected.end()&&current!=it->second){manual.insert(c);expected.erase(c);return false;}
  return true;
 }
-void TelemetryRuntime::remember(RGBControllerInterface* c){auto& colors=expected[c];colors.clear();for(unsigned i=0;i<c->GetLEDCount();i++)colors.push_back(c->GetColor(i));colors.push_back(c->GetActiveMode());colors.push_back(c->GetModeBrightness(c->GetActiveMode()));writes++;}
+void TelemetryRuntime::remember(RGBControllerInterface* c,bool wrote){auto& colors=expected[c];colors.clear();for(unsigned i=0;i<c->GetLEDCount();i++)colors.push_back(c->GetColor(i));colors.push_back(c->GetActiveMode());colors.push_back(c->GetModeBrightness(c->GetActiveMode()));if(wrote)writes++;}
 void TelemetryRuntime::assign(const void* owner,const std::string& name,const std::vector<std::pair<RGBControllerInterface*,unsigned>>& zones){assignments[owner]={name,zones};}
 std::string TelemetryRuntime::conflict(RGBControllerInterface* c,unsigned z,const void* owner)const{for(const auto& entry:assignments)if(entry.first!=owner)for(auto zone:entry.second.second)if(zone==std::make_pair(c,z))return entry.second.first;return "";}
 bool TelemetryRuntime::claim(RGBControllerInterface* c,unsigned z,const void* owner){return conflict(c,z,owner).empty();}

@@ -478,6 +478,7 @@ void MeasureEntry::UpdateLEDsThread(){
           if(fallback>=0 && static_cast<unsigned>(fallback)<c->GetModeCount()){c->SetActiveMode(fallback);runtime.remember(c);}
           if(!TelemetryMath::supportedMode(c->GetModeName(c->GetActiveMode()),c->GetModeFlags(c->GetActiveMode())))continue;
       }
+      bool frameChanged=false;
       for(auto zone:entry.second){
         double b=brightness*.01*zone->brightness*.01*scale;
         unsigned n=zone->leds_count();double fill=std::clamp(static_cast<double>(last_idx)/99.0,0.0,1.0);
@@ -485,11 +486,15 @@ void MeasureEntry::UpdateLEDsThread(){
           QColor selected=color;double dim=b;
           if(zone->is_percentage_fill){if(i>=static_cast<unsigned>(std::ceil(fill*n)))dim=0;else selected=std::get<1>(ui->measure_color->GetColor(ui->measure_color->min_value+(ui->measure_color->max_value-ui->measure_color->min_value)*i/std::max(1u,n-1),100.0*i/std::max(1u,n-1),fps));}
           auto actual=rendered(selected,dim);unsigned index=zone->reverse?n-1-i:i;if(zone->is_segment)index+=zone->start_idx();
-          if(index<c->GetZoneLEDsCount(zone->zone_idx))c->SetZoneColor(zone->zone_idx,index,ToRGBColor(actual.red(),actual.green(),actual.blue()));
+          if(index<c->GetZoneLEDsCount(zone->zone_idx)) {
+              const auto value=ToRGBColor(actual.red(),actual.green(),actual.blue());
+              if(c->GetZoneColor(zone->zone_idx,index)!=value){c->SetZoneColor(zone->zone_idx,index,value);frameChanged=true;}
+          }
         }
         lastOutputs.push_back({{"controller",c->GetName()},{"zone",zone->display_name()},{"color",rendered(color,b).name().toStdString()}});active++;
       }
-      c->UpdateLEDs();runtime.remember(c);
+      if(frameChanged)c->UpdateLEDs();
+      runtime.remember(c,frameChanged);
     }
     if(active==total)SetState("Active: "+std::to_string(active)+" zones");
     else SetState("Active: "+std::to_string(active)+"/"+std::to_string(total)+" zones. Black/OFF, manual change or incompatible mode protected: "+protectedNames);
